@@ -6,7 +6,7 @@ import User, { IUser } from '../models/User.model';
 // Generate JWT Token
 const generateToken = (id: string) => {
     return jwt.sign({ id }, process.env.JWT_SECRET as string, {
-        expiresIn: '30d',
+        expiresIn: '7d',
     });
 };
 
@@ -73,6 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
                 name: user.name,
                 email: user.email,
                 token: generateToken(user.id),
+                message: 'Logged in !!!'
             });
         } else {
             res.status(400).json({ message: 'Invalid credentials' });
