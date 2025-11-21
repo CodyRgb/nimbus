@@ -11,6 +11,7 @@ dotenv.config();
 const app: Application = express();
 
 import authRoutes from './routes/auth.routes';
+// import { protect } from './middleware/auth.middleware';
 
 // Body parser
 app.use(express.json());
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.get('/', (req: Request, res: Response) => {
     res.send('API is running...');
 });
+
 
 const PORT = process.env.PORT || 5000;
 
