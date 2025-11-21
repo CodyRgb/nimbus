@@ -9,14 +9,14 @@ export default function LandingPage() {
         <div className="text-xl font-bold text-blue-600">
           Telegram Cloud Storage
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Login Button */}
-          <Link href="/pages/login" className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white font-medium">
+          <Link href="/login" className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white font-medium">
             Login
           </Link>
           {/* Register Button */}
-          <Link href="/pages/register" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors">
+          <Link href="/register" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors">
             Register
           </Link>
         </div>
@@ -28,17 +28,17 @@ export default function LandingPage() {
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
           Unlimited Free Cloud Storage
         </h1>
-        
+
         {/* Subheadline */}
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl">
           Store your files securely using Telegram's infrastructure
         </p>
-        
+
         {/* Call-to-Action Button */}
-        <Link href="/pages/register" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+        <Link href="/register" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
           Get Started Free
         </Link>
-        
+
         {/* Hero Image/Illustration Placeholder */}
         <div className="mt-16 w-full max-w-4xl h-64 md:h-96 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700">
           <span className="text-gray-400 dark:text-gray-500 text-lg">Hero Image / Illustration representing cloud storage</span>
@@ -93,19 +93,19 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-gray-900 dark:text-white">Telegram Cloud Storage</span>
             <p className="text-sm text-gray-500 mt-2">© {new Date().getFullYear()} All rights reserved.</p>
           </div>
-          
+
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 text-center md:text-left">
             <div>
               <h4 className="font-semibold mb-2">Contact</h4>
               <p className="text-sm text-gray-500">support@example.com</p>
             </div>
             <div>
-               {/* Social media links (optional) */}
-               <h4 className="font-semibold mb-2">Follow Us</h4>
-               <div className="flex space-x-4 justify-center md:justify-start">
-                 <a href="#" className="text-gray-400 hover:text-blue-500">Twitter</a>
-                 <a href="#" className="text-gray-400 hover:text-blue-700">LinkedIn</a>
-               </div>
+              {/* Social media links (optional) */}
+              <h4 className="font-semibold mb-2">Follow Us</h4>
+              <div className="flex space-x-4 justify-center md:justify-start">
+                <a href="#" className="text-gray-400 hover:text-blue-500">Twitter</a>
+                <a href="#" className="text-gray-400 hover:text-blue-700">LinkedIn</a>
+              </div>
             </div>
           </div>
         </div>
