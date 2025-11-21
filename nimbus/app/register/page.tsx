@@ -3,21 +3,44 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+import api from "../../lib/api";
+
 export default function RegisterPage() {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
         confirmPassword: "",
     });
+    const [error, setError] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Register attempt:", formData);
+        setError("");
+
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        try {
+            const res = await api.post("/auth/register", {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+            });
+
+            localStorage.setItem("token", res.data.token);
+            router.push("/login"); // Redirect to login after registration (or dashboard)
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Registration failed");
+        }
     };
 
     return (
@@ -33,6 +56,12 @@ export default function RegisterPage() {
                     </h1>
                     <p className="text-gray-400 mt-2">Join us today</p>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-sm text-center">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>

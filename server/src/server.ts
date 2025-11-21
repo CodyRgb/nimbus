@@ -13,8 +13,17 @@ const app: Application = express();
 import authRoutes from './routes/auth.routes';
 // import { protect } from './middleware/auth.middleware';
 
+import cors from 'cors';
+
 // Body parser
 app.use(express.json());
+
+// Enable CORS
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+
 
 app.use('/api/auth', authRoutes);
 

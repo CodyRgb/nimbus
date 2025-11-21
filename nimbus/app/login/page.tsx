@@ -3,13 +3,30 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+import api from "../../lib/api";
+
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Login attempt:", { email, password });
+        setError("");
+
+        try {
+            const res = await api.post("/auth/login", {
+                email,
+                password,
+            });
+
+            localStorage.setItem("token", res.data.token);
+            router.push("/"); // Redirect to dashboard/home
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Login failed");
+        }
     };
 
     return (
@@ -25,6 +42,12 @@ export default function LoginPage() {
                     </h1>
                     <p className="text-gray-400 mt-2">Sign in to your account</p>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-sm text-center">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
