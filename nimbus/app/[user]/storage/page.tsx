@@ -262,12 +262,29 @@ export default function StoragePage() {
                                         <td className="px-6 py-4 capitalize">{file.mimeType.split('/')[1]}</td>
                                         <td className="px-6 py-4">{new Date(file.createdAt).toLocaleDateString()}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => handleDownload(file._id, file.originalName)}
-                                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                                            >
-                                                Download
-                                            </button>
+                                            <div className="flex items-center justify-end gap-3">
+                                                <button
+                                                    onClick={() => handlePreview(index)}
+                                                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                                    title="Preview"
+                                                >
+                                                    Preview
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownload(file._id, file.originalName)}
+                                                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                                                    title="Download"
+                                                >
+                                                    Download
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteClick(file)}
+                                                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium"
+                                                    title="Delete"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
