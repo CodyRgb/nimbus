@@ -107,7 +107,10 @@ export const downloadFileFromTelegram = async (messageId: number) => {
         throw new Error("Message does not contain any media");
     }
 
-    return client.iterDownload(message.media);
+    return client.iterDownload({
+        file: message.media,
+        requestSize: 512 * 1024,
+    });
 };
 
 export const getFileLink = async (messageId: number) => {

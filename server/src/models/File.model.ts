@@ -26,4 +26,4 @@ const FileSchema: Schema = new Schema({
     downloadCount: { type: Number, default: 0 },
 });
 
-export default mongoose.model<IFile>('File', FileSchema);
+export default (mongoose.models.File as mongoose.Model<IFile>) || mongoose.model<IFile>('File', FileSchema);
