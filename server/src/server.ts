@@ -1,16 +1,15 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
+import { connectTelegram } from './services/telegram.service';
 
 // Load env vars
 dotenv.config();
 
-// Connect to database
-// Connect to database moved to server startup
-
 const app: Application = express();
 
 import authRoutes from './routes/auth.routes';
+import fileRoutes from './routes/file.routes';
 // import { protect } from './middleware/auth.middleware';
 
 import cors from 'cors';
@@ -26,6 +25,7 @@ app.use(cors({
 
 
 app.use('/api/auth', authRoutes);
+app.use('/api/files', fileRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('API is running...');
@@ -35,11 +35,19 @@ app.get('/', (req: Request, res: Response) => {
 const PORT = process.env.PORT || 5000;
 
 // Connect to database and start server
-connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-    });
-}).catch((err) => {
-    console.error('Failed to connect to database:', err);
-    process.exit(1);
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+        await connectTelegram();
+
+        app.listen(PORT, () => {
+            console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+    }
+};
+
+startServer();
+
