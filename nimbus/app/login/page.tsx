@@ -23,7 +23,7 @@ export default function LoginPage() {
             });
 
             localStorage.setItem("token", res.data.token);
-            router.push("/"); // Redirect to dashboard/home
+            router.push(`/${res.data.name}`); // Redirect to dynamic user page
         } catch (err: any) {
             setError(err.response?.data?.message || "Login failed");
         }

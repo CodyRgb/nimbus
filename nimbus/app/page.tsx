@@ -4,23 +4,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans">
       {/* Header Section */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-        {/* Website Logo/Brand Name */}
-        <div className="text-xl font-bold text-blue-600">
-          Telegram Cloud Storage
-        </div>
-
-        <div className="flex items-center space-x-4">
-          {/* Login Button */}
-          <Link href="/login" className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white font-medium">
-            Login
-          </Link>
-          {/* Register Button */}
-          <Link href="/register" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors">
-            Register
-          </Link>
-        </div>
-      </header>
+      {/* Header Section Removed - Using Global Navbar */}
 
       {/* Hero Section */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
