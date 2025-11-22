@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth.middleware';
-import { uploadFile, getFiles, downloadFile, deleteFile } from '../controllers/file.controller';
+import { uploadFile, getFiles, downloadFile, deleteFile, createFolder, getFolders, previewFile } from '../controllers/file.controller';
 import path from 'path';
 import fs from 'fs';
 
@@ -34,8 +34,8 @@ router.post('/folders', protect, createFolder);
 router.get('/folders', protect, getFolders);
 router.get('/folders/:parentId', protect, getFolders);
 router.get('/', protect, getFiles);
-router.get('/:id/download', protect, downloadFile);
 router.get('/:id/preview', protect, previewFile);
+router.get('/:id/download', protect, downloadFile);
 router.delete('/:id', protect, deleteFile);
 
 export default router;
