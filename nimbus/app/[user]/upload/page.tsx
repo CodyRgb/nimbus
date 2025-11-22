@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import api from "../../../lib/api";
 
@@ -12,18 +12,27 @@ interface FileData {
     createdAt: string;
 }
 
+// Add webkitdirectory to InputHTMLAttributes
+declare module 'react' {
+    interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
+        webkitdirectory?: string;
+        directory?: string;
+    }
+}
+
 export default function UploadPage() {
     const params = useParams();
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [recentFiles, setRecentFiles] = useState<FileData[]>([]);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [progress, setProgress] = useState(0);
+
+    const folderInputRef = useRef<HTMLInputElement>(null);
 
     const fetchRecentFiles = useCallback(async () => {
         try {
             const res = await api.get("/files");
-            // Assuming API returns all files, slice top 5. 
-            // Ideally API should support limit/sort
             setRecentFiles(res.data.slice(0, 5));
         } catch (error) {
             console.error("Failed to fetch recent files", error);
@@ -48,36 +57,58 @@ export default function UploadPage() {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleUpload(e.dataTransfer.files[0]);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleUpload(e.dataTransfer.files);
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        if (e.target.files && e.target.files[0]) {
-            handleUpload(e.target.files[0]);
+        if (e.target.files && e.target.files.length > 0) {
+            handleUpload(e.target.files);
         }
     };
 
-    const handleUpload = async (file: File) => {
+    const handleUpload = async (files: FileList) => {
         setUploading(true);
         setMessage(null);
+        setProgress(0);
+
+        // Check total size
+        let totalSize = 0;
+        const filesArray = Array.from(files);
+        for (const file of filesArray) {
+            totalSize += file.size;
+        }
+
+        if (totalSize > 2 * 1024 * 1024 * 1024) {
+            setMessage({ type: 'error', text: "Total upload size exceeds 2GB limit." });
+            setUploading(false);
+            return;
+        }
+
         const formData = new FormData();
-        formData.append("file", file);
+        filesArray.forEach(file => {
+            formData.append("files", file);
+        });
 
         try {
             await api.post("/files/upload", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || totalSize));
+                    setProgress(percentCompleted);
+                }
             });
-            setMessage({ type: 'success', text: `Successfully uploaded ${file.name}` });
+            setMessage({ type: 'success', text: `Successfully uploaded ${files.length} file(s)` });
             fetchRecentFiles();
         } catch (error: any) {
             setMessage({ type: 'error', text: error.response?.data?.message || "Upload failed" });
         } finally {
             setUploading(false);
+            setProgress(0);
         }
     };
 
@@ -111,28 +142,32 @@ export default function UploadPage() {
                         </svg>
                     </div>
                     <p className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                        {uploading ? "Uploading..." : "Drag & Drop your files here"}
+                        {uploading ? `Uploading... ${progress}%` : "Drag & Drop files here"}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        or
+                        Max 2GB per upload
                     </p>
-                    <label className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer transition-colors">
-                        Browse Files
-                        <input
-                            type="file"
-                            className="hidden"
-                            onChange={handleChange}
-                            disabled={uploading}
-                        />
-                    </label>
+
+                    <div className="flex space-x-4 justify-center">
+                        <label className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer transition-colors">
+                            Select Files
+                            <input
+                                type="file"
+                                className="hidden"
+                                multiple
+                                onChange={handleChange}
+                                disabled={uploading}
+                            />
+                        </label>
+                    </div>
                 </div>
             </div>
 
             {/* Status Message */}
             {message && (
                 <div className={`mt-4 p-4 rounded-lg ${message.type === 'success'
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                        : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
                     }`}>
                     {message.text}
                 </div>

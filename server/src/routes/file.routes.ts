@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth.middleware';
-import { uploadFile, getFiles, downloadFile, previewFile, deleteFile } from '../controllers/file.controller';
+import { uploadFile, getFiles, downloadFile, deleteFile } from '../controllers/file.controller';
 import path from 'path';
 import fs from 'fs';
 
@@ -29,7 +29,10 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 * 1024 } // 2GB limit for now (multer limit)
 });
 
-router.post('/upload', protect, upload.single('file'), uploadFile);
+router.post('/upload', protect, upload.array('files'), uploadFile);
+router.post('/folders', protect, createFolder);
+router.get('/folders', protect, getFolders);
+router.get('/folders/:parentId', protect, getFolders);
 router.get('/', protect, getFiles);
 router.get('/:id/download', protect, downloadFile);
 router.get('/:id/preview', protect, previewFile);
