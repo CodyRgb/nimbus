@@ -1,58 +1,122 @@
 import { Request, Response } from 'express';
 import File from '../models/File.model';
+import Folder from '../models/Folder.model';
 import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage } from '../services/telegram.service';
 import fs from 'fs';
 import path from 'path';
 
 // Extend Request to include user (added by auth middleware)
-interface AuthRequest extends Request {
-    user?: any;
-    file?: Express.Multer.File;
-}
+// We can rely on declaration merging in auth.middleware.ts for 'user'
+// For 'files', we can cast inside the function
 
-export const uploadFile = async (req: AuthRequest, res: Response): Promise<void> => {
+
+export const uploadFile = async (req: Request, res: Response): Promise<void> => {
     try {
-        if (!req.file) {
-            res.status(400).json({ message: 'No file uploaded' });
+        const files = req.files as Express.Multer.File[];
+        if (!files || files.length === 0) {
+            res.status(400).json({ message: 'No files uploaded' });
             return;
         }
 
-        const { originalname, mimetype, size, path: tempPath, filename } = req.file;
         const userId = req.user._id;
+        const uploadedFiles = [];
 
-        // Upload to Telegram
-        const telegramResult = await uploadFileToTelegram(tempPath, originalname, mimetype);
+        for (const file of files) {
+            const { originalname, mimetype, size, path: tempPath, filename } = file;
 
-        // Create DB record
-        const newFile = await File.create({
-            user: userId,
-            filename: filename, // This might be the temp filename, maybe we want originalname?
-            originalName: originalname,
-            mimeType: mimetype,
-            size: size,
-            telegramFileId: 'N/A', // We might not get a persistent file_id easily without bot API, but we have message_id
-            telegramMessageId: telegramResult.messageId,
-        });
+            try {
+                // Upload to Telegram
+                const telegramResult = await uploadFileToTelegram(tempPath, originalname, mimetype);
 
-        // Clean up temp file
-        fs.unlink(tempPath, (err) => {
-            if (err) console.error("Error deleting temp file:", err);
-        });
+                // Create DB record
+                const newFile = await File.create({
+                    user: userId,
+                    folder: null,
+                    filename: filename,
+                    originalName: originalname,
+                    mimeType: mimetype,
+                    size: size,
+                    telegramFileId: 'N/A',
+                    telegramMessageId: telegramResult.messageId,
+                });
 
-        res.status(201).json(newFile);
+                uploadedFiles.push(newFile);
+
+                // Clean up temp file
+                fs.unlink(tempPath, (err) => {
+                    if (err) console.error("Error deleting temp file:", err);
+                });
+            } catch (err) {
+                console.error(`Failed to upload file ${originalname}:`, err);
+                // Try to clean up temp file even if upload failed
+                fs.unlink(tempPath, (e) => { });
+            }
+        }
+
+        res.status(201).json(uploadedFiles);
     } catch (error) {
         console.error(error);
-        // Clean up temp file if it exists
-        if (req.file && req.file.path) {
-            fs.unlink(req.file.path, (e) => { });
-        }
         res.status(500).json({ message: 'Server Error', error: (error as Error).message });
     }
 };
 
-export const getFiles = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createFolder = async (req: Request, res: Response): Promise<void> => {
     try {
-        const files = await File.find({ user: req.user._id }).sort({ uploadedAt: -1 });
+        const { name, parentId } = req.body;
+        const userId = req.user._id;
+
+        let path: string[] = [];
+        if (parentId) {
+            const parentFolder = await Folder.findOne({ _id: parentId, user: userId });
+            if (!parentFolder) {
+                res.status(404).json({ message: 'Parent folder not found' });
+                return;
+            }
+            path = [...parentFolder.path, parentFolder.name];
+        }
+
+        const folder = await Folder.create({
+            user: userId,
+            name,
+            parent: parentId || null,
+            path
+        });
+
+        res.status(201).json(folder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+export const getFolders = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const parentId = req.params.parentId || null;
+        const folders = await Folder.find({ user: req.user._id, parent: parentId }).sort({ name: 1 });
+        res.json(folders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+export const getFiles = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const folderId = req.query.folderId || null;
+        // If folderId is provided, filter by it. If not, filter by root (folder: null)
+        // However, current frontend might expect all files if no folderId is passed.
+        // Let's support both: if query param exists, filter. If not, return all (legacy behavior) or root.
+        // Given the requirement for folder navigation, we should probably filter by folder.
+        // But for "Storage Overview" (stats), we might need all files.
+        // Let's check if folderId is explicitly passed.
+
+        let query: any = { user: req.user._id };
+        if (req.query.folderId !== undefined) {
+            query.folder = req.query.folderId === 'root' ? null : req.query.folderId;
+        }
+        // If no folderId param, return all files (for stats/search)
+
+        const files = await File.find(query).sort({ uploadedAt: -1 });
         res.json(files);
     } catch (error) {
         console.error(error);
@@ -60,7 +124,7 @@ export const getFiles = async (req: AuthRequest, res: Response): Promise<void> =
     }
 };
 
-export const downloadFile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const downloadFile = async (req: Request, res: Response): Promise<void> => {
     try {
         const file = await File.findOne({ _id: req.params.id, user: req.user._id });
 
@@ -93,7 +157,7 @@ export const downloadFile = async (req: AuthRequest, res: Response): Promise<voi
     }
 };
 
-export const deleteFile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteFile = async (req: Request, res: Response): Promise<void> => {
     try {
         const file = await File.findOne({ _id: req.params.id, user: req.user._id });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import api from "../../../lib/api";
 
 interface FileData {
@@ -9,6 +9,7 @@ interface FileData {
     size: number;
     mimeType: string;
     createdAt: string;
+    folder: string | null;
 }
 
 export default function StoragePage() {
@@ -18,20 +19,26 @@ export default function StoragePage() {
     const [filterType, setFilterType] = useState("all");
     const [sortOrder, setSortOrder] = useState("date-desc");
 
-    useEffect(() => {
-        fetchFiles();
-    }, []);
-
-    const fetchFiles = async () => {
+    const fetchContent = useCallback(async () => {
+        setLoading(true);
         try {
+            // Just fetch all files (or root files if backend still filters, but we want all files now)
+            // If backend filters by folderId=root by default, we might need to adjust backend or pass nothing.
+            // Let's assume we want to see all files flat for now since folders are removed from UI.
+            // Or maybe just root files? User said "remove option for uploading folders", implies flat structure.
+            // I will fetch all files.
             const res = await api.get("/files");
             setFiles(res.data);
         } catch (error) {
-            console.error("Failed to fetch files", error);
+            console.error("Failed to fetch content", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchContent();
+    }, [fetchContent]);
 
     const handleDownload = async (fileId: string, fileName: string) => {
         try {
@@ -92,28 +99,25 @@ export default function StoragePage() {
         switch (type) {
             case 'image': return 'bg-blue-500';
             case 'video': return 'bg-purple-500';
-            case 'application': return 'bg-orange-500'; // Docs usually application/pdf etc
+            case 'application': return 'bg-orange-500';
             default: return 'bg-gray-500';
         }
     };
 
     return (
         <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Storage Overview</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Storage</h1>
+            </div>
 
             {/* Stats Section */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
                 <div className="flex justify-between items-end mb-4">
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Used Storage</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Storage Usage</p>
                         <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatSize(stats.totalSize)}</p>
                     </div>
-                    <div className="text-right">
-                        {/* Could add total limit here if available */}
-                    </div>
                 </div>
-
-                {/* Progress Bar */}
                 <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
                     {Object.entries(stats.typeStats).map(([type, size]) => (
                         <div
@@ -122,17 +126,6 @@ export default function StoragePage() {
                             className={`h-full ${getBarColor(type)}`}
                             title={`${type}: ${formatSize(size)}`}
                         />
-                    ))}
-                </div>
-
-                {/* Legend */}
-                <div className="flex flex-wrap gap-4 mt-4 text-sm">
-                    {Object.entries(stats.typeStats).map(([type, size]) => (
-                        <div key={type} className="flex items-center">
-                            <span className={`w-3 h-3 rounded-full mr-2 ${getBarColor(type)}`} />
-                            <span className="text-gray-600 dark:text-gray-300 capitalize">{type}</span>
-                            <span className="text-gray-400 ml-1">({formatSize(size)})</span>
-                        </div>
                     ))}
                 </div>
             </div>
@@ -168,11 +161,15 @@ export default function StoragePage() {
                 </select>
             </div>
 
-            {/* File List */}
+            {/* Content List */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Loading files...</div>
-                ) : filteredFiles.length > 0 ? (
+                    <div className="p-8 text-center text-gray-500">Loading...</div>
+                ) : filteredFiles.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No files found.
+                    </div>
+                ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
                             <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
@@ -187,7 +184,8 @@ export default function StoragePage() {
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {filteredFiles.map((file) => (
                                     <tr key={file._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center">
+                                            <span className="mr-3 text-xl">📄</span>
                                             {file.originalName}
                                         </td>
                                         <td className="px-6 py-4">{formatSize(file.size)}</td>
@@ -195,7 +193,10 @@ export default function StoragePage() {
                                         <td className="px-6 py-4">{new Date(file.createdAt).toLocaleDateString()}</td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => handleDownload(file._id, file.originalName)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDownload(file._id, file.originalName);
+                                                }}
                                                 className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                                             >
                                                 Download
@@ -205,10 +206,6 @@ export default function StoragePage() {
                                 ))}
                             </tbody>
                         </table>
-                    </div>
-                ) : (
-                    <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                        No files found matching your criteria.
                     </div>
                 )}
             </div>
