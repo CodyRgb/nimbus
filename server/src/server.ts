@@ -12,10 +12,12 @@ import authRoutes from './routes/auth.routes';
 import fileRoutes from './routes/file.routes';
 // import { protect } from './middleware/auth.middleware';
 
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
 // Body parser
 app.use(express.json());
+app.use(cookieParser());
 
 // Enable CORS
 app.use(cors({

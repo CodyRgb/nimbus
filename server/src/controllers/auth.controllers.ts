@@ -42,11 +42,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         });
 
         if (user) {
+            const token = generateToken(user.id);
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                sameSite: 'strict',
+                path: '/'
+            });
+
             res.status(201).json({
                 _id: user.id,
                 name: user.name,
                 email: user.email,
-                token: generateToken(user.id),
+                token: token,
             });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
@@ -68,11 +78,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         const user = await User.findOne({ email });
 
         if (user && (await bcrypt.compare(password, user.password))) {
+            const token = generateToken(user.id);
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                sameSite: 'strict',
+                path: '/'
+            });
+
             res.json({
                 _id: user.id,
                 name: user.name,
                 email: user.email,
-                token: generateToken(user.id),
+                token: token,
                 message: 'Logged in !!!'
             });
         } else {
@@ -88,8 +108,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // @route   POST /api/auth/logout
 // @access  Public
 export const logout = async (req: Request, res: Response): Promise<void> => {
-    // Since we are using JWTs stored on the client side (e.g., localStorage),
-    // the server doesn't need to do much for logout other than sending a success message.
-    // The client is responsible for deleting the token.
+    res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+    });
     res.status(200).json({ message: 'Logged out successfully' });
 };
