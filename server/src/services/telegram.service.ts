@@ -10,7 +10,21 @@ dotenv.config();
 const apiId = parseInt(process.env.TELEGRAM_API_ID || "0");
 const apiHash = process.env.TELEGRAM_API_HASH || "";
 const botToken = process.env.TELEGRAM_BOT_TOKEN || "";
-const channelId = process.env.TELEGRAM_CHANNEL_ID || "";
+const channelIdStr = process.env.TELEGRAM_CHANNEL_ID || "";
+
+// Helper to parse channel ID
+const getChannelId = () => {
+    if (/^-?\d+$/.test(channelIdStr)) {
+        return BigInt(channelIdStr);
+    }
+    return channelIdStr;
+};
+
+const channelId = getChannelId();
+
+if (!apiId || !apiHash || !botToken || !channelIdStr) {
+    throw new Error("Missing Telegram credentials in .env file");
+}
 
 // Initialize client
 // We use a StringSession. If you want to persist the session, save the string.
@@ -31,6 +45,17 @@ export const connectTelegram = async () => {
         botAuthToken: botToken,
     });
 
+    // Ensure we can access the channel
+    try {
+        // Resolving the entity caches the access hash which is required for subsequent calls
+        await client.getEntity(channelId as any);
+        console.log("Successfully resolved Telegram channel!");
+    } catch (error) {
+        console.error("Error resolving Telegram channel:", error);
+        console.error("Make sure the bot is an administrator in the channel and the CHANNEL_ID is correct.");
+        // client.getDialogs() is not supported for bots, so we removed it.
+    }
+
     // Save session if needed (optional for bots as they can login with token)
     // console.log("Session:", client.session.save());
 
@@ -49,7 +74,7 @@ export const uploadFileToTelegram = async (filePath: string, filename: string, m
     try {
         // Send the file to the channel
         // We use sendFile which handles uploading and sending in one go
-        const result = await client.sendFile(channelId, {
+        const result = await client.sendFile(channelId as any, {
             file: filePath,
             forceDocument: true,
             attributes: [
@@ -85,7 +110,7 @@ export const downloadFileFromTelegram = async (messageId: number) => {
     console.log(`Downloading message ${messageId}...`);
 
     // Get the message
-    const messages = await client.getMessages(channelId, { ids: [messageId] });
+    const messages = await client.getMessages(channelId as any, { ids: [messageId] });
     if (!messages || messages.length === 0) {
         throw new Error("Message not found");
     }
@@ -121,5 +146,5 @@ export const getFileLink = async (messageId: number) => {
 
 export const deleteMessage = async (messageId: number) => {
     if (!isConnected) await connectTelegram();
-    await client.deleteMessages(channelId, [messageId], { revoke: true });
+    await client.deleteMessages(channelId as any, [messageId], { revoke: true });
 };

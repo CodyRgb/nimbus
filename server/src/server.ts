@@ -1,10 +1,7 @@
+import 'dotenv/config';
 import express, { Application, Request, Response } from 'express';
-import dotenv from 'dotenv';
 import connectDB from './config/db';
 import { connectTelegram } from './services/telegram.service';
-
-// Load env vars
-dotenv.config();
 
 const app: Application = express();
 
