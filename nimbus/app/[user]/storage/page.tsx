@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import api from "../../../lib/api";
+import MediaPreviewModal from "../../components/MediaPreviewModal";
+import DeleteConfirmModal from "../../components/DeleteConfirmModal";
 
 interface FileData {
     _id: string;
@@ -17,6 +19,15 @@ export default function StoragePage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [sortOrder, setSortOrder] = useState("date-desc");
+    
+    // Preview modal state
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null);
+    
+    // Delete modal state
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState<FileData | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchFiles();
@@ -48,6 +59,63 @@ export default function StoragePage() {
         } catch (error) {
             console.error("Download failed", error);
             alert("Failed to download file");
+        }
+    };
+
+    const handlePreview = (index: number) => {
+        setSelectedFileIndex(index);
+        setPreviewModalOpen(true);
+    };
+
+    const handleDeleteClick = (file: FileData) => {
+        setFileToDelete(file);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!fileToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await api.delete(`/files/${fileToDelete._id}`);
+            
+            // Remove from local state
+            setFiles(files.filter(f => f._id !== fileToDelete._id));
+            
+            // Close modals
+            setDeleteModalOpen(false);
+            setFileToDelete(null);
+            
+            // If preview was open for this file, close it
+            if (previewModalOpen && selectedFileIndex !== null) {
+                const currentFile = filteredFiles[selectedFileIndex];
+                if (currentFile._id === fileToDelete._id) {
+                    setPreviewModalOpen(false);
+                    setSelectedFileIndex(null);
+                }
+            }
+        } catch (error) {
+            console.error("Delete failed", error);
+            alert("Failed to delete file");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModalOpen(false);
+        setFileToDelete(null);
+    };
+
+    const handlePreviewNext = () => {
+        if (selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1) {
+            setSelectedFileIndex(selectedFileIndex + 1);
+        }
+    };
+
+    const handlePreviewPrevious = () => {
+        if (selectedFileIndex !== null && selectedFileIndex > 0) {
+            setSelectedFileIndex(selectedFileIndex - 1);
         }
     };
 
@@ -97,6 +165,8 @@ export default function StoragePage() {
         }
     };
 
+    const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
+
     return (
         <div className="max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Storage Overview</h1>
@@ -144,12 +214,12 @@ export default function StoragePage() {
                     placeholder="Search files..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
                 />
                 <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
                 >
                     <option value="all">All Types</option>
                     <option value="image">Images</option>
@@ -159,7 +229,7 @@ export default function StoragePage() {
                 <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value)}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
                 >
                     <option value="date-desc">Newest First</option>
                     <option value="date-asc">Oldest First</option>
@@ -185,7 +255,7 @@ export default function StoragePage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {filteredFiles.map((file) => (
+                                {filteredFiles.map((file, index) => (
                                     <tr key={file._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                             {file.originalName}
@@ -194,12 +264,36 @@ export default function StoragePage() {
                                         <td className="px-6 py-4 capitalize">{file.mimeType.split('/')[1]}</td>
                                         <td className="px-6 py-4">{new Date(file.createdAt).toLocaleDateString()}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => handleDownload(file._id, file.originalName)}
-                                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                                            >
-                                                Download
-                                            </button>
+                                            <div className="flex items-center justify-end gap-3">
+                                                <button
+                                                    onClick={() => handlePreview(index)}
+                                                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium transition-colors"
+                                                    title="Preview"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDownload(file._id, file.originalName)}
+                                                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                                                    title="Download"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteClick(file)}
+                                                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors"
+                                                    title="Delete"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -212,6 +306,43 @@ export default function StoragePage() {
                     </div>
                 )}
             </div>
+
+            {/* Preview Modal */}
+            {selectedFile && (
+                <MediaPreviewModal
+                    isOpen={previewModalOpen}
+                    fileId={selectedFile._id}
+                    fileName={selectedFile.originalName}
+                    fileType={selectedFile.mimeType}
+                    fileSize={formatSize(selectedFile.size)}
+                    onClose={() => {
+                        setPreviewModalOpen(false);
+                        setSelectedFileIndex(null);
+                    }}
+                    onDelete={() => {
+                        setPreviewModalOpen(false);
+                        handleDeleteClick(selectedFile);
+                    }}
+                    onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
+                    onNext={handlePreviewNext}
+                    onPrevious={handlePreviewPrevious}
+                    hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
+                    hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
+                />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {fileToDelete && (
+                <DeleteConfirmModal
+                    isOpen={deleteModalOpen}
+                    fileName={fileToDelete.originalName}
+                    fileSize={formatSize(fileToDelete.size)}
+                    fileType={fileToDelete.mimeType.split('/')[1]?.toUpperCase() || 'Unknown'}
+                    onConfirm={handleDeleteConfirm}
+                    onCancel={handleDeleteCancel}
+                    isDeleting={isDeleting}
+                />
+            )}
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth.middleware';
-import { uploadFile, getFiles, downloadFile, deleteFile } from '../controllers/file.controller';
+import { uploadFile, getFiles, downloadFile, previewFile, deleteFile } from '../controllers/file.controller';
 import path from 'path';
 import fs from 'fs';
 
@@ -32,6 +32,7 @@ const upload = multer({
 router.post('/upload', protect, upload.single('file'), uploadFile);
 router.get('/', protect, getFiles);
 router.get('/:id/download', protect, downloadFile);
+router.get('/:id/preview', protect, previewFile);
 router.delete('/:id', protect, deleteFile);
 
 export default router;

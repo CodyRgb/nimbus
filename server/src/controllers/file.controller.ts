@@ -93,6 +93,40 @@ export const downloadFile = async (req: AuthRequest, res: Response): Promise<voi
     }
 };
 
+export const previewFile = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+
+        if (!file) {
+            res.status(404).json({ message: 'File not found' });
+            return;
+        }
+
+        // Stream from Telegram
+        const chunks = await downloadFileFromTelegram(file.telegramMessageId);
+
+        // Set headers for inline preview (not download)
+        res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
+        res.setHeader('Content-Type', file.mimeType);
+        res.setHeader('Content-Length', file.size);
+        res.setHeader('Accept-Ranges', 'bytes');
+
+        // Stream chunks to response
+        for await (const chunk of chunks) {
+            res.write(chunk);
+        }
+        res.end();
+
+        // Update stats
+        file.lastAccessed = new Date();
+        await file.save();
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Preview failed' });
+    }
+};
+
 export const deleteFile = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const file = await File.findOne({ _id: req.params.id, user: req.user._id });
