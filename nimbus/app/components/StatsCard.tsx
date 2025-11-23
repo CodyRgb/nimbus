@@ -12,7 +12,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon, trend }) => {
     <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
       <div className="p-5">
         <div className="flex items-center">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {icon}
           </div>
           <div className="ml-5 w-0 flex-1">

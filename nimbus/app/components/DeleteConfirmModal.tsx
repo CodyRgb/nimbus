@@ -79,7 +79,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                 {/* File Details */}
                 <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                        <div className="shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                             <span className="text-xl">📄</span>
                         </div>
                         <div className="flex-1 min-w-0">

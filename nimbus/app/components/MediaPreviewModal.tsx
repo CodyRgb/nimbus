@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import api from '../../lib/api';
+import Image from 'next/image';
 
 interface MediaPreviewModalProps {
     isOpen: boolean;
@@ -202,7 +203,9 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                     {!loading && !error && previewUrl && (
                         <>
                             {isImage && (
-                                <img 
+                                <Image 
+                                    width={500} 
+                                    height={500}
                                     src={previewUrl} 
                                     alt={fileName}
                                     className="max-w-full max-h-full object-contain rounded-lg"
@@ -224,7 +227,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                             {isAudio && (
                                 <div className="flex flex-col items-center gap-6 w-full max-w-2xl">
                                     {/* Audio Icon */}
-                                    <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl">
+                                    <div className="w-32 h-32 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl">
                                         <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                         </svg>
