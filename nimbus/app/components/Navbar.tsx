@@ -2,36 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import api from "../../lib/api";
 
 export default function Navbar() {
     const router = useRouter();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [username, setUsername] = useState("");
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        // Ideally, we should also verify the token or decode it to get the username if not stored
-        // For now, we'll assume if token exists, user is logged in. 
-        // We might need to store username in localStorage on login too for the link.
-        if (token) {
-            setIsLoggedIn(true);
-            // Try to get user info if not available (optional improvement)
-        }
-    }, []);
+    const { isLoggedIn, user, logout: authLogout } = useAuth();
 
     const handleLogout = async () => {
         try {
             await api.post("/auth/logout");
-            localStorage.removeItem("token");
-            setIsLoggedIn(false);
+            authLogout();
             router.push("/");
         } catch (error) {
             console.error("Logout failed", error);
             // Force logout on client even if server fails
-            localStorage.removeItem("token");
-            setIsLoggedIn(false);
+            authLogout();
             router.push("/");
         }
     };
@@ -46,7 +32,11 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
                 {isLoggedIn ? (
                     <>
-                        {/* Add link to dashboard if needed, or just show logout */}
+                        {user && (
+                            <span className="text-gray-600 dark:text-gray-300">
+                                Welcome, {user.name}
+                            </span>
+                        )}
                         <button
                             onClick={handleLogout}
                             className="text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 font-medium"

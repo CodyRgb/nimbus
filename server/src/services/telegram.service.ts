@@ -1,6 +1,7 @@
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { Api } from "telegram/tl";
+import { password } from "telegram";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
@@ -68,12 +69,8 @@ export const uploadFileToTelegram = async (filePath: string, filename: string, m
 
     console.log(`Uploading ${filename} to Telegram...`);
 
-    // CustomUploadFile allows uploading large files by chunks
-    // gram.js handles this automatically with client.uploadFile or sendFile
-
     try {
         // Send the file to the channel
-        // We use sendFile which handles uploading and sending in one go
         const result = await client.sendFile(channelId as any, {
             file: filePath,
             forceDocument: true,
@@ -81,19 +78,11 @@ export const uploadFileToTelegram = async (filePath: string, filename: string, m
                 new Api.DocumentAttributeFilename({ fileName: filename }),
             ],
             caption: `File: ${filename}\nMime: ${mimeType}`,
+            workers: 3, // Parallel uploads
         });
 
-        // Clean up local file
-        // fs.unlinkSync(filePath); // Caller handles cleanup
-
-        // Extract file_id and message_id
-        // result is a Message object
         const messageId = result.id;
 
-        // We need to get the file location to generate a file_id or just store the message_id
-        // For downloading, we can use downloadMedia(message)
-
-        // We'll return the message ID and the file object from Telegram
         return {
             messageId: messageId,
             media: result.media,
@@ -109,7 +98,6 @@ export const downloadFileFromTelegram = async (messageId: number) => {
 
     console.log(`Downloading message ${messageId}...`);
 
-    // Get the message
     const messages = await client.getMessages(channelId as any, { ids: [messageId] });
     if (!messages || messages.length === 0) {
         throw new Error("Message not found");
@@ -117,17 +105,6 @@ export const downloadFileFromTelegram = async (messageId: number) => {
 
     const message = messages[0];
 
-    // Download media
-    // This returns a Buffer. For very large files, we might want to stream.
-    // gram.js downloadMedia supports 'workers' and 'outputFile'.
-    // If we want to stream to the response, we might need to download to a temp file first or use an iterator.
-    // For now, let's return a buffer (might be memory intensive for huge files) 
-    // or better, download to a temp file and return the path.
-
-    // Let's try returning a buffer for now, but for production, streaming is better.
-    // gram.js iterDownload could be used for streaming.
-
-    // For this implementation, let's use iterDownload to get an async iterable
     if (!message.media || message.media instanceof Api.MessageMediaEmpty) {
         throw new Error("Message does not contain any media");
     }
@@ -147,4 +124,116 @@ export const getFileLink = async (messageId: number) => {
 export const deleteMessage = async (messageId: number) => {
     if (!isConnected) await connectTelegram();
     await client.deleteMessages(channelId as any, [messageId], { revoke: true });
+};
+
+// --- User Client & Auth ---
+
+export const getUserClient = async (session: string) => {
+    const stringSession = new StringSession(session);
+    const userClient = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
+        useWSS: false,
+    });
+    await userClient.connect();
+    return userClient;
+};
+
+export const sendLoginCode = async (phoneNumber: string) => {
+    const tempClient = new TelegramClient(new StringSession(""), apiId, apiHash, {
+        connectionRetries: 5,
+    });
+    await tempClient.connect();
+
+    const { phoneCodeHash } = await tempClient.sendCode(
+        {
+            apiId,
+            apiHash,
+        },
+        phoneNumber
+    );
+
+    const session = tempClient.session.save();
+    return { phoneCodeHash, session };
+};
+
+export const completeLogin = async (phoneNumber: string, code: string, phoneCodeHash: string, session: string, userPassword?: string) => {
+    const stringSession = new StringSession(session);
+    const tempClient = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
+    });
+    await tempClient.connect();
+
+    try {
+        await tempClient.invoke(
+            new Api.auth.SignIn({
+                phoneNumber,
+                phoneCodeHash,
+                phoneCode: code,
+            })
+        );
+    } catch (e: any) {
+        if (e.message.includes("SESSION_PASSWORD_NEEDED") && userPassword) {
+            // If 2FA is enabled, we need to use checkPassword
+            const passwordSrpResult = await tempClient.invoke(
+                new Api.account.GetPassword()
+            );
+            const passwordHash = await password.computeCheck(passwordSrpResult, userPassword);
+            await tempClient.invoke(
+                new Api.auth.CheckPassword({
+                    password: passwordHash,
+                })
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return tempClient.session.save();
+};
+
+export const uploadFileToTelegramWithClient = async (clientToUse: TelegramClient, filePath: string, filename: string, mimeType: string) => {
+    console.log(`Uploading ${filename} to Telegram (User)...`);
+    try {
+        const result = await clientToUse.sendFile("me", {
+            file: filePath,
+            forceDocument: true,
+            attributes: [
+                new Api.DocumentAttributeFilename({ fileName: filename }),
+            ],
+            caption: `File: ${filename}\nMime: ${mimeType}`,
+            workers: 3, // Parallel uploads
+        });
+
+        return {
+            messageId: result.id,
+            media: result.media,
+        };
+    } catch (error) {
+        console.error("Error uploading to Telegram (User):", error);
+        throw error;
+    }
+};
+
+export const downloadFileFromTelegramWithClient = async (clientToUse: TelegramClient, messageId: number) => {
+    console.log(`Downloading message ${messageId} (User)...`);
+    const messages = await clientToUse.getMessages("me", { ids: [messageId] });
+    if (!messages || messages.length === 0) {
+        throw new Error("Message not found");
+    }
+    const message = messages[0];
+
+    if (!message.media || message.media instanceof Api.MessageMediaEmpty) {
+        throw new Error("Message does not contain any media");
+    }
+
+    return clientToUse.iterDownload({
+        file: message.media,
+        requestSize: 512 * 1024,
+    });
+};
+
+export const deleteMessageWithClient = async (clientToUse: TelegramClient, messageId: number) => {
+    // We do NOT delete from Telegram as per requirements, but keeping this helper just in case needed later
+    // or for cleanup of failed uploads.
+    await clientToUse.deleteMessages("me", [messageId], { revoke: true });
 };

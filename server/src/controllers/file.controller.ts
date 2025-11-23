@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import File from '../models/File.model';
 import Folder from '../models/Folder.model';
-import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage } from '../services/telegram.service';
+import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage, getUserClient, uploadFileToTelegramWithClient, downloadFileFromTelegramWithClient, deleteMessageWithClient } from '../services/telegram.service';
 import fs from 'fs';
 import path from 'path';
+import User from '../models/User.model';
 
 // Extend Request to include user (added by auth middleware)
 // We can rely on declaration merging in auth.middleware.ts for 'user'
@@ -19,14 +20,24 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
         }
 
         const userId = req.user._id;
+
+        // Fetch user to get telegram session
+        const user = await User.findById(userId).select('+telegramSession');
+
+        if (!user || !user.telegramSession) {
+            res.status(403).json({ message: 'Please connect your Telegram account to upload files.' });
+            return;
+        }
+
+        const userClient = await getUserClient(user.telegramSession);
         const uploadedFiles = [];
 
         for (const file of files) {
             const { originalname, mimetype, size, path: tempPath, filename } = file;
 
             try {
-                // Upload to Telegram
-                const telegramResult = await uploadFileToTelegram(tempPath, originalname, mimetype);
+                // Upload to Telegram (User)
+                const telegramResult = await uploadFileToTelegramWithClient(userClient, tempPath, originalname, mimetype);
 
                 // Create DB record
                 const newFile = await File.create({
@@ -38,6 +49,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                     size: size,
                     telegramFileId: 'N/A',
                     telegramMessageId: telegramResult.messageId,
+                    storageType: 'user',
                 });
 
                 uploadedFiles.push(newFile);
@@ -133,8 +145,18 @@ export const previewFile = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        // Stream from Telegram
-        const chunks = await downloadFileFromTelegram(file.telegramMessageId);
+        let chunks;
+        if (file.storageType === 'user') {
+            const user = await User.findById(req.user._id).select('+telegramSession');
+            if (!user || !user.telegramSession) {
+                res.status(403).json({ message: 'Telegram connection required to preview this file.' });
+                return;
+            }
+            const userClient = await getUserClient(user.telegramSession);
+            chunks = await downloadFileFromTelegramWithClient(userClient, file.telegramMessageId);
+        } else {
+            chunks = await downloadFileFromTelegram(file.telegramMessageId);
+        }
 
         // Use inline disposition for preview
         res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
@@ -166,8 +188,18 @@ export const downloadFile = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        // Stream from Telegram
-        const chunks = await downloadFileFromTelegram(file.telegramMessageId);
+        let chunks;
+        if (file.storageType === 'user') {
+            const user = await User.findById(req.user._id).select('+telegramSession');
+            if (!user || !user.telegramSession) {
+                res.status(403).json({ message: 'Telegram connection required to download this file.' });
+                return;
+            }
+            const userClient = await getUserClient(user.telegramSession);
+            chunks = await downloadFileFromTelegramWithClient(userClient, file.telegramMessageId);
+        } else {
+            chunks = await downloadFileFromTelegram(file.telegramMessageId);
+        }
 
         res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
         res.setHeader('Content-Type', file.mimeType);
@@ -199,8 +231,21 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        // Delete from Telegram
-        await deleteMessage(file.telegramMessageId);
+        if (file.storageType === 'user') {
+            // Requirement: "if user deletes from website, they can still access it from Telegram"
+            // So we DO NOT delete from Telegram for user storage.
+            // We only delete the reference in our DB.
+        } else {
+            // For legacy/bot files, we might want to delete, or keep them too.
+            // Let's keep the existing behavior for bot files (delete) or maybe not?
+            // The requirement specifically mentions "Saved Messages".
+            // Let's assume bot files should be deleted to save space/cleanup.
+            try {
+                await deleteMessage(file.telegramMessageId);
+            } catch (e) {
+                console.error("Failed to delete message from bot channel", e);
+            }
+        }
 
         // Delete from DB
         await file.deleteOne();

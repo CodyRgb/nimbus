@@ -7,6 +7,7 @@ export interface IUser extends Document {
     storageUsed: number;
     fileCount: number;
     createdAt: Date;
+    telegramSession?: string;
     matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
@@ -17,6 +18,7 @@ const UserSchema: Schema = new Schema({
     storageUsed: { type: Number, default: 0 },
     fileCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
+    telegramSession: { type: String, select: false },
 });
 
 

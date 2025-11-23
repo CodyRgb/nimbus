@@ -7,6 +7,7 @@ const app: Application = express();
 
 import authRoutes from './routes/auth.routes';
 import fileRoutes from './routes/file.routes';
+import telegramRoutes from './routes/telegram.routes';
 // import { protect } from './middleware/auth.middleware';
 
 import cookieParser from 'cookie-parser';
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('API is running...');
