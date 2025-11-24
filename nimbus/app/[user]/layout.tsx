@@ -13,7 +13,6 @@ export default function UserLayout({
     const user = params.user as string;
 
     const navItems = [
-        { name: "Dashboard", href: `/${user}` },
         { name: "Upload", href: `/${user}/upload` },
         { name: "Storage", href: `/${user}/storage` },
     ];
@@ -34,8 +33,8 @@ export default function UserLayout({
                                     key={item.name}
                                     href={item.href}
                                     className={`block px-4 py-2 rounded-lg transition-colors ${isActive
-                                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
-                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
+                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                                         }`}
                                 >
                                     {item.name}
@@ -55,8 +54,8 @@ export default function UserLayout({
                             key={item.name}
                             href={item.href}
                             className={`text-sm font-medium ${isActive
-                                    ? "text-blue-600 dark:text-blue-400"
-                                    : "text-gray-500 dark:text-gray-400"
+                                ? "text-blue-600 dark:text-blue-400"
+                                : "text-gray-500 dark:text-gray-400"
                                 }`}
                         >
                             {item.name}

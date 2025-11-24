@@ -31,7 +31,7 @@ export default function LoginPage() {
                 email: res.data.email,
             }, res.data.token);
 
-            router.push(`/${res.data.name}`); // Redirect to dynamic user page
+            router.push(`/${res.data.name}/upload`); // Redirect to upload page
         } catch (err: any) {
             setError(err.response?.data?.message || "Login failed");
         }

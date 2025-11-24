@@ -20,11 +20,15 @@ export default function StoragePage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [sortOrder, setSortOrder] = useState("date-desc");
-    
+
+    // Selection state
+    const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+    const [touchTimer, setTouchTimer] = useState<NodeJS.Timeout | null>(null);
+
     // Preview modal state
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null);
-    
+
     // Delete modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<FileData | null>(null);
@@ -85,14 +89,14 @@ export default function StoragePage() {
         setIsDeleting(true);
         try {
             await api.delete(`/files/${fileToDelete._id}`);
-            
+
             // Remove from local state
             setFiles(files.filter(f => f._id !== fileToDelete._id));
-            
+
             // Close modals
             setDeleteModalOpen(false);
             setFileToDelete(null);
-            
+
             // If preview was open for this file, close it
             if (previewModalOpen && selectedFileIndex !== null) {
                 const currentFile = filteredFiles[selectedFileIndex];
@@ -112,6 +116,92 @@ export default function StoragePage() {
     const handleDeleteCancel = () => {
         setDeleteModalOpen(false);
         setFileToDelete(null);
+    };
+
+    // Selection handlers
+    const toggleFileSelection = (fileId: string) => {
+        const newSelected = new Set(selectedFiles);
+        if (newSelected.has(fileId)) {
+            newSelected.delete(fileId);
+        } else {
+            newSelected.add(fileId);
+        }
+        setSelectedFiles(newSelected);
+    };
+
+    const selectAll = () => {
+        if (selectedFiles.size === filteredFiles.length) {
+            setSelectedFiles(new Set());
+        } else {
+            setSelectedFiles(new Set(filteredFiles.map(f => f._id)));
+        }
+    };
+
+    const handleBulkDownload = async () => {
+        if (selectedFiles.size === 0) return;
+
+        try {
+            const response = await api.post('/files/bulk-download', {
+                fileIds: Array.from(selectedFiles)
+            }, {
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `files-${Date.now()}.zip`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setSelectedFiles(new Set());
+        } catch (err) {
+            console.error("Bulk download failed", err);
+            alert("Failed to download files. Please try again.");
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedFiles.size === 0) return;
+
+        if (!confirm(`Are you sure you want to delete ${selectedFiles.size} file(s)?`)) return;
+
+        try {
+            await api.post('/files/bulk-delete', {
+                fileIds: Array.from(selectedFiles)
+            });
+
+            setSelectedFiles(new Set());
+            fetchContent();
+        } catch (err) {
+            console.error("Bulk delete failed", err);
+            alert("Failed to delete files. Please try again.");
+        }
+    };
+
+    // Touch handlers for mobile
+    const handleTouchStart = (fileId: string) => {
+        const timer = setTimeout(() => {
+            toggleFileSelection(fileId);
+        }, 500);
+        setTouchTimer(timer);
+    };
+
+    const handleTouchEnd = () => {
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            setTouchTimer(null);
+        }
+    };
+
+    const handleRowClick = (fileId: string, e: React.MouseEvent) => {
+        if ((e.target as HTMLElement).closest('button')) {
+            return;
+        }
+        if (selectedFiles.size > 0) {
+            toggleFileSelection(fileId);
+        }
     };
 
     const handlePreviewNext = () => {
@@ -178,6 +268,30 @@ export default function StoragePage() {
         <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Storage</h1>
+
+                {/* Bulk action buttons */}
+                {selectedFiles.size > 0 && (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleBulkDownload}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+                        >
+                            Download ({selectedFiles.size})
+                        </button>
+                        <button
+                            onClick={handleBulkDelete}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm"
+                        >
+                            Delete ({selectedFiles.size})
+                        </button>
+                        <button
+                            onClick={() => setSelectedFiles(new Set())}
+                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium text-sm"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Stats Section */}
@@ -240,57 +354,203 @@ export default function StoragePage() {
                         No files found.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-                            <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
-                                <tr>
-                                    <th className="px-6 py-4">Name</th>
-                                    <th className="px-6 py-4">Size</th>
-                                    <th className="px-6 py-4">Type</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {filteredFiles.map((file, index) => (
-                                    <tr key={file._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center">
-                                            <span className="mr-3 text-xl">📄</span>
-                                            {file.originalName}
-                                        </td>
-                                        <td className="px-6 py-4">{formatSize(file.size)}</td>
-                                        <td className="px-6 py-4 capitalize">{file.mimeType.split('/')[1]}</td>
-                                        <td className="px-6 py-4">{new Date(file.createdAt).toLocaleDateString()}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <button
-                                                    onClick={() => handlePreview(index)}
-                                                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                                                    title="Preview"
-                                                >
-                                                    Preview
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDownload(file._id, file.originalName)}
-                                                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                                                    title="Download"
-                                                >
-                                                    Download
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteClick(file)}
-                                                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium"
-                                                    title="Delete"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                    <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+                                <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                                    <tr>
+                                        <th className="px-6 py-4 w-12">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedFiles.size === filteredFiles.length && filteredFiles.length > 0}
+                                                onChange={selectAll}
+                                                className="w-5 h-5 cursor-pointer"
+                                            />
+                                        </th>
+                                        <th className="px-6 py-4">Name</th>
+                                        <th className="px-6 py-4">Size</th>
+                                        <th className="px-6 py-4">Type</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {filteredFiles.map((file, index) => {
+                                        const isSelected = selectedFiles.has(file._id);
+                                        return (
+                                            <tr
+                                                key={file._id}
+                                                className={`transition-colors cursor-pointer ${isSelected
+                                                        ? 'bg-blue-50 dark:bg-blue-900/20'
+                                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                                    }`}
+                                                onClick={(e) => handleRowClick(file._id, e)}
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleFileSelection(file._id)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="w-5 h-5 cursor-pointer"
+                                                    />
+                                                </td>
+                                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                    <div className="flex items-center">
+                                                        <span className="mr-3 text-xl">📄</span>
+                                                        {file.originalName}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">{formatSize(file.size)}</td>
+                                                <td className="px-6 py-4 capitalize">{file.mimeType.split('/')[1]}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    {!isSelected ? (
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handlePreview(index);
+                                                                }}
+                                                                className="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                                                                title="Preview"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDownload(file._id, file.originalName);
+                                                                }}
+                                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                                title="Download"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteClick(file);
+                                                                }}
+                                                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                                title="Delete"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-sm text-gray-400 dark:text-gray-500">Selected</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                            {filteredFiles.map((file, index) => {
+                                const isSelected = selectedFiles.has(file._id);
+                                return (
+                                    <div
+                                        key={file._id}
+                                        className={`p-4 transition-colors ${isSelected
+                                                ? 'bg-blue-50 dark:bg-blue-900/20'
+                                                : 'active:bg-gray-50 dark:active:bg-gray-700/50'
+                                            }`}
+                                        onTouchStart={() => handleTouchStart(file._id)}
+                                        onTouchEnd={handleTouchEnd}
+                                        onClick={(e) => {
+                                            if (selectedFiles.size > 0 && !(e.target as HTMLElement).closest('button')) {
+                                                toggleFileSelection(file._id);
+                                            }
+                                        }}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            {selectedFiles.size > 0 && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => toggleFileSelection(file._id)}
+                                                    className="w-5 h-5 mt-1 cursor-pointer flex-shrink-0"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            )}
+
+                                            <span className="text-2xl flex-shrink-0">📄</span>
+
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                                                    {file.originalName}
+                                                </h3>
+                                                <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                    <span>{formatSize(file.size)}</span>
+                                                    <span>•</span>
+                                                    <span className="capitalize">{file.mimeType.split('/')[1]}</span>
+                                                </div>
+
+                                                {!isSelected && (
+                                                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handlePreview(index);
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-purple-600 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            Preview
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDownload(file._id, file.originalName);
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                            </svg>
+                                                            Download
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteClick(file);
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {isSelected && (
+                                                    <div className="mt-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                                                        ✓ Selected
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
                 )}
             </div>
 

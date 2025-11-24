@@ -5,6 +5,7 @@ import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage, getUserC
 import fs from 'fs';
 import path from 'path';
 import User from '../models/User.model';
+import archiver from 'archiver';
 
 // Extend Request to include user (added by auth middleware)
 // We can rely on declaration merging in auth.middleware.ts for 'user'
@@ -254,5 +255,142 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+export const bulkDownloadFiles = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { fileIds } = req.body;
+
+        if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+            res.status(400).json({ message: 'No file IDs provided' });
+            return;
+        }
+
+        // Fetch all files and verify ownership
+        const files = await File.find({ _id: { $in: fileIds }, user: req.user._id });
+
+        if (files.length === 0) {
+            res.status(404).json({ message: 'No files found' });
+            return;
+        }
+
+        // Get user for Telegram session if needed
+        const user = await User.findById(req.user._id).select('+telegramSession');
+
+        // Create ZIP archive
+        const archive = archiver('zip', {
+            zlib: { level: 9 } // Maximum compression
+        });
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="files-${Date.now()}.zip"`);
+
+        // Pipe archive to response
+        archive.pipe(res);
+
+        // Handle archive errors
+        archive.on('error', (err) => {
+            console.error('Archive error:', err);
+            res.status(500).json({ message: 'Failed to create archive' });
+        });
+
+        // Add each file to the archive
+        for (const file of files) {
+            try {
+                let chunks;
+                if (file.storageType === 'user') {
+                    if (!user || !user.telegramSession) {
+                        console.error(`Skipping file ${file.originalName}: No Telegram session`);
+                        continue;
+                    }
+                    const userClient = await getUserClient(user.telegramSession);
+                    chunks = await downloadFileFromTelegramWithClient(userClient, file.telegramMessageId);
+                } else {
+                    chunks = await downloadFileFromTelegram(file.telegramMessageId);
+                }
+
+                // Create a readable stream from the async iterable
+                const { Readable } = await import('stream');
+                const fileStream = Readable.from(chunks);
+
+                // Add file to archive
+                archive.append(fileStream, { name: file.originalName });
+
+                // Update stats
+                file.downloadCount += 1;
+                file.lastAccessed = new Date();
+                await file.save();
+            } catch (err) {
+                console.error(`Failed to add file ${file.originalName} to archive:`, err);
+                // Continue with other files
+            }
+        }
+
+        // Finalize the archive
+        await archive.finalize();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Bulk download failed', error: (error as Error).message });
+    }
+};
+
+export const bulkDeleteFiles = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { fileIds } = req.body;
+
+        if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+            res.status(400).json({ message: 'No file IDs provided' });
+            return;
+        }
+
+        // Fetch all files and verify ownership
+        const files = await File.find({ _id: { $in: fileIds }, user: req.user._id });
+
+        if (files.length === 0) {
+            res.status(404).json({ message: 'No files found' });
+            return;
+        }
+
+        const results = {
+            success: [] as string[],
+            failed: [] as { id: string; error: string }[]
+        };
+
+        // Delete each file
+        for (const file of files) {
+            try {
+                if (file.storageType === 'user') {
+                    // Don't delete from Telegram for user storage
+                    // Only delete the reference in our DB
+                } else {
+                    // For bot files, delete from Telegram
+                    try {
+                        await deleteMessage(file.telegramMessageId);
+                    } catch (e) {
+                        console.error(`Failed to delete message from bot channel for file ${file._id}:`, e);
+                    }
+                }
+
+                // Delete from DB
+                await file.deleteOne();
+                results.success.push(file._id.toString());
+            } catch (err) {
+                console.error(`Failed to delete file ${file._id}:`, err);
+                results.failed.push({
+                    id: file._id.toString(),
+                    error: (err as Error).message
+                });
+            }
+        }
+
+        res.json({
+            message: `Deleted ${results.success.length} of ${files.length} files`,
+            results
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Bulk delete failed', error: (error as Error).message });
     }
 };
