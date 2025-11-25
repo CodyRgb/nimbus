@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import api from "../../lib/api";
@@ -24,9 +25,10 @@ export default function Navbar() {
 
     return (
         <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-            {/* Website Logo/Brand Name */}
-            <Link href="/" className="text-xl font-bold text-blue-600">
-                Nimbus
+            {/* Website Logo */}
+            <Link href="/" className="flex items-center gap-2">
+                <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={40} height={40} className="object-contain" />
+                <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">Nimbus</span>
             </Link>
 
             <div className="flex items-center space-x-4">

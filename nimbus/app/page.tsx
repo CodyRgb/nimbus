@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function LandingPage() {
@@ -99,9 +100,12 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Nimbus
-            </span>
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={40} height={40} className="object-contain" />
+              <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                Nimbus
+              </span>
+            </Link>
             <div className="hidden md:flex space-x-8">
               <button
                 onClick={() => scrollToSection("hero")}
@@ -754,9 +758,12 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Nimbus
-              </span>
+              <div className="flex items-center gap-2 mb-3">
+                <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={36} height={36} className="object-contain" />
+                <span className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                  Nimbus
+                </span>
+              </div>
               <p className="text-sm text-gray-500 mt-3 max-w-sm">
                 Unlimited free cloud storage powered by Telegram. Store, manage,
                 and access your files from anywhere.
