@@ -3,6 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import ParticleBackground from "./components/ui/ParticleBackground";
+import GlassCard from "./components/ui/GlassCard";
+import MagneticButton from "./components/ui/MagneticButton";
+import AnimatedCounter from "./components/ui/AnimatedCounter";
 
 export default function LandingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -23,7 +29,6 @@ export default function LandingPage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -49,7 +54,6 @@ export default function LandingPage() {
       setFormErrors(errors);
       return;
     }
-    // Handle form submission (e.g., send to API)
     alert("Thank you for contacting us! We'll get back to you soon.");
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
@@ -94,187 +98,224 @@ export default function LandingPage() {
     }
   };
 
+  const { ref: featuresRef, inView: featuresInView } = useInView({ triggerOnce: true, threshold: 0.1 });
+  const { ref: statsRef, inView: statsInView } = useInView({ triggerOnce: true, threshold: 0.1 });
+
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white font-sans overflow-x-hidden">
       {/* Navigation Menu */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+      <motion.nav 
+        className="sticky top-0 z-50 glass-card backdrop-blur-xl border-b border-white/10"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={40} height={40} className="object-contain" />
-              <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+            <Link href="/" className="flex items-center gap-3 group">
+              <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
+                <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={40} height={40} className="object-contain" />
+              </motion.div>
+              <span className="text-2xl font-bold text-gradient font-display">
                 Nimbus
               </span>
             </Link>
             <div className="hidden md:flex space-x-8">
-              <button
-                onClick={() => scrollToSection("hero")}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => scrollToSection("about")}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                About
-              </button>
-              <button
-                onClick={() => scrollToSection("help")}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Help
-              </button>
-              <button
-                onClick={() => scrollToSection("faq")}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                FAQ
-              </button>
-              <button
-                onClick={() => scrollToSection("contact")}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Contact
-              </button>
+              {["Home", "About", "Help", "FAQ", "Contact"].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => scrollToSection(item.toLowerCase())}
+                  className="text-gray-300 hover:text-white transition-colors relative group"
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-aurora group-hover:w-full transition-all duration-300" />
+                </button>
+              ))}
             </div>
-            <Link
-              href="/login"
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
-            >
-              Login
+            <Link href="/login">
+              <MagneticButton variant="primary" className="px-6 py-2 text-base">
+                Login
+              </MagneticButton>
             </Link>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
       <section
-        id="hero"
-        className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950"
+        id="home"
+        className="relative flex-1 flex flex-col items-center justify-center text-center px-6 py-32 overflow-hidden"
       >
-        <div className="max-w-5xl">
+        <ParticleBackground />
+        
+        {/* Floating gradient orbs */}
+        <div className="absolute top-20 left-10 w-96 h-96 bg-aurora-purple/30 rounded-full blur-3xl animate-float opacity-50" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-aurora-blue/30 rounded-full blur-3xl animate-float opacity-50" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-aurora-pink/20 rounded-full blur-3xl animate-float opacity-40" style={{ animationDelay: "4s" }} />
+
+        <div className="relative z-10 max-w-6xl">
           {/* Badge */}
-          <div className="inline-block mb-6 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400 text-sm font-semibold">
-            ✨ Powered by Telegram
-          </div>
+          <motion.div
+            className="inline-block mb-8 px-6 py-3 glass-card text-aurora-blue text-sm font-semibold"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            ✨ Powered by Telegram Infrastructure
+          </motion.div>
 
           {/* Main Headline */}
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Unlimited Free Cloud Storage
-          </h1>
+          <motion.h1 
+            className="text-6xl md:text-8xl font-extrabold tracking-tight mb-8 text-gradient font-display leading-tight"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Unlimited Free
+            <br />
+            Cloud Storage
+          </motion.h1>
 
           {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <motion.p 
+            className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed font-body"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
             Store, manage, and access your files anywhere with the power of
             Telegram's infrastructure. No limits, no fees, just pure storage.
-          </p>
+          </motion.p>
 
           {/* Call-to-Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/register"
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
-            >
-              Get Started Free
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <Link href="/register">
+              <MagneticButton variant="primary">
+                Get Started Free →
+              </MagneticButton>
             </Link>
-            <button
+            <MagneticButton 
+              variant="secondary"
               onClick={() => scrollToSection("about")}
-              className="px-8 py-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-gray-200 dark:border-gray-700"
             >
               Learn More
-            </button>
-          </div>
+            </MagneticButton>
+          </motion.div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400">
-                ∞
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Storage Space
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400">
-                2GB
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Max File Size
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-pink-600 dark:text-pink-400">
-                100%
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Free Forever
-              </div>
-            </div>
-          </div>
+          <motion.div 
+            ref={statsRef}
+            className="grid grid-cols-3 gap-8 max-w-3xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={statsInView ? { opacity: 1 } : {}}
+            transition={{ duration: 1, delay: 0.8 }}
+          >
+            {[
+              { value: "∞", label: "Storage Space", color: "aurora-blue" },
+              { value: "2GB", label: "Max File Size", color: "aurora-purple" },
+              { value: "100%", label: "Free Forever", color: "aurora-pink" }
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="glass-card p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.8 + i * 0.1 }}
+              >
+                <div className={`text-4xl md:text-5xl font-bold text-${stat.color} mb-2`}>
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-400">
+                  {stat.label}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-6 bg-white dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Why Choose Us?
-          </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
-            Experience the next generation of cloud storage with features
-            designed for modern users.
-          </p>
+      {/* Features Section - Bento Grid */}
+      <section ref={featuresRef} className="py-32 px-6 relative">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={featuresInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gradient font-display">
+              Why Choose Nimbus?
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto font-body">
+              Experience the next generation of cloud storage with features
+              designed for modern users.
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Feature Card 1 */}
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 text-white text-3xl group-hover:scale-110 transition-transform">
-                ☁️
-              </div>
-              <h3 className="text-xl font-bold mb-2">Unlimited Storage</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Store as many files as you need without any storage limits or
-                restrictions.
-              </p>
-            </div>
-
-            {/* Feature Card 2 */}
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 text-white text-3xl group-hover:scale-110 transition-transform">
-                🔒
-              </div>
-              <h3 className="text-xl font-bold mb-2">Secure & Private</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Your data is encrypted and stored securely with Telegram's
-                infrastructure.
-              </p>
-            </div>
-
-            {/* Feature Card 3 */}
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800 hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 text-white text-3xl group-hover:scale-110 transition-transform">
-                ⚡
-              </div>
-              <h3 className="text-xl font-bold mb-2">Lightning Fast</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Upload and download files at blazing speeds with optimized
-                performance.
-              </p>
-            </div>
-
-            {/* Feature Card 4 */}
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800 hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 text-white text-3xl group-hover:scale-110 transition-transform">
-                📁
-              </div>
-              <h3 className="text-xl font-bold mb-2">All File Types</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Support for images, videos, documents, archives, and more file
-                formats.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { 
+                icon: "☁️", 
+                title: "Unlimited Storage", 
+                desc: "Store as many files as you need without any storage limits or restrictions.",
+                gradient: "from-blue-500/20 to-blue-600/20",
+                border: "border-blue-500/30",
+                glow: "blue" as const
+              },
+              { 
+                icon: "🔒", 
+                title: "Secure & Private", 
+                desc: "Your data is encrypted and stored securely with Telegram's infrastructure.",
+                gradient: "from-green-500/20 to-green-600/20",
+                border: "border-green-500/30",
+                glow: "none" as const
+              },
+              { 
+                icon: "⚡", 
+                title: "Lightning Fast", 
+                desc: "Upload and download files at blazing speeds with optimized performance.",
+                gradient: "from-purple-500/20 to-purple-600/20",
+                border: "border-purple-500/30",
+                glow: "purple" as const
+              },
+              { 
+                icon: "📁", 
+                title: "All File Types", 
+                desc: "Support for images, videos, documents, archives, and more file formats.",
+                gradient: "from-orange-500/20 to-orange-600/20",
+                border: "border-orange-500/30",
+                glow: "none" as const
+              },
+            ].map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                animate={featuresInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+              >
+                <GlassCard 
+                  className={`p-8 h-full bg-gradient-to-br ${feature.gradient} border ${feature.border} group cursor-pointer`}
+                  glow={feature.glow}
+                >
+                  <motion.div 
+                    className="text-5xl mb-6"
+                    whileHover={{ scale: 1.2, rotate: 10 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {feature.icon}
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-3 font-display">{feature.title}</h3>
+                  <p className="text-gray-400 leading-relaxed font-body">
+                    {feature.desc}
+                  </p>
+                </GlassCard>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -282,206 +323,160 @@ export default function LandingPage() {
       {/* About Section */}
       <section
         id="about"
-        className="py-20 px-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-950 dark:to-gray-900"
+        className="py-32 px-6 relative"
       >
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-5xl md:text-6xl font-bold mb-8 text-gradient font-display">
                 About Nimbus
               </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+              <p className="text-lg text-gray-300 mb-6 leading-relaxed font-body">
                 Nimbus is a revolutionary cloud storage solution that
                 leverages the power of Telegram's infrastructure to provide you
                 with unlimited, free storage for all your files.
               </p>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+              <p className="text-lg text-gray-300 mb-8 leading-relaxed font-body">
                 We believe that cloud storage should be accessible to everyone,
                 without hidden fees or storage limits. By integrating with
                 Telegram, we're able to offer a secure, fast, and reliable
                 storage solution that puts you in control of your data.
               </p>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">
-                      Built on Telegram's Infrastructure
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Leverage the reliability and security of Telegram's
-                      proven platform.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">
-                      Your Data, Your Control
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Files are stored in your personal Telegram space, giving
-                      you full ownership.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-1">
-                      Simple and Intuitive
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Easy-to-use interface designed for seamless file
-                      management.
-                    </p>
-                  </div>
-                </div>
+              <div className="space-y-6">
+                {[
+                  {
+                    title: "Built on Telegram's Infrastructure",
+                    desc: "Leverage the reliability and security of Telegram's proven platform."
+                  },
+                  {
+                    title: "Your Data, Your Control",
+                    desc: "Files are stored in your personal Telegram space, giving you full ownership."
+                  },
+                  {
+                    title: "Simple and Intuitive",
+                    desc: "Easy-to-use interface designed for seamless file management."
+                  }
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    className="flex items-start space-x-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: i * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="w-8 h-8 bg-gradient-aurora rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-white text-sm">✓</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2 text-lg font-display">{item.title}</h4>
+                      <p className="text-gray-400 font-body">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </div>
-            <div className="relative">
-              <div className="w-full h-96 bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900 rounded-3xl flex items-center justify-center shadow-2xl">
-                <div className="text-center p-8">
-                  <div className="text-6xl mb-4">🚀</div>
-                  <h3 className="text-2xl font-bold mb-2">
-                    Powered by Innovation
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Combining the best of cloud storage with Telegram's
-                    technology
-                  </p>
-                </div>
-              </div>
-            </div>
+            </motion.div>
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <GlassCard className="p-12 text-center bg-gradient-to-br from-aurora-purple/20 to-aurora-blue/20 border-aurora-blue/30" glow="blue">
+                <motion.div 
+                  className="text-8xl mb-6"
+                  animate={{ y: [0, -20, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  🚀
+                </motion.div>
+                <h3 className="text-3xl font-bold mb-4 font-display">
+                  Powered by Innovation
+                </h3>
+                <p className="text-gray-300 text-lg font-body">
+                  Combining the best of cloud storage with Telegram's
+                  technology
+                </p>
+              </GlassCard>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Help Section */}
-      <section id="help" className="py-20 px-6 bg-white dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            How It Works
-          </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
-            Get started with Nimbus in just a few simple steps.
-          </p>
+      {/* How It Works */}
+      <section id="help" className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gradient font-display">
+              How It Works
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto font-body">
+              Get started with Nimbus in just a few simple steps.
+            </p>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                  1
-                </div>
-                <div className="text-4xl mb-4 mt-4">📝</div>
-                <h3 className="text-xl font-bold mb-3">Create Account</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Sign up with your email and create a secure password. It only
-                  takes a minute!
-                </p>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center space-x-2">
-                    <span className="text-blue-600">•</span>
-                    <span>Quick registration process</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <span className="text-blue-600">•</span>
-                    <span>No credit card required</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                  2
-                </div>
-                <div className="text-4xl mb-4 mt-4">🔗</div>
-                <h3 className="text-xl font-bold mb-3">Connect Telegram</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Link your Telegram account to enable secure file storage in
-                  your personal space.
-                </p>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center space-x-2">
-                    <span className="text-purple-600">•</span>
-                    <span>Secure OTP verification</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <span className="text-purple-600">•</span>
-                    <span>One-time setup</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-8 border border-green-200 dark:border-green-800">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                  3
-                </div>
-                <div className="text-4xl mb-4 mt-4">☁️</div>
-                <h3 className="text-xl font-bold mb-3">Start Uploading</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Upload your files and access them from anywhere, anytime.
-                  It's that simple!
-                </p>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center space-x-2">
-                    <span className="text-green-600">•</span>
-                    <span>Drag and drop interface</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <span className="text-green-600">•</span>
-                    <span>Multiple file uploads</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Help Resources */}
-          <div className="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 border border-blue-200 dark:border-gray-700">
-            <h3 className="text-2xl font-bold mb-6 text-center">
-              Need More Help?
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-xl">
-                  📚
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Documentation</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Comprehensive guides and tutorials to help you get the most
-                    out of Nimbus.
+            {[
+              { 
+                step: "1", 
+                icon: "📝", 
+                title: "Create Account", 
+                desc: "Sign up with your email and create a secure password. It only takes a minute!",
+                color: "blue"
+              },
+              { 
+                step: "2", 
+                icon: "🔗", 
+                title: "Connect Telegram", 
+                desc: "Link your Telegram account to enable secure file storage in your personal space.",
+                color: "purple"
+              },
+              { 
+                step: "3", 
+                icon: "☁️", 
+                title: "Start Uploading", 
+                desc: "Upload your files and access them from anywhere, anytime. It's that simple!",
+                color: "pink"
+              },
+            ].map((step, i) => (
+              <motion.div
+                key={step.step}
+                className="relative"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.2 }}
+                viewport={{ once: true }}
+              >
+                <GlassCard className="p-8 h-full bg-gradient-to-br from-white/5 to-white/10">
+                  <div className="absolute -top-6 -left-6 w-16 h-16 bg-gradient-aurora rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-2xl glow-purple">
+                    {step.step}
+                  </div>
+                  <motion.div 
+                    className="text-6xl mb-6 mt-8"
+                    whileHover={{ scale: 1.2, rotate: 10 }}
+                    transition={{ type: "spring" }}
+                  >
+                    {step.icon}
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-4 font-display">{step.title}</h3>
+                  <p className="text-gray-400 leading-relaxed font-body">
+                    {step.desc}
                   </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-xl">
-                  💬
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Community Support</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Join our community forum to ask questions and share tips
-                    with other users.
-                  </p>
-                </div>
-              </div>
-            </div>
+                </GlassCard>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -489,159 +484,146 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section
         id="faq"
-        className="py-20 px-6 bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-950 dark:to-gray-900"
+        className="py-32 px-6"
       >
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-16">
-            Find answers to common questions about Nimbus.
-          </p>
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gradient font-display">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-gray-400 font-body">
+              Find answers to common questions about Nimbus.
+            </p>
+          </motion.div>
 
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div
+              <motion.div
                 key={index}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                viewport={{ once: true }}
               >
-                <button
-                  onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                >
-                  <span className="font-semibold text-lg pr-4">
-                    {faq.question}
-                  </span>
-                  <span
-                    className={`text-2xl text-blue-600 dark:text-blue-400 transform transition-transform ${openFaqIndex === index ? "rotate-45" : ""
-                      }`}
+                <GlassCard className="overflow-hidden" hover={false}>
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="w-full px-8 py-6 flex justify-between items-center text-left hover:bg-white/5 transition-colors"
                   >
-                    +
-                  </span>
-                </button>
-                <div
-                  className={`overflow-hidden transition-all duration-300 ${openFaqIndex === index ? "max-h-96" : "max-h-0"
-                    }`}
-                >
-                  <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {faq.answer}
-                  </div>
-                </div>
-              </div>
+                    <span className="font-semibold text-lg pr-4 font-display">
+                      {faq.question}
+                    </span>
+                    <motion.span
+                      className="text-3xl text-aurora-blue"
+                      animate={{ rotate: openFaqIndex === index ? 45 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      +
+                    </motion.span>
+                  </button>
+                  <motion.div
+                    initial={false}
+                    animate={{ 
+                      height: openFaqIndex === index ? "auto" : 0,
+                      opacity: openFaqIndex === index ? 1 : 0
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-8 pb-6 text-gray-400 leading-relaxed font-body">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                </GlassCard>
+              </motion.div>
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <motion.div 
+            className="mt-16 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-gray-400 mb-6 font-body">
               Still have questions?
             </p>
-            <button
+            <MagneticButton 
+              variant="primary"
               onClick={() => scrollToSection("contact")}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all"
             >
               Contact Us
-            </button>
-          </div>
+            </MagneticButton>
+          </motion.div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-6 bg-white dark:bg-gray-900">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Get In Touch
-          </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
-            Have a question or feedback? We'd love to hear from you. Send us a
-            message and we'll respond as soon as possible.
-          </p>
+      <section id="contact" className="py-32 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 text-gradient font-display">
+              Get In Touch
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto font-body">
+              Have a question or feedback? We'd love to hear from you.
+            </p>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
-            <div>
+            <GlassCard className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-semibold mb-2"
-                  >
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.name
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                      } bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
-                    placeholder="Your name"
-                  />
-                  {formErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {formErrors.name}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold mb-2"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.email
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                      } bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
-                    placeholder="your.email@example.com"
-                  />
-                  {formErrors.email && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {formErrors.email}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-semibold mb-2"
-                  >
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.subject
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                      } bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
-                    placeholder="What is this about?"
-                  />
-                  {formErrors.subject && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {formErrors.subject}
-                    </p>
-                  )}
-                </div>
+                {[
+                  { name: "name", label: "Name", type: "text", placeholder: "Your name" },
+                  { name: "email", label: "Email", type: "email", placeholder: "your.email@example.com" },
+                  { name: "subject", label: "Subject", type: "text", placeholder: "What is this about?" },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label
+                      htmlFor={field.name}
+                      className="block text-sm font-semibold mb-2 font-display"
+                    >
+                      {field.label}
+                    </label>
+                    <input
+                      type={field.type}
+                      id={field.name}
+                      name={field.name}
+                      value={formData[field.name as keyof typeof formData]}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-xl glass-card border ${
+                        formErrors[field.name]
+                          ? "border-red-500"
+                          : "border-white/10"
+                      } focus:outline-none focus:ring-2 focus:ring-aurora-blue transition-all bg-white/5 text-white placeholder-gray-500 font-body`}
+                      placeholder={field.placeholder}
+                    />
+                    {formErrors[field.name] && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {formErrors[field.name]}
+                      </p>
+                    )}
+                  </div>
+                ))}
 
                 <div>
                   <label
                     htmlFor="message"
-                    className="block text-sm font-semibold mb-2"
+                    className="block text-sm font-semibold mb-2 font-display"
                   >
                     Message
                   </label>
@@ -651,204 +633,159 @@ export default function LandingPage() {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={5}
-                    className={`w-full px-4 py-3 rounded-xl border ${formErrors.message
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                      } bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none`}
+                    className={`w-full px-4 py-3 rounded-xl glass-card border ${
+                      formErrors.message
+                        ? "border-red-500"
+                        : "border-white/10"
+                    } focus:outline-none focus:ring-2 focus:ring-aurora-blue transition-all resize-none bg-white/5 text-white placeholder-gray-500 font-body`}
                     placeholder="Your message..."
                   />
                   {formErrors.message && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-400 text-sm mt-1">
                       {formErrors.message}
                     </p>
                   )}
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
-                >
-                  Send Message
-                </button>
+                <MagneticButton variant="primary" className="w-full">
+                  Send Message →
+                </MagneticButton>
               </form>
-            </div>
+            </GlassCard>
 
             {/* Contact Information */}
-            <div className="space-y-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-2xl">
-                    📧
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg mb-2">Email Us</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
-                      For general inquiries and support
-                    </p>
-                    <a
-                      href="mailto:support@nimbus.com"
-                      className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
-                    >
-                      support@nimbus.com
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-2xl">
-                    💬
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg mb-2">Join Community</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
-                      Connect with other users on Telegram
-                    </p>
-                    <a
-                      href="#"
-                      className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
-                    >
-                      @nimbus_community
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-8 border border-green-200 dark:border-green-800">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-2xl">
-                    🌐
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg mb-2">Follow Us</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-3">
-                      Stay updated on social media
-                    </p>
-                    <div className="flex space-x-4">
-                      <a
-                        href="#"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        Twitter
-                      </a>
-                      <a
-                        href="#"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                      <a
-                        href="#"
-                        className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                      >
-                        GitHub
-                      </a>
+            <div className="space-y-6">
+              {[
+                { 
+                  icon: "📧", 
+                  title: "Email Us", 
+                  desc: "For general inquiries and support",
+                  link: "support@nimbus.com",
+                  gradient: "from-blue-500/20 to-blue-600/20"
+                },
+                { 
+                  icon: "💬", 
+                  title: "Join Community", 
+                  desc: "Connect with other users on Telegram",
+                  link: "@nimbus_community",
+                  gradient: "from-purple-500/20 to-purple-600/20"
+                },
+                { 
+                  icon: "🌐", 
+                  title: "Follow Us", 
+                  desc: "Stay updated on social media",
+                  link: "Social Links",
+                  gradient: "from-green-500/20 to-green-600/20"
+                },
+              ].map((contact, i) => (
+                <motion.div
+                  key={contact.title}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <GlassCard className={`p-8 bg-gradient-to-br ${contact.gradient}`}>
+                    <div className="flex items-start space-x-4">
+                      <div className="text-4xl">{contact.icon}</div>
+                      <div>
+                        <h3 className="font-bold text-xl mb-2 font-display">{contact.title}</h3>
+                        <p className="text-gray-400 mb-3 font-body">{contact.desc}</p>
+                        <a
+                          href="#"
+                          className="text-aurora-blue hover:text-aurora-pink transition-colors font-semibold"
+                        >
+                          {contact.link}
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </GlassCard>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-50 dark:bg-gray-950 py-12 px-6 border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-6xl mx-auto">
+      <footer className="glass-card border-t border-white/10 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-3 mb-4">
                 <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={36} height={36} className="object-contain" />
-                <span className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-gradient font-display">
                   Nimbus
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-3 max-w-sm">
+              <p className="text-gray-400 mt-3 max-w-sm font-body">
                 Unlimited free cloud storage powered by Telegram. Store, manage,
                 and access your files from anywhere.
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <h4 className="font-semibold mb-4 font-display">Quick Links</h4>
               <div className="space-y-2">
-                <button
-                  onClick={() => scrollToSection("about")}
-                  className="block text-sm text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  About
-                </button>
-                <button
-                  onClick={() => scrollToSection("help")}
-                  className="block text-sm text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Help
-                </button>
-                <button
-                  onClick={() => scrollToSection("faq")}
-                  className="block text-sm text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  FAQ
-                </button>
+                {["About", "Help", "FAQ"].map((link) => (
+                  <button
+                    key={link}
+                    onClick={() => scrollToSection(link.toLowerCase())}
+                    className="block text-gray-400 hover:text-aurora-blue transition-colors font-body"
+                  >
+                    {link}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
+              <h4 className="font-semibold mb-4 font-display">Legal</h4>
               <div className="space-y-2">
-                <a
-                  href="#"
-                  className="block text-sm text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Privacy Policy
-                </a>
-                <a
-                  href="#"
-                  className="block text-sm text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Terms of Service
-                </a>
+                {["Privacy Policy", "Terms of Service"].map((link) => (
+                  <a
+                    key={link}
+                    href="#"
+                    className="block text-gray-400 hover:text-aurora-blue transition-colors font-body"
+                  >
+                    {link}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-500">
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 font-body">
               © {new Date().getFullYear()} Nimbus. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
-              >
-                Twitter
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-700 transition-colors"
-              >
-                LinkedIn
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                GitHub
-              </a>
+              {["Twitter", "LinkedIn", "GitHub"].map((social) => (
+                <a
+                  key={social}
+                  href="#"
+                  className="text-gray-400 hover:text-aurora-blue transition-colors font-body"
+                >
+                  {social}
+                </a>
+              ))}
             </div>
           </div>
         </div>
       </footer>
 
       {/* Back to Top Button */}
-      <button
-        onClick={() => scrollToSection("hero")}
-        className="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center"
-        aria-label="Back to top"
+      <motion.button
+        onClick={() => scrollToSection("home")}
+        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-aurora rounded-full shadow-2xl glow-purple flex items-center justify-center text-white text-2xl z-50"
+        whileHover={{ scale: 1.1, rotate: 360 }}
+        whileTap={{ scale: 0.9 }}
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1 }}
       >
         ↑
-      </button>
+      </motion.button>
     </div>
   );
 }

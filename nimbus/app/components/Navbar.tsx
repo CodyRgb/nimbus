@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import api from "../../lib/api";
+import { motion } from "framer-motion";
+import MagneticButton from "./ui/MagneticButton";
 
 export default function Navbar() {
     const router = useRouter();
@@ -17,52 +19,81 @@ export default function Navbar() {
             router.push("/");
         } catch (error) {
             console.error("Logout failed", error);
-            // Force logout on client even if server fails
             authLogout();
             router.push("/");
         }
     };
 
     return (
-        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-            {/* Website Logo */}
-            <Link href="/" className="flex items-center gap-2">
-                <Image src="/nimbus-logo.png" alt="Nimbus Logo" width={40} height={40} className="object-contain" />
-                <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">Nimbus</span>
-            </Link>
+        <motion.header 
+            className="glass-card sticky top-0 z-50 px-6 py-4 border-b border-white/10 backdrop-blur-xl"
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.6 }}
+        >
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+                {/* Website Logo */}
+                <Link href="/" className="flex items-center gap-3 group">
+                    <motion.div 
+                        whileHover={{ rotate: 360, scale: 1.1 }} 
+                        transition={{ duration: 0.6 }}
+                    >
+                        <Image 
+                            src="/nimbus-logo.png" 
+                            alt="Nimbus Logo" 
+                            width={40} 
+                            height={40} 
+                            className="object-contain" 
+                        />
+                    </motion.div>
+                    <span className="text-2xl font-bold text-gradient font-display">
+                        Nimbus
+                    </span>
+                </Link>
 
-            <div className="flex items-center space-x-4">
-                {isLoggedIn ? (
-                    <>
-                        {user && (
-                            <span className="text-gray-600 dark:text-gray-300">
-                                Welcome, {user.name}
-                            </span>
-                        )}
-                        <button
-                            onClick={handleLogout}
-                            className="text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 font-medium"
-                        >
-                            Logout
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <Link
-                            href="/login"
-                            className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-white font-medium"
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
-                        >
-                            Register
-                        </Link>
-                    </>
-                )}
+                <div className="flex items-center space-x-4">
+                    {isLoggedIn ? (
+                        <>
+                            {user && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="glass-card px-4 py-2 rounded-full"
+                                >
+                                    <span className="text-gray-300 font-body">
+                                        Welcome, <span className="text-aurora-blue font-semibold">{user.name}</span>
+                                    </span>
+                                </motion.div>
+                            )}
+                            <motion.button
+                                onClick={handleLogout}
+                                className="px-4 py-2 text-gray-300 hover:text-red-400 font-medium transition-colors font-body"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Logout
+                            </motion.button>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/login">
+                                <motion.button
+                                    className="px-4 py-2 text-gray-300 hover:text-white font-medium transition-colors font-body"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Login
+                                </motion.button>
+                            </Link>
+                            <Link href="/register">
+                                <MagneticButton variant="primary" className="px-6 py-2 text-base">
+                                    Register
+                                </MagneticButton>
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
-        </header>
+        </motion.header>
     );
 }

@@ -120,14 +120,14 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/95 backdrop-blur-xl"
                 onClick={onClose}
             />
             
             {/* Modal */}
             <div className="relative w-full h-full flex flex-col">
                 {/* Header */}
-                <div className="relative z-10 flex items-center justify-between px-6 py-4 bg-black/50 backdrop-blur-md border-b border-gray-700">
+                <div className="relative z-10 flex items-center justify-between px-6 py-4 glass-card border-b border-white/10">
                     <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-white truncate" title={fileName}>
                             {fileName}
@@ -142,7 +142,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                         {onDownload && (
                             <button
                                 onClick={onDownload}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                                className="p-2 hover:bg-aurora-blue/20 rounded-xl transition-colors text-aurora-blue border border-aurora-blue/30"
                                 title="Download"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,7 +155,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                         {onDelete && (
                             <button
                                 onClick={onDelete}
-                                className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-400 hover:text-red-300"
+                                className="p-2 hover:bg-red-500/20 rounded-xl transition-colors text-red-400 hover:text-red-300 border border-red-500/30"
                                 title="Delete"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,7 +167,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                            className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white border border-white/20"
                             title="Close (ESC)"
                         >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -306,11 +306,11 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                 </div>
 
                 {/* Footer with keyboard hints */}
-                <div className="relative z-10 px-6 py-3 bg-black/50 backdrop-blur-md border-t border-gray-700">
-                    <p className="text-xs text-gray-400 text-center">
-                        <kbd className="px-2 py-1 bg-gray-700 rounded">ESC</kbd> Close
-                        {hasPrevious && <> • <kbd className="px-2 py-1 bg-gray-700 rounded">←</kbd> Previous</>}
-                        {hasNext && <> • <kbd className="px-2 py-1 bg-gray-700 rounded">→</kbd> Next</>}
+                <div className="relative z-10 px-6 py-3 glass-card border-t border-white/10">
+                    <p className="text-xs text-gray-400 text-center font-body">
+                        <kbd className="px-2 py-1 glass-card border border-white/20 rounded">ESC</kbd> Close
+                        {hasPrevious && <> • <kbd className="px-2 py-1 glass-card border border-white/20 rounded">←</kbd> Previous</>}
+                        {hasNext && <> • <kbd className="px-2 py-1 glass-card border border-white/20 rounded">→</kbd> Next</>}
                     </p>
                 </div>
             </div>

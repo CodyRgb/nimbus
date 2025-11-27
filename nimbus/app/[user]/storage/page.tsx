@@ -4,6 +4,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import api from "../../../lib/api";
 import MediaPreviewModal from "../../components/MediaPreviewModal";
 import DeleteConfirmModal from "../../components/DeleteConfirmModal";
+import { motion, AnimatePresence } from "framer-motion";
+import GlassCard from "../../components/ui/GlassCard";
+import ProgressRing from "../../components/ui/ProgressRing";
+import AnimatedCounter from "../../components/ui/AnimatedCounter";
 
 interface FileData {
     _id: string;
@@ -20,6 +24,7 @@ export default function StoragePage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [sortOrder, setSortOrder] = useState("date-desc");
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
     // Selection state
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
@@ -37,11 +42,6 @@ export default function StoragePage() {
     const fetchContent = useCallback(async () => {
         setLoading(true);
         try {
-            // Just fetch all files (or root files if backend still filters, but we want all files now)
-            // If backend filters by folderId=root by default, we might need to adjust backend or pass nothing.
-            // Let's assume we want to see all files flat for now since folders are removed from UI.
-            // Or maybe just root files? User said "remove option for uploading folders", implies flat structure.
-            // I will fetch all files.
             const res = await api.get("/files");
             setFiles(res.data);
         } catch (error) {
@@ -89,15 +89,10 @@ export default function StoragePage() {
         setIsDeleting(true);
         try {
             await api.delete(`/files/${fileToDelete._id}`);
-
-            // Remove from local state
             setFiles(files.filter(f => f._id !== fileToDelete._id));
-
-            // Close modals
             setDeleteModalOpen(false);
             setFileToDelete(null);
 
-            // If preview was open for this file, close it
             if (previewModalOpen && selectedFileIndex !== null) {
                 const currentFile = filteredFiles[selectedFileIndex];
                 if (currentFile._id === fileToDelete._id) {
@@ -180,7 +175,6 @@ export default function StoragePage() {
         }
     };
 
-    // Touch handlers for mobile
     const handleTouchStart = (fileId: string) => {
         const timer = setTimeout(() => {
             toggleFileSelection(fileId);
@@ -253,138 +247,330 @@ export default function StoragePage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    const getBarColor = (type: string) => {
+    const getFileIcon = (mimeType: string) => {
+        if (mimeType.startsWith('image/')) return '🖼️';
+        if (mimeType.startsWith('video/')) return '🎬';
+        if (mimeType.startsWith('audio/')) return '🎵';
+        if (mimeType.includes('pdf')) return '📕';
+        if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
+        if (mimeType.includes('word')) return '📝';
+        if (mimeType.includes('excel') || mimeType.includes('sheet')) return '📊';
+        return '📄';
+    };
+
+    const getTypeColor = (type: string) => {
         switch (type) {
-            case 'image': return 'bg-blue-500';
-            case 'video': return 'bg-purple-500';
-            case 'application': return 'bg-orange-500';
-            default: return 'bg-gray-500';
+            case 'image': return { bg: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' };
+            case 'video': return { bg: 'from-purple-500/20 to-purple-600/20', border: 'border-purple-500/30', text: 'text-purple-400' };
+            case 'audio': return { bg: 'from-pink-500/20 to-pink-600/20', border: 'border-pink-500/30', text: 'text-pink-400' };
+            case 'application': return { bg: 'from-orange-500/20 to-orange-600/20', border: 'border-orange-500/30', text: 'text-orange-400' };
+            default: return { bg: 'from-gray-500/20 to-gray-600/20', border: 'border-gray-500/30', text: 'text-gray-400' };
         }
     };
 
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Storage</h1>
-
-                {/* Bulk action buttons */}
-                {selectedFiles.size > 0 && (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleBulkDownload}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-                        >
-                            Download ({selectedFiles.size})
-                        </button>
-                        <button
-                            onClick={handleBulkDelete}
-                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm"
-                        >
-                            Delete ({selectedFiles.size})
-                        </button>
-                        <button
-                            onClick={() => setSelectedFiles(new Set())}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium text-sm"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Stats Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
-                <div className="flex justify-between items-end mb-4">
+        <div className="min-h-screen bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <motion.div 
+                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Storage Usage</p>
-                        <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatSize(stats.totalSize)}</p>
+                        <h1 className="text-4xl md:text-5xl font-bold text-gradient mb-2 font-display">Storage</h1>
+                        <p className="text-gray-400 font-body">Manage your files in the cloud</p>
                     </div>
-                </div>
-                <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
-                    {Object.entries(stats.typeStats).map(([type, size]) => (
-                        <div
-                            key={type}
-                            style={{ width: `${(size / stats.totalSize) * 100}%` }}
-                            className={`h-full ${getBarColor(type)}`}
-                            title={`${type}: ${formatSize(size)}`}
+
+                    {/* Bulk action buttons */}
+                    <AnimatePresence>
+                        {selectedFiles.size > 0 && (
+                            <motion.div 
+                                className="flex gap-3"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                            >
+                                <motion.button
+                                    onClick={handleBulkDownload}
+                                    className="px-4 py-2 glass-card border border-blue-500/30 text-blue-400 rounded-xl hover:bg-blue-500/10 font-medium text-sm transition-all"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    ⬇ Download ({selectedFiles.size})
+                                </motion.button>
+                                <motion.button
+                                    onClick={handleBulkDelete}
+                                    className="px-4 py-2 glass-card border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/10 font-medium text-sm transition-all"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    🗑 Delete ({selectedFiles.size})
+                                </motion.button>
+                                <motion.button
+                                    onClick={() => setSelectedFiles(new Set())}
+                                    className="px-4 py-2 glass-card border border-gray-500/30 text-gray-400 rounded-xl hover:bg-gray-500/10 font-medium text-sm transition-all"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    ✕ Cancel
+                                </motion.button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
+                {/* Stats Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                    <GlassCard className="p-8 mb-8 bg-gradient-to-br from-aurora-purple/10 to-aurora-blue/10 border-aurora-blue/20" glow="blue">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+                            <div>
+                                <p className="text-sm text-gray-400 mb-2 font-body">Total Storage Usage</p>
+                                <div className="text-4xl font-bold text-gradient font-display">
+                                    <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.5} suffix=" MB" />
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <ProgressRing progress={Math.min((stats.totalSize / (1024 * 1024 * 1024)) * 100, 100)} size={100}>
+                                    <div className="text-center">
+                                        <div className="text-xl font-bold text-white">
+                                            <AnimatedCounter value={files.length} duration={1} />
+                                        </div>
+                                        <div className="text-xs text-gray-400">Files</div>
+                                    </div>
+                                </ProgressRing>
+                            </div>
+                        </div>
+                        
+                        {/* Type breakdown */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {Object.entries(stats.typeStats).map(([type, size]) => {
+                                const colors = getTypeColor(type);
+                                return (
+                                    <motion.div
+                                        key={type}
+                                        className={`glass-card p-4 bg-gradient-to-br ${colors.bg} border ${colors.border}`}
+                                        whileHover={{ scale: 1.05 }}
+                                    >
+                                        <div className={`text-2xl font-bold ${colors.text} mb-1 font-display`}>
+                                            {formatSize(size)}
+                                        </div>
+                                        <div className="text-sm text-gray-400 capitalize font-body">{type}</div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </GlassCard>
+                </motion.div>
+
+                {/* Controls */}
+                <motion.div 
+                    className="flex flex-col md:flex-row gap-4 mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="🔍 Search files..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white placeholder-gray-500 bg-white/5 font-body"
                         />
-                    ))}
-                </div>
-            </div>
+                    </div>
+                    <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white bg-white/5 font-body"
+                    >
+                        <option value="all">All Types</option>
+                        <option value="image">Images</option>
+                        <option value="video">Videos</option>
+                        <option value="audio">Audio</option>
+                        <option value="application">Documents</option>
+                    </select>
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value)}
+                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white bg-white/5 font-body"
+                    >
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="size-desc">Size (Largest)</option>
+                    </select>
+                    
+                    {/* View Mode Toggle */}
+                    <div className="flex gap-2 glass-card p-1 rounded-xl border border-white/10">
+                        <button
+                            onClick={() => setViewMode("grid")}
+                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                        >
+                            ⊞ Grid
+                        </button>
+                        <button
+                            onClick={() => setViewMode("list")}
+                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "list" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                        >
+                            ☰ List
+                        </button>
+                    </div>
+                </motion.div>
 
-            {/* Controls */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <input
-                    type="text"
-                    placeholder="Search files..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
-                />
-                <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
-                >
-                    <option value="all">All Types</option>
-                    <option value="image">Images</option>
-                    <option value="video">Videos</option>
-                    <option value="application">Documents</option>
-                </select>
-                <select
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
-                >
-                    <option value="date-desc">Newest First</option>
-                    <option value="date-asc">Oldest First</option>
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="size-desc">Size (Largest)</option>
-                </select>
-            </div>
-
-            {/* Content List */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {/* Content */}
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Loading...</div>
+                    <GlassCard className="p-12 text-center">
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block text-6xl mb-4"
+                        >
+                            ⚡
+                        </motion.div>
+                        <p className="text-gray-400 font-body">Loading your files...</p>
+                    </GlassCard>
                 ) : filteredFiles.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                        No files found.
+                    <GlassCard className="p-12 text-center">
+                        <div className="text-6xl mb-4">📁</div>
+                        <p className="text-gray-400 text-lg font-body">No files found.</p>
+                    </GlassCard>
+                ) : viewMode === "grid" ? (
+                    /* Grid View */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredFiles.map((file, index) => {
+                            const isSelected = selectedFiles.has(file._id);
+                            const fileType = file.mimeType.split('/')[0];
+                            const colors = getTypeColor(fileType);
+                            
+                            return (
+                                <motion.div
+                                    key={file._id}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                    layout
+                                >
+                                    <GlassCard
+                                        className={`p-6 cursor-pointer bg-gradient-to-br ${colors.bg} border ${isSelected ? 'border-aurora-blue' : colors.border} ${isSelected ? 'glow-blue' : ''}`}
+                                        onClick={() => selectedFiles.size > 0 ? toggleFileSelection(file._id) : handlePreview(index)}
+                                        onTouchStart={() => handleTouchStart(file._id)}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
+                                        {/* Selection checkbox */}
+                                        <div className="flex justify-between items-start mb-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => toggleFileSelection(file._id)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="w-5 h-5 cursor-pointer accent-aurora-blue"
+                                            />
+                                            {isSelected && (
+                                                <span className="text-xs text-aurora-blue font-semibold">✓ Selected</span>
+                                            )}
+                                        </div>
+
+                                        {/* File icon */}
+                                        <motion.div 
+                                            className="text-6xl mb-4 text-center"
+                                            whileHover={{ scale: 1.2, rotate: 10 }}
+                                            transition={{ type: "spring" }}
+                                        >
+                                            {getFileIcon(file.mimeType)}
+                                        </motion.div>
+
+                                        {/* File info */}
+                                        <h3 className="font-semibold truncate mb-2 text-white font-display" title={file.originalName}>
+                                            {file.originalName}
+                                        </h3>
+                                        <div className="flex justify-between items-center text-sm text-gray-400 mb-4 font-body">
+                                            <span>{formatSize(file.size)}</span>
+                                            <span className="capitalize">{fileType}</span>
+                                        </div>
+
+                                        {/* Actions */}
+                                        {!isSelected && (
+                                            <div className="flex gap-2">
+                                                <motion.button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handlePreview(index);
+                                                    }}
+                                                    className="flex-1 px-3 py-2 glass-card border border-purple-500/30 text-purple-400 rounded-lg hover:bg-purple-500/10 text-xs transition-all"
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    👁 Preview
+                                                </motion.button>
+                                                <motion.button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDownload(file._id, file.originalName);
+                                                    }}
+                                                    className="flex-1 px-3 py-2 glass-card border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 text-xs transition-all"
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    ⬇
+                                                </motion.button>
+                                                <motion.button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteClick(file);
+                                                    }}
+                                                    className="px-3 py-2 glass-card border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 text-xs transition-all"
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    🗑
+                                                </motion.button>
+                                            </div>
+                                        )}
+                                    </GlassCard>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 ) : (
-                    <>
-                        {/* Desktop Table View */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-                                <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                    /* List View */
+                    <GlassCard className="overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="glass-card border-b border-white/10">
                                     <tr>
-                                        <th className="px-6 py-4 w-12">
+                                        <th className="px-6 py-4">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedFiles.size === filteredFiles.length && filteredFiles.length > 0}
                                                 onChange={selectAll}
-                                                className="w-5 h-5 cursor-pointer"
+                                                className="w-5 h-5 cursor-pointer accent-aurora-blue"
                                             />
                                         </th>
-                                        <th className="px-6 py-4">Name</th>
-                                        <th className="px-6 py-4">Size</th>
-                                        <th className="px-6 py-4">Type</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-6 py-4 font-semibold text-white font-display">Name</th>
+                                        <th className="px-6 py-4 font-semibold text-white font-display">Size</th>
+                                        <th className="px-6 py-4 font-semibold text-white font-display">Type</th>
+                                        <th className="px-6 py-4 text-right font-semibold text-white font-display">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody className="divide-y divide-white/10">
                                     {filteredFiles.map((file, index) => {
                                         const isSelected = selectedFiles.has(file._id);
                                         return (
-                                            <tr
+                                            <motion.tr
                                                 key={file._id}
-                                                className={`transition-colors cursor-pointer ${isSelected
-                                                        ? 'bg-blue-50 dark:bg-blue-900/20'
-                                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                                    }`}
+                                                className={`transition-colors cursor-pointer ${isSelected ? 'bg-aurora-blue/10' : 'hover:bg-white/5'}`}
                                                 onClick={(e) => handleRowClick(file._id, e)}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ duration: 0.3, delay: index * 0.02 }}
                                             >
                                                 <td className="px-6 py-4">
                                                     <input
@@ -392,165 +578,63 @@ export default function StoragePage() {
                                                         checked={isSelected}
                                                         onChange={() => toggleFileSelection(file._id)}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="w-5 h-5 cursor-pointer"
+                                                        className="w-5 h-5 cursor-pointer accent-aurora-blue"
                                                     />
                                                 </td>
-                                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                    <div className="flex items-center">
-                                                        <span className="mr-3 text-xl">📄</span>
-                                                        {file.originalName}
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
+                                                        <span className="font-medium text-white font-body">{file.originalName}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">{formatSize(file.size)}</td>
-                                                <td className="px-6 py-4 capitalize">{file.mimeType.split('/')[1]}</td>
+                                                <td className="px-6 py-4 text-gray-400 font-body">{formatSize(file.size)}</td>
+                                                <td className="px-6 py-4 text-gray-400 capitalize font-body">{file.mimeType.split('/')[1]}</td>
                                                 <td className="px-6 py-4 text-right">
-                                                    {!isSelected ? (
+                                                    {!isSelected && (
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <button
+                                                            <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handlePreview(index);
                                                                 }}
-                                                                className="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
-                                                                title="Preview"
+                                                                className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
                                                             >
-                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                </svg>
-                                                            </button>
-                                                            <button
+                                                                👁
+                                                            </motion.button>
+                                                            <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDownload(file._id, file.originalName);
                                                                 }}
-                                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                                                title="Download"
+                                                                className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
                                                             >
-                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                </svg>
-                                                            </button>
-                                                            <button
+                                                                ⬇
+                                                            </motion.button>
+                                                            <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDeleteClick(file);
                                                                 }}
-                                                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                                title="Delete"
+                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
                                                             >
-                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </button>
+                                                                🗑
+                                                            </motion.button>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-sm text-gray-400 dark:text-gray-500">Selected</span>
                                                     )}
                                                 </td>
-                                            </tr>
+                                            </motion.tr>
                                         );
                                     })}
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Mobile Card View */}
-                        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
-                            {filteredFiles.map((file, index) => {
-                                const isSelected = selectedFiles.has(file._id);
-                                return (
-                                    <div
-                                        key={file._id}
-                                        className={`p-4 transition-colors ${isSelected
-                                                ? 'bg-blue-50 dark:bg-blue-900/20'
-                                                : 'active:bg-gray-50 dark:active:bg-gray-700/50'
-                                            }`}
-                                        onTouchStart={() => handleTouchStart(file._id)}
-                                        onTouchEnd={handleTouchEnd}
-                                        onClick={(e) => {
-                                            if (selectedFiles.size > 0 && !(e.target as HTMLElement).closest('button')) {
-                                                toggleFileSelection(file._id);
-                                            }
-                                        }}
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            {selectedFiles.size > 0 && (
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isSelected}
-                                                    onChange={() => toggleFileSelection(file._id)}
-                                                    className="w-5 h-5 mt-1 cursor-pointer flex-shrink-0"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                            )}
-
-                                            <span className="text-2xl flex-shrink-0">📄</span>
-
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                                                    {file.originalName}
-                                                </h3>
-                                                <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    <span>{formatSize(file.size)}</span>
-                                                    <span>•</span>
-                                                    <span className="capitalize">{file.mimeType.split('/')[1]}</span>
-                                                </div>
-
-                                                {!isSelected && (
-                                                    <div className="flex flex-wrap items-center gap-2 mt-3">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handlePreview(index);
-                                                            }}
-                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-purple-600 hover:text-purple-800 hover:bg-purple-50 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                            </svg>
-                                                            Preview
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleDownload(file._id, file.originalName);
-                                                            }}
-                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                            Download
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleDeleteClick(file);
-                                                            }}
-                                                            className="flex items-center gap-1 px-3 py-1.5 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {isSelected && (
-                                                    <div className="mt-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                                                        ✓ Selected
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </>
+                    </GlassCard>
                 )}
             </div>
 
