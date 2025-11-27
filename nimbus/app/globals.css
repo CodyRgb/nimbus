@@ -186,10 +186,8 @@
   }
 }
 
-/* Global Styles */
+/* Global Styles - Minimal reset to avoid breaking Tailwind spacing */
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -199,18 +197,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--deep-space-start);
-  color: white;
   overflow-x: hidden;
-}
-
-/* Smooth transitions for all interactive elements */
-button,
-a,
-input,
-textarea,
-select {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom scrollbar */
