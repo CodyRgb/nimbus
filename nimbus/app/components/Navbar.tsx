@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
 interface User {
     _id: string;
@@ -19,6 +20,8 @@ interface NavbarProps {
 
 export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) {
     const { logout } = useAuth();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     return (
         <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none">
             <motion.nav
@@ -55,7 +58,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                     </span>
                 </div>
 
-                {/* Links */}
+                {/* Desktop Links */}
                 <div className="hidden md:flex items-center gap-1 relative z-10">
                     {isOnAuthPage ? null : isLoggedIn ? (
                         <>
@@ -79,8 +82,8 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                     )}
                 </div>
 
-                {/* Buttons */}
-                <div className="flex items-center gap-4 shrink-0 relative z-10">
+                {/* Desktop Buttons */}
+                <div className="hidden md:flex items-center gap-4 shrink-0 relative z-10">
                     {isOnAuthPage ? (
                         <Link href="/contact" className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
                             Contact
@@ -112,7 +115,74 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         </>
                     )}
                 </div>
+
+                {/* Mobile Hamburger Menu */}
+                {isLoggedIn && !isOnAuthPage && (
+                    <motion.button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="md:hidden relative z-10 p-2 text-white"
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            {mobileMenuOpen ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            )}
+                        </svg>
+                    </motion.button>
+                )}
             </motion.nav>
+
+            {/* Mobile Menu Dropdown */}
+            <AnimatePresence>
+                {mobileMenuOpen && isLoggedIn && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="md:hidden absolute top-24 left-4 right-4 pointer-events-auto"
+                    >
+                        <div className="glass-card border border-white/10 rounded-2xl p-4 shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)]">
+                            <div className="flex flex-col gap-2">
+                                <Link
+                                    href={`/${user?.name}/storage`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                >
+                                    📂 Storage
+                                </Link>
+                                <Link
+                                    href={`/${user?.name}/upload`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                >
+                                    📤 Uploads
+                                </Link>
+                                <div className="border-t border-white/10 my-2"></div>
+                                <div className="px-6 py-2 text-sm text-gray-400">
+                                    {user?.name}
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        logout();
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className="px-6 py-3 text-base font-medium text-red-400 hover:text-red-300 transition-all duration-300 rounded-xl hover:bg-red-500/10 text-left"
+                                >
+                                    🚪 Logout
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
