@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams } from "next/navigation";
-import { isAxiosError } from "axios";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import EnhancedUpload from "../../components/EnhancedUpload";
+import ParticleBackground from "../../components/ui/ParticleBackground";
+import GlassCard from "../../components/ui/GlassCard";
 import api from "../../../lib/api";
 
 interface FileData {
@@ -13,30 +16,21 @@ interface FileData {
     createdAt: string;
 }
 
-// Add webkitdirectory to InputHTMLAttributes
-declare module 'react' {
-    interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
-        webkitdirectory?: string;
-        directory?: string;
-    }
-}
-
 export default function UploadPage() {
-    const params = useParams();
-    const [dragActive, setDragActive] = useState(false);
-    const [uploading, setUploading] = useState(false);
+    const router = useRouter();
+    const [uploadComplete, setUploadComplete] = useState(false);
     const [recentFiles, setRecentFiles] = useState<FileData[]>([]);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-    const [progress, setProgress] = useState(0);
-
-    const folderInputRef = useRef<HTMLInputElement>(null);
+    const [loadingFiles, setLoadingFiles] = useState(true);
 
     const fetchRecentFiles = useCallback(async () => {
+        setLoadingFiles(true);
         try {
             const res = await api.get("/files");
             setRecentFiles(res.data.slice(0, 5));
         } catch (error) {
             console.error("Failed to fetch recent files", error);
+        } finally {
+            setLoadingFiles(false);
         }
     }, []);
 
@@ -44,75 +38,13 @@ export default function UploadPage() {
         fetchRecentFiles();
     }, [fetchRecentFiles]);
 
-    const handleDrag = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.type === "dragenter" || e.type === "dragover") {
-            setDragActive(true);
-        } else if (e.type === "dragleave") {
-            setDragActive(false);
-        }
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setDragActive(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleUpload(e.dataTransfer.files);
-        }
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        if (e.target.files && e.target.files.length > 0) {
-            handleUpload(e.target.files);
-        }
-    };
-
-    const handleUpload = async (files: FileList) => {
-        setUploading(true);
-        setMessage(null);
-        setProgress(0);
-
-        // Check total size
-        let totalSize = 0;
-        const filesArray = Array.from(files);
-        for (const file of filesArray) {
-            totalSize += file.size;
-        }
-
-        if (totalSize > 2 * 1024 * 1024 * 1024) {
-            setMessage({ type: 'error', text: "Total upload size exceeds 2GB limit." });
-            setUploading(false);
-            return;
-        }
-
-        const formData = new FormData();
-        filesArray.forEach(file => {
-            formData.append("files", file);
-        });
-
-        try {
-            await api.post("/files/upload", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || totalSize));
-                    setProgress(percentCompleted);
-                }
-            });
-            setMessage({ type: 'success', text: `Successfully uploaded ${files.length} file(s)` });
-            fetchRecentFiles();
-        } catch (error) {
-            const message = isAxiosError(error) ? (error.response?.data?.message || 'Upload failed') : 'Upload failed';
-            setMessage({ type: 'error', text: message });
-        } finally {
-            setUploading(false);
-            setProgress(0);
-        }
-    };
+    const handleUploadComplete = useCallback(() => {
+        setUploadComplete(true);
+        fetchRecentFiles();
+        setTimeout(() => {
+            router.push('/storage');
+        }, 2000);
+    }, [router, fetchRecentFiles]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 Bytes";
@@ -122,92 +54,182 @@ export default function UploadPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
+    const getFileIcon = (mimeType: string) => {
+        if (mimeType.startsWith('image/')) return '🖼️';
+        if (mimeType.startsWith('video/')) return '🎬';
+        if (mimeType.startsWith('audio/')) return '🎵';
+        if (mimeType.includes('pdf')) return '📕';
+        if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
+        if (mimeType.includes('word')) return '📝';
+        if (mimeType.includes('excel') || mimeType.includes('sheet')) return '📊';
+        return '📄';
+    };
+
     return (
-        <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Upload Files</h1>
+        <div className="min-h-screen bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6 relative overflow-hidden">
+            <ParticleBackground />
 
-            {/* Upload Area */}
-            <div
-                className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl transition-colors ${dragActive
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-            >
-                <div className="text-center p-6">
-                    <div className="w-16 h-16 mx-auto mb-4 text-blue-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
+            <div className="absolute top-20 left-10 w-96 h-96 bg-aurora-purple/30 rounded-full blur-3xl animate-float opacity-50" />
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-aurora-blue/30 rounded-full blur-3xl animate-float opacity-50" style={{ animationDelay: "2s" }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-aurora-pink/20 rounded-full blur-3xl animate-float opacity-40" style={{ animationDelay: "4s" }} />
+
+            <div className="max-w-5xl mx-auto relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                    <EnhancedUpload onUploadComplete={handleUploadComplete} />
+                </motion.div>
+
+                {uploadComplete && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mt-6"
+                    >
+                        <GlassCard className="p-6 bg-gradient-to-br from-green-500/20 to-green-600/20 border-green-500/30">
+                            <div className="flex items-center gap-4">
+                                <motion.div
+                                    className="text-4xl"
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    ✅
+                                </motion.div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white font-display">Upload Complete!</h3>
+                                    <p className="text-green-300 font-body">Redirecting to storage...</p>
+                                </div>
+                            </div>
+                        </GlassCard>
+                    </motion.div>
+                )}
+
+                <motion.div
+                    className="mt-12"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gradient font-display">Recently Uploaded</h2>
                     </div>
-                    <p className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                        {uploading ? `Uploading... ${progress}%` : "Drag & Drop files here"}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Max 2GB per upload
-                    </p>
 
-                    <div className="flex space-x-4 justify-center">
-                        <label className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg cursor-pointer transition-colors">
-                            Select Files
-                            <input
-                                type="file"
-                                className="hidden"
-                                multiple
-                                onChange={handleChange}
-                                disabled={uploading}
-                            />
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            {/* Status Message */}
-            {message && (
-                <div className={`mt-4 p-4 rounded-lg ${message.type === 'success'
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                    : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
-                    }`}>
-                    {message.text}
-                </div>
-            )}
-
-            {/* Recent Files */}
-            <div className="mt-12">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Recently Uploaded</h2>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    {recentFiles.length > 0 ? (
-                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {recentFiles.map((file) => (
-                                <li key={file._id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                            📄
+                    <GlassCard className="p-6 bg-gradient-to-br from-white/5 to-white/10 border-white/10">
+                        {loadingFiles ? (
+                            <div className="text-center py-12">
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    className="inline-block text-5xl mb-4"
+                                >
+                                    ⚡
+                                </motion.div>
+                                <p className="text-gray-400 font-body">Loading recent files...</p>
+                            </div>
+                        ) : recentFiles.length > 0 ? (
+                            <div className="space-y-3">
+                                {recentFiles.map((file, index) => (
+                                    <motion.div
+                                        key={file._id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                                        className="flex items-center justify-between p-4 glass-card border border-white/5 rounded-xl hover:border-aurora-blue/30 hover:bg-white/5 transition-all cursor-pointer group"
+                                        whileHover={{ scale: 1.02, x: 5 }}
+                                    >
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <motion.div
+                                                className="text-4xl flex-shrink-0"
+                                                whileHover={{ scale: 1.2, rotate: 10 }}
+                                                transition={{ type: "spring", stiffness: 300 }}
+                                            >
+                                                {getFileIcon(file.mimeType)}
+                                            </motion.div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-white truncate font-display group-hover:text-aurora-blue transition-colors">
+                                                    {file.originalName}
+                                                </p>
+                                                <p className="text-sm text-gray-400 font-body">
+                                                    {formatSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-white truncate max-w-xs">
-                                                {file.originalName}
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                {formatSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
-                                        {file.mimeType.split('/')[1] || 'file'}
-                                    </span>
-                                </li>
-                            ))}
+                                        <motion.div
+                                            className="text-aurora-blue opacity-0 group-hover:opacity-100 transition-opacity"
+                                            initial={{ x: -10 }}
+                                            whileHover={{ x: 0 }}
+                                        >
+                                            →
+                                        </motion.div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">📁</div>
+                                <p className="text-gray-400 text-lg font-body">No files uploaded yet</p>
+                                <p className="text-gray-500 text-sm font-body mt-2">Upload your first file to get started!</p>
+                            </div>
+                        )}
+                    </GlassCard>
+                </motion.div>
+
+                <motion.div
+                    className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                    <GlassCard className="p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20">
+                        <h3 className="text-xl font-bold text-white mb-3 font-display flex items-center gap-2">
+                            <span>💡</span> Upload Tips
+                        </h3>
+                        <ul className="space-y-2 text-gray-300 font-body">
+                            <li className="flex items-start gap-2">
+                                <span className="text-blue-400">•</span>
+                                <span>Drag and drop files directly into the upload area</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-blue-400">•</span>
+                                <span>Maximum file size: 2GB per file</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-blue-400">•</span>
+                                <span>All file types are supported</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-blue-400">•</span>
+                                <span>Files are automatically encrypted</span>
+                            </li>
                         </ul>
-                    ) : (
-                        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                            No files uploaded yet.
-                        </div>
-                    )}
-                </div>
+                    </GlassCard>
+
+                    <GlassCard className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
+                        <h3 className="text-xl font-bold text-white mb-3 font-display flex items-center gap-2">
+                            <span>🎯</span> Features
+                        </h3>
+                        <ul className="space-y-2 text-gray-300 font-body">
+                            <li className="flex items-start gap-2">
+                                <span className="text-purple-400">•</span>
+                                <span>Unlimited storage space</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-purple-400">•</span>
+                                <span>Fast upload speeds</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-purple-400">•</span>
+                                <span>Secure cloud storage</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <span className="text-purple-400">•</span>
+                                <span>Access from anywhere</span>
+                            </li>
+                        </ul>
+                    </GlassCard>
+                </motion.div>
             </div>
         </div>
     );

@@ -18,7 +18,7 @@ export default function UserLayout({
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-28">
+        <div className="min-h-screen bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start pt-28">
             {/* Main Content */}
             <main className="p-8 overflow-y-auto">
                 {children}
