@@ -2,98 +2,108 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
-import api from "../../lib/api";
 import { motion } from "framer-motion";
-import MagneticButton from "./ui/MagneticButton";
+import { useAuth } from "../context/AuthContext";
 
-export default function Navbar() {
-    const router = useRouter();
-    const { isLoggedIn, user, logout: authLogout } = useAuth();
+interface User {
+    _id: string;
+    name: string;
+    email: string;
+}
 
-    const handleLogout = async () => {
-        try {
-            await api.post("/auth/logout");
-            authLogout();
-            router.push("/");
-        } catch (error) {
-            console.error("Logout failed", error);
-            authLogout();
-            router.push("/");
-        }
-    };
+interface NavbarProps {
+    isLoggedIn: boolean;
+    user: User | null;
+    isOnAuthPage: boolean;
+}
 
+export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) {
+    const { logout } = useAuth();
     return (
-        <motion.header 
-            className="glass-card sticky top-0 z-50 px-6 py-4 border-b border-white/10 backdrop-blur-xl"
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6 }}
-        >
-            <div className="flex items-center justify-between max-w-7xl mx-auto">
-                {/* Website Logo */}
-                <Link href="/" className="flex items-center gap-3 group">
-                    <motion.div 
-                        whileHover={{ rotate: 360, scale: 1.1 }} 
-                        transition={{ duration: 0.6 }}
-                    >
-                        <Image 
-                            src="/nimbus-logo.png" 
-                            alt="Nimbus Logo" 
-                            width={40} 
-                            height={40} 
-                            className="object-contain" 
+        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none">
+            <motion.nav
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)] max-w-7xl w-full relative overflow-hidden"
+            >
+                {/* Subtle Aurora Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
+
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-3 group shrink-0 relative z-10">
+                    <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
+                        <Image
+                            src="/nimbus-logo.png"
+                            alt="Nimbus Logo"
+                            width={36}
+                            height={36}
+                            className="object-contain"
                         />
                     </motion.div>
-                    <span className="text-2xl font-bold text-gradient font-display">
+                    <span className="text-2xl font-bold text-white font-display hidden sm:block tracking-tight">
                         Nimbus
                     </span>
                 </Link>
 
-                <div className="flex items-center space-x-4">
-                    {isLoggedIn ? (
+                {/* Links */}
+                <div className="hidden md:flex items-center gap-1 relative z-10">
+                    {isOnAuthPage ? (
+                        <Link href="/contact" className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            Contact
+                        </Link>
+                    ) : isLoggedIn ? (
                         <>
-                            {user && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    className="glass-card px-4 py-2 rounded-full"
-                                >
-                                    <span className="text-gray-300 font-body">
-                                        Welcome, <span className="text-aurora-blue font-semibold">{user.name}</span>
-                                    </span>
-                                </motion.div>
-                            )}
-                            <motion.button
-                                onClick={handleLogout}
-                                className="px-4 py-2 text-gray-300 hover:text-red-400 font-medium transition-colors font-body"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                            <Link href={`/${user?.name}/storage`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                                Storage
+                            </Link>
+                            <Link href={`/${user?.name}/upload`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                                Uploads
+                            </Link>
+                        </>
+                    ) : (
+                        ["About", "Help", "FAQ", "Contact"].map((item) => (
+                            <Link
+                                key={item}
+                                href={`/#${item.toLowerCase()}`}
+                                className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105"
+                            >
+                                {item}
+                            </Link>
+                        ))
+                    )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex items-center gap-4 shrink-0 relative z-10">
+                    {isOnAuthPage ? null : isLoggedIn ? (
+                        <>
+                            <span className="text-white font-medium">
+                                {user?.name}
+                            </span>
+                            <button
+                                onClick={logout}
+                                className="px-7 py-3 text-base font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-105"
                             >
                                 Logout
-                            </motion.button>
+                            </button>
                         </>
                     ) : (
                         <>
                             <Link href="/login">
-                                <motion.button
-                                    className="px-4 py-2 text-gray-300 hover:text-white font-medium transition-colors font-body"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
+                                <button className="px-7 py-3 text-base font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-all duration-300 hover:scale-105">
                                     Login
-                                </motion.button>
+                                </button>
                             </Link>
                             <Link href="/register">
-                                <MagneticButton variant="primary" className="px-6 py-2 text-base">
+                                <button className="px-7 py-3 text-base font-medium text-black bg-white rounded-full hover:bg-gray-100 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] hover:scale-105">
                                     Register
-                                </MagneticButton>
+                                </button>
                             </Link>
                         </>
                     )}
                 </div>
-            </div>
-        </motion.header>
+            </motion.nav>
+        </div>
     );
 }

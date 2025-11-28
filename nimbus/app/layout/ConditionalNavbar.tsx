@@ -1,15 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
 export default function ConditionalNavbar() {
+    const { isLoggedIn, user } = useAuth();
     const pathname = usePathname();
+    const isOnAuthPage = pathname === '/login' || pathname === '/register';
 
-    // Hide navbar on the landing page
-    if (pathname === "/") {
-        return null;
-    }
-
-    return <Navbar />;
+    return <Navbar isLoggedIn={isLoggedIn} user={user} isOnAuthPage={isOnAuthPage} />;
 }

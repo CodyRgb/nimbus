@@ -52,7 +52,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center pt-32 bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start relative overflow-hidden">
             {/* Animated Background Orbs */}
             <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-aurora-purple/30 rounded-full blur-3xl opacity-50 animate-float" />
             <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-aurora-blue/30 rounded-full blur-3xl opacity-50 animate-float" style={{ animationDelay: "2s" }} />
@@ -166,7 +166,7 @@ export default function LoginPage() {
                     </form>
 
                     <div className="mt-8 text-center text-gray-400 text-sm font-body">
-                        Don't have an account?{" "}
+                        Don&rsquo;t have an account?{" "}
                         <Link
                             href="/register"
                             className="text-aurora-blue hover:text-aurora-pink font-medium transition-colors"

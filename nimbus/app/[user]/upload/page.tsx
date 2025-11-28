@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
+import { isAxiosError } from "axios";
 import api from "../../../lib/api";
 
 interface FileData {
@@ -104,8 +105,9 @@ export default function UploadPage() {
             });
             setMessage({ type: 'success', text: `Successfully uploaded ${files.length} file(s)` });
             fetchRecentFiles();
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.response?.data?.message || "Upload failed" });
+        } catch (error) {
+            const message = isAxiosError(error) ? (error.response?.data?.message || 'Upload failed') : 'Upload failed';
+            setMessage({ type: 'error', text: message });
         } finally {
             setUploading(false);
             setProgress(0);

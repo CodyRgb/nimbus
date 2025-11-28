@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isAxiosError } from 'axios';
 import api from '@/lib/api';
 
 interface TelegramConnectProps {
@@ -24,8 +25,9 @@ const TelegramConnect: React.FC<TelegramConnectProps> = ({ onConnected }) => {
             setPhoneCodeHash(res.data.phoneCodeHash);
             setSession(res.data.session);
             setStep('CODE');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to send code');
+        } catch (err) {
+            const message = isAxiosError(err) ? (err.response?.data?.message || 'Failed to send code') : 'Failed to send code';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -44,8 +46,8 @@ const TelegramConnect: React.FC<TelegramConnectProps> = ({ onConnected }) => {
                 password
             });
             onConnected();
-        } catch (err: any) {
-            const msg = err.response?.data?.message || 'Verification failed';
+        } catch (err) {
+            const msg = isAxiosError(err) ? (err.response?.data?.message || 'Verification failed') : 'Verification failed';
             if (msg.includes('password') || msg.includes('SESSION_PASSWORD_NEEDED')) {
                 setStep('PASSWORD');
                 setError('Two-step verification required');

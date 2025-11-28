@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { isAxiosError } from "axios";
 import api from "../../lib/api";
 
 export default function RegisterPage() {
@@ -58,8 +59,9 @@ export default function RegisterPage() {
 
             setRegistrationComplete(true);
             setStep('TELEGRAM');
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Registration failed");
+        } catch (err) {
+            const message = isAxiosError(err) ? (err.response?.data?.message || 'Registration failed') : 'Registration failed';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -75,8 +77,9 @@ export default function RegisterPage() {
             setPhoneCodeHash(res.data.phoneCodeHash);
             setSession(res.data.session);
             setTelegramStep('CODE');
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to send code');
+        } catch (err) {
+            const message = isAxiosError(err) ? (err.response?.data?.message || 'Failed to send code') : 'Failed to send code';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -96,8 +99,8 @@ export default function RegisterPage() {
             });
             // Success! Redirect to dashboard
             router.push("/login");
-        } catch (err: any) {
-            const msg = err.response?.data?.message || 'Verification failed';
+        } catch (err) {
+            const msg = isAxiosError(err) ? (err.response?.data?.message || 'Verification failed') : 'Verification failed';
             if (msg.includes('password') || msg.includes('SESSION_PASSWORD_NEEDED')) {
                 setTelegramStep('PASSWORD');
                 setError('Two-step verification required');
@@ -114,7 +117,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center pt-32 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/30 rounded-full blur-3xl opacity-50 animate-pulse" />
             <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-600/30 rounded-full blur-3xl opacity-50 animate-pulse delay-1000" />

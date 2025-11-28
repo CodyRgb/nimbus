@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { isAxiosError } from 'axios';
 import api from '../../lib/api';
 
 const Upload = ({ onUploadComplete }: { onUploadComplete: () => void }) => {
@@ -32,9 +33,10 @@ const Upload = ({ onUploadComplete }: { onUploadComplete: () => void }) => {
                 },
             });
             onUploadComplete();
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || 'Upload failed');
+            const message = isAxiosError(err) ? (err.response?.data?.message || 'Upload failed') : 'Upload failed';
+            setError(message);
         } finally {
             setUploading(false);
         }

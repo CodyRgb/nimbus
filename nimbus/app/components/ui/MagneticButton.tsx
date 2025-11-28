@@ -41,16 +41,38 @@ export default function MagneticButton({
 
   const baseClasses = "px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 relative overflow-hidden";
 
-  const Component = href ? motion.a : motion.button;
+  if (href) {
+    return (
+      <motion.a
+        ref={ref as React.Ref<HTMLAnchorElement>}
+        className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+        onMouseMove={handleMouse}
+        onMouseLeave={resetPosition}
+        onClick={onClick}
+        href={href}
+        animate={{ x: position.x, y: position.y }}
+        transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.span
+          className="absolute inset-0 bg-white/20 rounded-full"
+          initial={{ scale: 0, opacity: 0 }}
+          whileHover={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        />
+        <span className="relative z-10">{children}</span>
+      </motion.a>
+    );
+  }
 
   return (
-    <Component
-      ref={ref as any}
+    <motion.button
+      ref={ref as React.Ref<HTMLButtonElement>}
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
       onMouseMove={handleMouse}
       onMouseLeave={resetPosition}
       onClick={onClick}
-      href={href}
       animate={{ x: position.x, y: position.y }}
       transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
       whileHover={{ scale: 1.05 }}
@@ -63,6 +85,6 @@ export default function MagneticButton({
         transition={{ duration: 0.4 }}
       />
       <span className="relative z-10">{children}</span>
-    </Component>
+    </motion.button>
   );
 }
