@@ -19,26 +19,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        if (typeof window === 'undefined') return false;
         const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         return !!(token && storedUser);
     });
 
     const [user, setUser] = useState<User | null>(() => {
+        if (typeof window === 'undefined') return null;
         const storedUser = localStorage.getItem('user');
         return storedUser ? JSON.parse(storedUser) : null;
     });
 
     const login = (userData: User, token: string) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(userData));
+        }
         setUser(userData);
         setIsLoggedIn(true);
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
         setUser(null);
         setIsLoggedIn(false);
     };

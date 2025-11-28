@@ -31,7 +31,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
 
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-3 group shrink-0 relative z-10">
+                <Link href="/" className="flex items-center gap-3 group shrink-0 relative z-10 cursor-pointer">
                     <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
                         <Image
                             src="/nimbus-logo.png"
@@ -48,11 +48,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
 
                 {/* Links */}
                 <div className="hidden md:flex items-center gap-1 relative z-10">
-                    {isOnAuthPage ? (
-                        <Link href="/contact" className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
-                            Contact
-                        </Link>
-                    ) : isLoggedIn ? (
+                    {isOnAuthPage ? null : isLoggedIn ? (
                         <>
                             <Link href={`/${user?.name}/storage`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
                                 Storage
@@ -76,7 +72,11 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
 
                 {/* Buttons */}
                 <div className="flex items-center gap-4 shrink-0 relative z-10">
-                    {isOnAuthPage ? null : isLoggedIn ? (
+                    {isOnAuthPage ? (
+                        <Link href="/contact" className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            Contact
+                        </Link>
+                    ) : isLoggedIn ? (
                         <>
                             <span className="text-white font-medium">
                                 {user?.name}

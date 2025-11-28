@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { isAxiosError } from "axios";
 import api from "../../lib/api";
+import { motion, AnimatePresence } from "framer-motion";
+import GlassCard from "../components/ui/GlassCard";
+import MagneticButton from "../components/ui/MagneticButton";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -117,258 +120,349 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center pt-32 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/30 rounded-full blur-3xl opacity-50 animate-pulse" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-600/30 rounded-full blur-3xl opacity-50 animate-pulse delay-1000" />
+        <div className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start relative overflow-hidden">
+            {/* Animated Background Orbs */}
+            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-aurora-purple/20 rounded-full blur-[100px] opacity-50 animate-float" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-aurora-blue/20 rounded-full blur-[100px] opacity-50 animate-float" style={{ animationDelay: "2s" }} />
 
-            <div className="relative w-full max-w-md p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-10">
-                {/* Step Indicator */}
-                <div className="flex items-center justify-center mb-6">
-                    <div className="flex items-center space-x-2">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step === 'REGISTER' ? 'bg-purple-600 text-white' : 'bg-green-600 text-white'}`}>
-                            {registrationComplete ? '✓' : '1'}
-                        </div>
-                        <div className="w-12 h-0.5 bg-white/20"></div>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step === 'TELEGRAM' ? 'bg-purple-600 text-white' : 'bg-white/10 text-gray-400'}`}>
-                            2
+            <motion.div
+                className="relative w-full max-w-md z-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+                <GlassCard className="p-8 md:p-10 glow-blue border-white/10">
+                    {/* Step Indicator */}
+                    <div className="flex items-center justify-center mb-8">
+                        <div className="flex items-center space-x-4">
+                            <motion.div
+                                animate={{
+                                    backgroundColor: step === 'REGISTER' ? 'var(--aurora-purple)' : 'var(--accent-success)',
+                                    scale: step === 'REGISTER' ? 1.1 : 1
+                                }}
+                                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg relative overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-white/20" />
+                                {registrationComplete ? '✓' : '1'}
+                            </motion.div>
+                            <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-aurora-purple to-aurora-blue"
+                                    initial={{ width: "0%" }}
+                                    animate={{ width: step === 'TELEGRAM' ? "100%" : "0%" }}
+                                    transition={{ duration: 0.5 }}
+                                />
+                            </div>
+                            <motion.div
+                                animate={{
+                                    backgroundColor: step === 'TELEGRAM' ? 'var(--aurora-blue)' : 'rgba(255,255,255,0.1)',
+                                    color: step === 'TELEGRAM' ? 'white' : 'rgba(255,255,255,0.4)',
+                                    scale: step === 'TELEGRAM' ? 1.1 : 1
+                                }}
+                                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg relative overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-white/20 opacity-0 data-[active=true]:opacity-100" data-active={step === 'TELEGRAM'} />
+                                2
+                            </motion.div>
                         </div>
                     </div>
+
+                    <AnimatePresence mode="wait">
+                        {step === 'REGISTER' ? (
+                            <motion.div
+                                key="register"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <div className="mb-8 text-center">
+                                    <h1 className="text-3xl font-bold text-gradient mb-3 font-display tracking-tight">
+                                        Create Account
+                                    </h1>
+                                    <p className="text-gray-400 font-body">Join the future of storage today</p>
+                                </div>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm flex items-center gap-3 font-body"
+                                    >
+                                        <svg className="w-5 h-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={handleRegister} className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                            Full Name
+                                        </label>
+                                        <motion.input
+                                            whileFocus={{ scale: 1.01 }}
+                                            type="text"
+                                            id="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-purple/50 focus:border-aurora-purple/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                            placeholder="John Doe"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                            Email Address
+                                        </label>
+                                        <motion.input
+                                            whileFocus={{ scale: 1.01 }}
+                                            type="email"
+                                            id="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-purple/50 focus:border-aurora-purple/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                            placeholder="you@example.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label htmlFor="password" className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                                Password
+                                            </label>
+                                            <motion.input
+                                                whileFocus={{ scale: 1.01 }}
+                                                type="password"
+                                                id="password"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-purple/50 focus:border-aurora-purple/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                                placeholder="••••••••"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                                Confirm
+                                            </label>
+                                            <motion.input
+                                                whileFocus={{ scale: 1.01 }}
+                                                type="password"
+                                                id="confirmPassword"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-purple/50 focus:border-aurora-purple/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                                placeholder="••••••••"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <MagneticButton
+                                        variant="primary"
+                                        className="w-full !py-4 !text-lg !font-bold shadow-lg shadow-aurora-purple/20 mt-6"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                Creating Account...
+                                            </span>
+                                        ) : (
+                                            "Continue →"
+                                        )}
+                                    </MagneticButton>
+                                </form>
+
+                                <div className="mt-8 pt-6 border-t border-white/10 text-center text-gray-400 text-sm font-body">
+                                    Already have an account?{" "}
+                                    <Link
+                                        href="/login"
+                                        className="text-aurora-blue hover:text-aurora-pink font-semibold transition-colors inline-flex items-center gap-1 group"
+                                    >
+                                        Sign in
+                                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="telegram"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <div className="mb-6 text-center">
+                                    <div className="w-16 h-16 mx-auto bg-[#229ED9]/20 rounded-2xl flex items-center justify-center mb-4">
+                                        <svg className="w-8 h-8 text-[#229ED9]" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.638z" />
+                                        </svg>
+                                    </div>
+                                    <h1 className="text-2xl font-bold text-white mb-2 font-display">
+                                        Connect Telegram
+                                    </h1>
+                                    <p className="text-gray-400 text-sm font-body">
+                                        Store files securely in your Saved Messages
+                                    </p>
+                                </div>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm flex items-center gap-3 font-body"
+                                    >
+                                        <svg className="w-5 h-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                {/* Phone Number Step */}
+                                {telegramStep === 'PHONE' && (
+                                    <form onSubmit={handleSendCode} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                                Phone Number
+                                            </label>
+                                            <motion.input
+                                                whileFocus={{ scale: 1.01 }}
+                                                type="text"
+                                                placeholder="+1234567890"
+                                                value={phoneNumber}
+                                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue/50 focus:border-aurora-blue/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                                required
+                                            />
+                                            <p className="text-xs text-gray-500 ml-1">Include country code (e.g., +1...)</p>
+                                        </div>
+                                        <MagneticButton
+                                            variant="primary"
+                                            className="w-full !py-3.5 !text-base shadow-lg shadow-aurora-blue/20"
+                                        >
+                                            {loading ? 'Sending...' : 'Send Verification Code'}
+                                        </MagneticButton>
+                                    </form>
+                                )}
+
+                                {/* Verification Code Step */}
+                                {telegramStep === 'CODE' && (
+                                    <form onSubmit={handleVerifyTelegram} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                                Verification Code
+                                            </label>
+                                            <motion.input
+                                                whileFocus={{ scale: 1.01 }}
+                                                type="text"
+                                                placeholder="12345"
+                                                value={code}
+                                                onChange={(e) => setCode(e.target.value)}
+                                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue/50 focus:border-aurora-blue/50 outline-none text-white placeholder-gray-500 transition-all font-body tracking-widest text-center text-lg"
+                                                required
+                                            />
+                                            <p className="text-xs text-gray-500 text-center">Enter the code sent to your Telegram app</p>
+                                        </div>
+                                        <MagneticButton
+                                            variant="primary"
+                                            className="w-full !py-3.5 !text-base shadow-lg shadow-aurora-blue/20"
+                                        >
+                                            {loading ? 'Verifying...' : 'Verify & Connect'}
+                                        </MagneticButton>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTelegramStep('PHONE')}
+                                            className="w-full text-sm text-aurora-blue hover:text-aurora-pink transition-colors"
+                                        >
+                                            Change Phone Number
+                                        </button>
+                                    </form>
+                                )}
+
+                                {/* 2FA Password Step */}
+                                {telegramStep === 'PASSWORD' && (
+                                    <form onSubmit={handleVerifyTelegram} className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-300 font-display ml-1">
+                                                Two-Step Verification Password
+                                            </label>
+                                            <motion.input
+                                                whileFocus={{ scale: 1.01 }}
+                                                type="password"
+                                                placeholder="Enter your 2FA password"
+                                                value={telegramPassword}
+                                                onChange={(e) => setTelegramPassword(e.target.value)}
+                                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue/50 focus:border-aurora-blue/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                                required
+                                            />
+                                        </div>
+                                        <MagneticButton
+                                            variant="primary"
+                                            className="w-full !py-3.5 !text-base shadow-lg shadow-aurora-blue/20"
+                                        >
+                                            {loading ? 'Verifying...' : 'Verify Password'}
+                                        </MagneticButton>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTelegramStep('CODE')}
+                                            className="w-full text-sm text-aurora-blue hover:text-aurora-pink transition-colors"
+                                        >
+                                            Back to Code
+                                        </button>
+                                    </form>
+                                )}
+
+                                {/* Skip Button */}
+                                <div className="mt-6 pt-6 border-t border-white/10">
+                                    <button
+                                        onClick={skipTelegram}
+                                        className="w-full py-3 text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all hover:bg-white/5"
+                                    >
+                                        Skip for Now
+                                    </button>
+                                    <p className="text-xs text-gray-500 text-center mt-3">
+                                        You can connect Telegram later from your dashboard
+                                    </p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </GlassCard>
+
+                {/* Floating particles effect */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {[...Array(15)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute w-1 h-1 bg-white/30 rounded-full"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                            }}
+                            animate={{
+                                y: [0, -40, 0],
+                                opacity: [0, 0.8, 0],
+                                scale: [0, 1.5, 0],
+                            }}
+                            transition={{
+                                duration: 3 + Math.random() * 4,
+                                repeat: Infinity,
+                                delay: Math.random() * 2,
+                                ease: "easeInOut",
+                            }}
+                        />
+                    ))}
                 </div>
-
-                {step === 'REGISTER' ? (
-                    <>
-                        <div className="mb-8 text-center">
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                                Create Account
-                            </h1>
-                            <p className="text-gray-400 mt-2">Join us today</p>
-                        </div>
-
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-sm text-center">
-                                {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleRegister} className="space-y-5">
-                            <div>
-                                <label
-                                    htmlFor="name"
-                                    className="block text-sm font-medium text-gray-300 mb-2"
-                                >
-                                    Full Name
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                    placeholder="John Doe"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="email"
-                                    className="block text-sm font-medium text-gray-300 mb-2"
-                                >
-                                    Email Address
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                    placeholder="you@example.com"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="password"
-                                    className="block text-sm font-medium text-gray-300 mb-2"
-                                >
-                                    Password
-                                </label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    htmlFor="confirmPassword"
-                                    className="block text-sm font-medium text-gray-300 mb-2"
-                                >
-                                    Confirm Password
-                                </label>
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className={`w-full py-3.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] mt-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {loading ? 'Creating Account...' : 'Continue'}
-                            </button>
-                        </form>
-
-                        <div className="mt-8 text-center text-gray-400 text-sm">
-                            Already have an account?{" "}
-                            <Link
-                                href="/login"
-                                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
-                            >
-                                Sign in
-                            </Link>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="mb-6 text-center">
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                                Connect Telegram Storage
-                            </h1>
-                            <p className="text-gray-400 mt-2 text-sm">
-                                Connect your Telegram account to store files in your Saved Messages
-                            </p>
-                        </div>
-
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Phone Number Step */}
-                        {telegramStep === 'PHONE' && (
-                            <form onSubmit={handleSendCode} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Phone Number
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="+1234567890"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Include country code (e.g., +1...)</p>
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold rounded-lg shadow-lg transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {loading ? 'Sending...' : 'Send Verification Code'}
-                                </button>
-                            </form>
-                        )}
-
-                        {/* Verification Code Step */}
-                        {telegramStep === 'CODE' && (
-                            <form onSubmit={handleVerifyTelegram} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Verification Code
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="12345"
-                                        value={code}
-                                        onChange={(e) => setCode(e.target.value)}
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                        required
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Enter the code sent to your Telegram</p>
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {loading ? 'Verifying...' : 'Verify & Connect'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setTelegramStep('PHONE')}
-                                    className="w-full text-sm text-purple-400 hover:text-purple-300 transition-colors"
-                                >
-                                    Change Phone Number
-                                </button>
-                            </form>
-                        )}
-
-                        {/* 2FA Password Step */}
-                        {telegramStep === 'PASSWORD' && (
-                            <form onSubmit={handleVerifyTelegram} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Two-Step Verification Password
-                                    </label>
-                                    <input
-                                        type="password"
-                                        placeholder="Enter your 2FA password"
-                                        value={telegramPassword}
-                                        onChange={(e) => setTelegramPassword(e.target.value)}
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-gray-500 transition-all"
-                                        required
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold rounded-lg shadow-lg transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {loading ? 'Verifying...' : 'Verify Password'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setTelegramStep('CODE')}
-                                    className="w-full text-sm text-purple-400 hover:text-purple-300 transition-colors"
-                                >
-                                    Back to Code
-                                </button>
-                            </form>
-                        )}
-
-                        {/* Skip Button */}
-                        <div className="mt-6">
-                            <button
-                                onClick={skipTelegram}
-                                className="w-full py-2.5 text-gray-400 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all"
-                            >
-                                Skip for Now
-                            </button>
-                            <p className="text-xs text-gray-500 text-center mt-2">
-                                You can connect Telegram later from your dashboard
-                            </p>
-                        </div>
-                    </>
-                )}
-            </div>
+            </motion.div>
         </div>
     );
 }
