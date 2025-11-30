@@ -41,10 +41,11 @@ export default function UploadPage() {
     const handleUploadComplete = useCallback(() => {
         setUploadComplete(true);
         fetchRecentFiles();
+        // Removed redirection to keep user on the same page
         setTimeout(() => {
-            router.push('/storage');
-        }, 2000);
-    }, [router, fetchRecentFiles]);
+            setUploadComplete(false);
+        }, 3000);
+    }, [fetchRecentFiles]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 Bytes";
@@ -99,7 +100,7 @@ export default function UploadPage() {
                                 </motion.div>
                                 <div>
                                     <h3 className="text-xl font-bold text-white font-display">Upload Complete!</h3>
-                                    <p className="text-green-300 font-body">Redirecting to storage...</p>
+                                    <p className="text-green-300 font-body">File uploaded successfully.</p>
                                 </div>
                             </div>
                         </GlassCard>

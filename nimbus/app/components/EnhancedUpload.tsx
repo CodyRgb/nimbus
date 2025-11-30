@@ -1,68 +1,139 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isAxiosError } from 'axios';
 import api from '../../lib/api';
 import GlassCard from './ui/GlassCard';
 import ParticleBackground from './ui/ParticleBackground';
+import UploadProgressItem, { UploadProgressItemProps } from './UploadProgressItem';
 
 interface EnhancedUploadProps {
     onUploadComplete: () => void;
 }
 
-export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps) {
-    const [uploading, setUploading] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [error, setError] = useState('');
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+interface UploadState {
+    id: string;
+    file: File;
+    progress: number;
+    status: 'uploading' | 'paused' | 'error' | 'completed' | 'queued';
+    uploadedBytes: number;
+    totalBytes: number;
+    error?: string;
+}
 
-    const uploadFiles = async (files: File[]) => {
-        setUploading(true);
-        setProgress(0);
-        setError('');
-        setUploadedFiles(files);
+export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps) {
+    const [uploads, setUploads] = useState<UploadState[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const abortControllers = useRef<{ [key: string]: AbortController }>({});
+
+    const startUpload = async (uploadId: string, file: File) => {
+        const controller = new AbortController();
+        abortControllers.current[uploadId] = controller;
+
+        setUploads(prev => prev.map(u =>
+            u.id === uploadId ? { ...u, status: 'uploading', error: undefined } : u
+        ));
 
         const formData = new FormData();
-<<<<<<< HEAD
         formData.append('files', file);
-=======
-        files.forEach(file => {
-            formData.append('files', file);
-        });
->>>>>>> 1a14695ebf6ff247bb4d8887164f58e75a5e9d34
 
         try {
             await api.post('/files/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
+                signal: controller.signal,
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-                    setProgress(percentCompleted);
+                    const total = progressEvent.total || file.size || 1;
+                    const loaded = progressEvent.loaded;
+                    const percentCompleted = Math.round((loaded * 100) / total);
+
+                    setUploads(prev => prev.map(u =>
+                        u.id === uploadId ? {
+                            ...u,
+                            progress: percentCompleted,
+                            uploadedBytes: loaded,
+                            totalBytes: total
+                        } : u
+                    ));
                 },
             });
 
-            // Success animation delay
-            setTimeout(() => {
-                onUploadComplete();
-                setUploadedFiles([]);
-                setProgress(0);
-            }, 1000);
+            setUploads(prev => prev.map(u =>
+                u.id === uploadId ? { ...u, status: 'completed', progress: 100, uploadedBytes: u.totalBytes } : u
+            ));
+
+            // Check if all uploads are complete to trigger the parent callback
+            // We might want to trigger it per file or once a batch is done. 
+            // For now, let's trigger it when a file completes so the list updates.
+            onUploadComplete();
+
         } catch (err) {
-            console.error(err);
-            const message = isAxiosError(err) ? (err.response?.data?.message || 'Upload failed') : 'Upload failed';
-            setError(message);
+            if (isAxiosError(err) && err.code === 'ERR_CANCELED') {
+                setUploads(prev => prev.map(u =>
+                    u.id === uploadId ? { ...u, status: 'paused' } : u
+                ));
+            } else {
+                console.error(err);
+                const message = isAxiosError(err) ? (err.response?.data?.message || 'Upload failed') : 'Upload failed';
+                setUploads(prev => prev.map(u =>
+                    u.id === uploadId ? { ...u, status: 'error', error: message } : u
+                ));
+            }
         } finally {
-            setUploading(false);
+            delete abortControllers.current[uploadId];
         }
+    };
+
+    const uploadFiles = async (files: File[]) => {
+        const newUploads: UploadState[] = files.map(file => ({
+            id: Math.random().toString(36).substr(2, 9),
+            file,
+            progress: 0,
+            status: 'queued',
+            uploadedBytes: 0,
+            totalBytes: file.size
+        }));
+
+        setUploads(prev => [...newUploads, ...prev]);
+
+        // Start uploads
+        newUploads.forEach(upload => {
+            startUpload(upload.id, upload.file);
+        });
+    };
+
+    const handlePause = (id: string) => {
+        if (abortControllers.current[id]) {
+            abortControllers.current[id].abort();
+        }
+    };
+
+    const handleResume = (id: string) => {
+        const upload = uploads.find(u => u.id === id);
+        if (upload) {
+            startUpload(id, upload.file);
+        }
+    };
+
+    const handleRetry = (id: string) => {
+        handleResume(id);
+    };
+
+    const handleCancel = (id: string) => {
+        if (abortControllers.current[id]) {
+            abortControllers.current[id].abort();
+        }
+        setUploads(prev => prev.filter(u => u.id !== id));
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             await uploadFiles(Array.from(e.target.files));
         }
+        // Reset input
+        e.target.value = '';
     };
 
     const handleDrop = useCallback((e: React.DragEvent) => {
@@ -84,150 +155,107 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
         setIsDragging(false);
     }, []);
 
-    const formatSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
     return (
-        <div className="relative min-h-[400px] overflow-hidden rounded-3xl">
-            {/* Particle Background */}
-            <div className="absolute inset-0 opacity-30">
-                <ParticleBackground />
-            </div>
+        <div className="relative min-h-[400px] rounded-3xl">
+            {/* Particle Background - Contained within this section if desired, or remove if it conflicts with layout */}
+            {/* We'll keep the container styling but maybe remove the overflow-hidden if the list grows long, 
+                 or keep it and make the list scrollable. Let's make the list scrollable. */}
 
-            {/* Floating gradient orbs */}
-            <div className="absolute top-10 left-10 w-64 h-64 bg-aurora-purple/20 rounded-full blur-3xl animate-float" />
-            <div className="absolute bottom-10 right-10 w-64 h-64 bg-aurora-blue/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+            <div className="relative z-10">
+                <GlassCard className="p-8 border-2 border-white/10 mb-8">
+                    <h3 className="text-2xl font-bold mb-6 text-gradient font-display">Upload Files</h3>
 
-            <GlassCard className="relative z-10 p-8 border-2 border-white/10">
-                <h3 className="text-2xl font-bold mb-6 text-gradient font-display">Upload Files</h3>
-
-                <motion.div
-                    className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${isDragging
-                        ? 'border-aurora-blue bg-aurora-blue/10 scale-105'
-                        : uploading
-                            ? 'border-aurora-purple bg-aurora-purple/5'
+                    <motion.div
+                        className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${isDragging
+                            ? 'border-aurora-blue bg-aurora-blue/10 scale-105'
                             : 'border-white/20 hover:border-aurora-blue/50 hover:bg-white/5'
-                        }`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    whileHover={{ scale: uploading ? 1 : 1.02 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                >
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                        className="hidden"
-                        id="file-upload"
-                    />
+                            }`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                    >
+                        <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            className="hidden"
+                            id="file-upload"
+                        />
 
-                    <label htmlFor="file-upload" className="cursor-pointer block">
-                        <AnimatePresence mode="wait">
-                            {uploading ? (
+                        <label htmlFor="file-upload" className="cursor-pointer block">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="space-y-4"
+                            >
                                 <motion.div
-                                    key="uploading"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    className="space-y-4"
+                                    className="text-6xl mb-4"
+                                    whileHover={{ scale: 1.2, rotate: 10 }}
+                                    transition={{ type: "spring" }}
                                 >
-                                    <motion.div
-                                        className="text-6xl mb-4"
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                    >
-                                        ⚡
-                                    </motion.div>
-                                    <p className="text-lg font-semibold text-white font-display">
-                                        Uploading {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''}...
-                                    </p>
-                                    <p className="text-sm text-gray-400 font-body">
-                                        {formatSize(uploadedFiles.reduce((sum, f) => sum + f.size, 0))}
-                                    </p>
-
-                                    {/* Progress Bar */}
-                                    <div className="w-full max-w-md mx-auto">
-                                        <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                                            <motion.div
-                                                className="h-full bg-gradient-aurora rounded-full"
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${progress}%` }}
-                                                transition={{ duration: 0.3 }}
-                                            />
-                                        </div>
-                                        <p className="text-sm text-aurora-blue mt-2 font-semibold">{progress}%</p>
-                                    </div>
+                                    {isDragging ? '📥' : '☁️'}
                                 </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="idle"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    className="space-y-4"
-                                >
-                                    <motion.div
-                                        className="text-6xl mb-4"
-                                        whileHover={{ scale: 1.2, rotate: 10 }}
-                                        transition={{ type: "spring" }}
-                                    >
-                                        {isDragging ? '📥' : '☁️'}
-                                    </motion.div>
-                                    <p className="text-xl font-semibold text-white font-display">
-                                        {isDragging ? 'Drop your file here' : 'Click to upload or drag and drop'}
-                                    </p>
-                                    <p className="text-sm text-gray-400 font-body">
-                                        Any file type • Max 2GB
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </label>
-                </motion.div>
+                                <p className="text-xl font-semibold text-white font-display">
+                                    {isDragging ? 'Drop your files here' : 'Click to upload or drag and drop'}
+                                </p>
+                                <p className="text-sm text-gray-400 font-body">
+                                    Any file type • Max 2GB
+                                </p>
+                            </motion.div>
+                        </label>
+                    </motion.div>
 
-                {/* Error Message */}
+                    {/* Upload Tips */}
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                            { icon: '🚀', title: 'Fast Upload', desc: 'Optimized for speed' },
+                            { icon: '🔒', title: 'Secure', desc: 'End-to-end encrypted' },
+                            { icon: '♾️', title: 'Unlimited', desc: 'No storage limits' },
+                        ].map((tip, i) => (
+                            <motion.div
+                                key={tip.title}
+                                className="glass-card p-4 text-center bg-gradient-to-br from-white/5 to-white/10"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: i * 0.1 }}
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                <div className="text-3xl mb-2">{tip.icon}</div>
+                                <h4 className="font-semibold text-white mb-1 font-display">{tip.title}</h4>
+                                <p className="text-xs text-gray-400 font-body">{tip.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </GlassCard>
+
+                {/* Upload Progress List */}
                 <AnimatePresence>
-                    {error && (
+                    {uploads.length > 0 && (
                         <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="mt-4 p-4 glass-card border border-red-500/30 bg-red-500/10 rounded-xl"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="space-y-4"
                         >
-                            <p className="text-red-400 text-sm font-semibold">❌ {error}</p>
+                            <h4 className="text-lg font-semibold text-white mb-4 pl-2">Active Uploads</h4>
+                            <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                {uploads.map(upload => (
+                                    <UploadProgressItem
+                                        key={upload.id}
+                                        {...upload}
+                                        onPause={() => handlePause(upload.id)}
+                                        onResume={() => handleResume(upload.id)}
+                                        onRetry={() => handleRetry(upload.id)}
+                                        onCancel={() => handleCancel(upload.id)}
+                                    />
+                                ))}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                {/* Upload Tips */}
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                        { icon: '🚀', title: 'Fast Upload', desc: 'Optimized for speed' },
-                        { icon: '🔒', title: 'Secure', desc: 'End-to-end encrypted' },
-                        { icon: '♾️', title: 'Unlimited', desc: 'No storage limits' },
-                    ].map((tip, i) => (
-                        <motion.div
-                            key={tip.title}
-                            className="glass-card p-4 text-center bg-gradient-to-br from-white/5 to-white/10"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: i * 0.1 }}
-                            whileHover={{ scale: 1.05 }}
-                        >
-                            <div className="text-3xl mb-2">{tip.icon}</div>
-                            <h4 className="font-semibold text-white mb-1 font-display">{tip.title}</h4>
-                            <p className="text-xs text-gray-400 font-body">{tip.desc}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </GlassCard>
+            </div>
         </div>
     );
 }

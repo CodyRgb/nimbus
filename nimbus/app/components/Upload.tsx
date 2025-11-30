@@ -19,13 +19,9 @@ const Upload = ({ onUploadComplete }: { onUploadComplete: () => void }) => {
         setError('');
 
         const formData = new FormData();
-<<<<<<< HEAD
-        formData.append('files', file);
-=======
         files.forEach(file => {
             formData.append('files', file);
         });
->>>>>>> 1a14695ebf6ff247bb4d8887164f58e75a5e9d34
 
         try {
             await api.post('/files/upload', formData, {
