@@ -9,18 +9,23 @@ const Upload = ({ onUploadComplete }: { onUploadComplete: () => void }) => {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            const file = e.target.files[0];
-            await uploadFile(file);
+            await uploadFiles(Array.from(e.target.files));
         }
     };
 
-    const uploadFile = async (file: File) => {
+    const uploadFiles = async (files: File[]) => {
         setUploading(true);
         setProgress(0);
         setError('');
 
         const formData = new FormData();
+<<<<<<< HEAD
         formData.append('files', file);
+=======
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+>>>>>>> 1a14695ebf6ff247bb4d8887164f58e75a5e9d34
 
         try {
             await api.post('/files/upload', formData, {
@@ -54,7 +59,7 @@ const Upload = ({ onUploadComplete }: { onUploadComplete: () => void }) => {
                         <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Any file (Max 2GB)</p>
                     </div>
-                    <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={uploading} />
+                    <input id="dropzone-file" type="file" multiple className="hidden" onChange={handleFileChange} disabled={uploading} />
                 </label>
             </div>
 

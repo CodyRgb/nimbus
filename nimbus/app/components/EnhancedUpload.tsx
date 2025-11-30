@@ -16,16 +16,22 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
     const [isDragging, setIsDragging] = useState(false);
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-    const uploadFile = async (file: File) => {
+    const uploadFiles = async (files: File[]) => {
         setUploading(true);
         setProgress(0);
         setError('');
-        setUploadedFile(file);
+        setUploadedFiles(files);
 
         const formData = new FormData();
+<<<<<<< HEAD
         formData.append('files', file);
+=======
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+>>>>>>> 1a14695ebf6ff247bb4d8887164f58e75a5e9d34
 
         try {
             await api.post('/files/upload', formData, {
@@ -41,7 +47,7 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
             // Success animation delay
             setTimeout(() => {
                 onUploadComplete();
-                setUploadedFile(null);
+                setUploadedFiles([]);
                 setProgress(0);
             }, 1000);
         } catch (err) {
@@ -55,8 +61,7 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            const file = e.target.files[0];
-            await uploadFile(file);
+            await uploadFiles(Array.from(e.target.files));
         }
     };
 
@@ -65,8 +70,7 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
         setIsDragging(false);
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            const file = e.dataTransfer.files[0];
-            uploadFile(file);
+            uploadFiles(Array.from(e.dataTransfer.files));
         }
     }, []);
 
@@ -117,6 +121,7 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
                 >
                     <input
                         type="file"
+                        multiple
                         onChange={handleFileChange}
                         disabled={uploading}
                         className="hidden"
@@ -141,10 +146,10 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
                                         ⚡
                                     </motion.div>
                                     <p className="text-lg font-semibold text-white font-display">
-                                        Uploading {uploadedFile?.name}...
+                                        Uploading {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''}...
                                     </p>
                                     <p className="text-sm text-gray-400 font-body">
-                                        {formatSize(uploadedFile?.size || 0)}
+                                        {formatSize(uploadedFiles.reduce((sum, f) => sum + f.size, 0))}
                                     </p>
 
                                     {/* Progress Bar */}
