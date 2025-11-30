@@ -25,7 +25,7 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
         setUploadedFile(file);
 
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('files', file);
 
         try {
             await api.post('/files/upload', formData, {
@@ -104,10 +104,10 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
 
                 <motion.div
                     className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${isDragging
-                            ? 'border-aurora-blue bg-aurora-blue/10 scale-105'
-                            : uploading
-                                ? 'border-aurora-purple bg-aurora-purple/5'
-                                : 'border-white/20 hover:border-aurora-blue/50 hover:bg-white/5'
+                        ? 'border-aurora-blue bg-aurora-blue/10 scale-105'
+                        : uploading
+                            ? 'border-aurora-purple bg-aurora-purple/5'
+                            : 'border-white/20 hover:border-aurora-blue/50 hover:bg-white/5'
                         }`}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}

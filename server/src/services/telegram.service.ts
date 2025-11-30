@@ -33,7 +33,9 @@ if (!apiId || !apiHash || !botToken || !channelIdStr) {
 const stringSession = new StringSession("");
 
 export const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 5,
+    connectionRetries: 10,
+    useWSS: false, // Ensure WSS is disabled for stability
+    timeout: 300, // 5 minutes timeout
 });
 
 let isConnected = false;
@@ -69,28 +71,55 @@ export const uploadFileToTelegram = async (filePath: string, filename: string, m
 
     console.log(`Uploading ${filename} to Telegram...`);
 
-    try {
-        // Send the file to the channel
-        const result = await client.sendFile(channelId as any, {
-            file: filePath,
-            forceDocument: true,
-            attributes: [
-                new Api.DocumentAttributeFilename({ fileName: filename }),
-            ],
-            caption: `File: ${filename}\nMime: ${mimeType}`,
-            workers: 3, // Parallel uploads
-        });
+    const MAX_RETRIES = 5;
+    const RETRY_DELAY = 5000; // 5 seconds
 
-        const messageId = result.id;
+    let lastError;
 
-        return {
-            messageId: messageId,
-            media: result.media,
-        };
-    } catch (error) {
-        console.error("Error uploading to Telegram:", error);
-        throw error;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            // Send the file to the channel
+            const result = await client.sendFile(channelId as any, {
+                file: filePath,
+                forceDocument: true,
+                attributes: [
+                    new Api.DocumentAttributeFilename({ fileName: filename }),
+                ],
+                caption: `File: ${filename}\nMime: ${mimeType}`,
+                workers: 3, // Parallel uploads (kept at 3 per user request)
+            });
+
+            const messageId = result.id;
+
+            return {
+                messageId: messageId,
+                media: result.media,
+            };
+        } catch (error) {
+            lastError = error;
+            console.error(`Upload attempt ${attempt}/${MAX_RETRIES} failed for ${filename}:`, error);
+
+            // Check for specific errors that might need a reconnect
+            if ((error as any).message && ((error as any).message.includes('Not connected') || (error as any).message.includes('TIMEOUT'))) {
+                console.log("Connection issue detected, attempting to reconnect...");
+                try {
+                    await client.disconnect();
+                    await client.connect();
+                    isConnected = true;
+                } catch (reconnectError) {
+                    console.error("Reconnection failed:", reconnectError);
+                }
+            }
+
+            if (attempt < MAX_RETRIES) {
+                console.log(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
     }
+
+    console.error(`All ${MAX_RETRIES} attempts failed for ${filename}`);
+    throw lastError;
 };
 
 export const downloadFileFromTelegram = async (messageId: number) => {
@@ -131,8 +160,9 @@ export const deleteMessage = async (messageId: number) => {
 export const getUserClient = async (session: string) => {
     const stringSession = new StringSession(session);
     const userClient = new TelegramClient(stringSession, apiId, apiHash, {
-        connectionRetries: 5,
+        connectionRetries: 10,
         useWSS: false,
+        timeout: 300,
     });
     await userClient.connect();
     return userClient;
@@ -193,25 +223,52 @@ export const completeLogin = async (phoneNumber: string, code: string, phoneCode
 
 export const uploadFileToTelegramWithClient = async (clientToUse: TelegramClient, filePath: string, filename: string, mimeType: string) => {
     console.log(`Uploading ${filename} to Telegram (User)...`);
-    try {
-        const result = await clientToUse.sendFile("me", {
-            file: filePath,
-            forceDocument: true,
-            attributes: [
-                new Api.DocumentAttributeFilename({ fileName: filename }),
-            ],
-            caption: `File: ${filename}\nMime: ${mimeType}`,
-            workers: 3, // Parallel uploads
-        });
 
-        return {
-            messageId: result.id,
-            media: result.media,
-        };
-    } catch (error) {
-        console.error("Error uploading to Telegram (User):", error);
-        throw error;
+    const MAX_RETRIES = 5;
+    const RETRY_DELAY = 5000; // 5 seconds
+
+    let lastError;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const result = await clientToUse.sendFile("me", {
+                file: filePath,
+                forceDocument: true,
+                attributes: [
+                    new Api.DocumentAttributeFilename({ fileName: filename }),
+                ],
+                caption: `File: ${filename}\nMime: ${mimeType}`,
+                workers: 3, // Parallel uploads (kept at 3 per user request)
+            });
+
+            return {
+                messageId: result.id,
+                media: result.media,
+            };
+        } catch (error) {
+            lastError = error;
+            console.error(`User Upload attempt ${attempt}/${MAX_RETRIES} failed for ${filename}:`, error);
+
+            // Check for specific errors that might need a reconnect
+            if ((error as any).message && ((error as any).message.includes('Not connected') || (error as any).message.includes('TIMEOUT'))) {
+                console.log("User Client Connection issue detected, attempting to reconnect...");
+                try {
+                    await clientToUse.disconnect();
+                    await clientToUse.connect();
+                } catch (reconnectError) {
+                    console.error("User Client Reconnection failed:", reconnectError);
+                }
+            }
+
+            if (attempt < MAX_RETRIES) {
+                console.log(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            }
+        }
     }
+
+    console.error(`All ${MAX_RETRIES} attempts failed for ${filename} (User)`);
+    throw lastError;
 };
 
 export const downloadFileFromTelegramWithClient = async (clientToUse: TelegramClient, messageId: number) => {

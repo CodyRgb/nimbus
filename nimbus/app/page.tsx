@@ -619,7 +619,7 @@ export default function LandingPage() {
                   icon: "📧",
                   title: "Email Us",
                   desc: "For general inquiries and support",
-                  link: "support@nimbus.com",
+                  link: "contact.nimbuscloud@gmail.com",
                   gradient: "from-blue-500/20 to-blue-600/20"
                 },
                 {
