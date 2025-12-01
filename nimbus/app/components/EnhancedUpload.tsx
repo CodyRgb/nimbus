@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isAxiosError } from 'axios';
 import api from '../../lib/api';
@@ -22,10 +22,139 @@ interface UploadState {
     error?: string;
 }
 
+
+const DB_NAME = 'cloudcontainer_db';
+const DB_VERSION = 1;
+const STORE_NAME = 'uploads';
+const COUNTER_KEY = 'upload_counter';
+
 export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps) {
     const [uploads, setUploads] = useState<UploadState[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+    const [totalUploadsProcessed, setTotalUploadsProcessed] = useState(0);
     const abortControllers = useRef<{ [key: string]: AbortController }>({});
+    const isProcessingQueue = useRef(false);
+
+    // IndexedDB helper functions
+    const openDB = (): Promise<IDBDatabase> => {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+
+            request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+        });
+    };
+
+    const saveUploadsToDB = async (uploadsToSave: UploadState[], counter: number) => {
+        try {
+            const db = await openDB();
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+
+            // Clear existing data
+            await new Promise((resolve, reject) => {
+                const clearRequest = store.clear();
+                clearRequest.onsuccess = () => resolve(undefined);
+                clearRequest.onerror = () => reject(clearRequest.error);
+            });
+
+            // Save each upload with its File object
+            for (const upload of uploadsToSave) {
+                const uploadData = {
+                    id: upload.id,
+                    file: upload.file, // File objects can be stored in IndexedDB
+                    progress: upload.progress,
+                    status: upload.status,
+                    uploadedBytes: upload.uploadedBytes,
+                    totalBytes: upload.totalBytes,
+                    error: upload.error
+                };
+                store.put(uploadData);
+            }
+
+            // Save counter
+            store.put({ id: COUNTER_KEY, value: counter });
+
+            db.close();
+        } catch (error) {
+            console.error('Failed to save uploads to IndexedDB:', error);
+        }
+    };
+
+    const loadUploadsFromDB = async (): Promise<{ uploads: UploadState[], counter: number }> => {
+        try {
+            const db = await openDB();
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    const results = request.result;
+                    let counter = 0;
+                    const uploads: UploadState[] = [];
+
+                    results.forEach((item: any) => {
+                        if (item.id === COUNTER_KEY) {
+                            counter = item.value;
+                        } else if (item.file) {
+                            // Only restore non-completed uploads
+                            if (item.status !== 'completed') {
+                                uploads.push({
+                                    id: item.id,
+                                    file: item.file,
+                                    progress: 0, // Reset progress to start fresh
+                                    status: 'queued', // Always set to queued so they auto-resume
+                                    uploadedBytes: 0, // Reset uploaded bytes
+                                    totalBytes: item.totalBytes,
+                                    error: undefined // Clear any previous errors
+                                });
+                            }
+                        }
+                    });
+
+                    db.close();
+                    resolve({ uploads, counter });
+                };
+
+                request.onerror = () => {
+                    db.close();
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('Failed to load uploads from IndexedDB:', error);
+            return { uploads: [], counter: 0 };
+        }
+    };
+
+    // Load uploads from IndexedDB on mount
+    useEffect(() => {
+        const restoreUploads = async () => {
+            const { uploads: restoredUploads, counter } = await loadUploadsFromDB();
+
+            if (restoredUploads.length > 0) {
+                console.log('Restored', restoredUploads.length, 'uploads from previous session');
+                setUploads(restoredUploads);
+                setTotalUploadsProcessed(counter);
+            }
+        };
+
+        restoreUploads();
+    }, []);
+
+    // Save to IndexedDB whenever uploads or counter change
+    useEffect(() => {
+        saveUploadsToDB(uploads, totalUploadsProcessed);
+    }, [uploads, totalUploadsProcessed]);
 
     const startUpload = async (uploadId: string, file: File) => {
         const controller = new AbortController();
@@ -64,9 +193,6 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
                 u.id === uploadId ? { ...u, status: 'completed', progress: 100, uploadedBytes: u.totalBytes } : u
             ));
 
-            // Check if all uploads are complete to trigger the parent callback
-            // We might want to trigger it per file or once a batch is done. 
-            // For now, let's trigger it when a file completes so the list updates.
             onUploadComplete();
 
         } catch (err) {
@@ -83,8 +209,28 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
             }
         } finally {
             delete abortControllers.current[uploadId];
+            isProcessingQueue.current = false;
         }
     };
+
+    // Auto-process queue when uploads change
+    useEffect(() => {
+        const processQueue = async () => {
+            if (isProcessingQueue.current) return;
+
+            // Find next upload to process
+            const nextUpload = uploads.find(u =>
+                u.status === 'queued' && !abortControllers.current[u.id]
+            );
+
+            if (!nextUpload) return;
+
+            isProcessingQueue.current = true;
+            await startUpload(nextUpload.id, nextUpload.file);
+        };
+
+        processQueue();
+    }, [uploads]);
 
     const uploadFiles = async (files: File[]) => {
         const newUploads: UploadState[] = files.map(file => ({
@@ -96,12 +242,8 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
             totalBytes: file.size
         }));
 
-        setUploads(prev => [...newUploads, ...prev]);
-
-        // Start uploads
-        newUploads.forEach(upload => {
-            startUpload(upload.id, upload.file);
-        });
+        setUploads(prev => [...prev, ...newUploads]);
+        setTotalUploadsProcessed(prev => prev + files.length);
     };
 
     const handlePause = (id: string) => {
@@ -113,12 +255,19 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
     const handleResume = (id: string) => {
         const upload = uploads.find(u => u.id === id);
         if (upload) {
-            startUpload(id, upload.file);
+            setUploads(prev => prev.map(u =>
+                u.id === id ? { ...u, status: 'queued' } : u
+            ));
         }
     };
 
     const handleRetry = (id: string) => {
-        handleResume(id);
+        const upload = uploads.find(u => u.id === id);
+        if (upload) {
+            setUploads(prev => prev.map(u =>
+                u.id === id ? { ...u, status: 'queued', progress: 0, uploadedBytes: 0, error: undefined } : u
+            ));
+        }
     };
 
     const handleCancel = (id: string) => {
@@ -157,10 +306,6 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
 
     return (
         <div className="relative min-h-[400px] rounded-3xl">
-            {/* Particle Background - Contained within this section if desired, or remove if it conflicts with layout */}
-            {/* We'll keep the container styling but maybe remove the overflow-hidden if the list grows long, 
-                 or keep it and make the list scrollable. Let's make the list scrollable. */}
-
             <div className="relative z-10">
                 <GlassCard className="p-8 border-2 border-white/10 mb-8">
                     <h3 className="text-2xl font-bold mb-6 text-gradient font-display">Upload Files</h3>
@@ -241,16 +386,23 @@ export default function EnhancedUpload({ onUploadComplete }: EnhancedUploadProps
                         >
                             <h4 className="text-lg font-semibold text-white mb-4 pl-2">Active Uploads</h4>
                             <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                {uploads.map(upload => (
-                                    <UploadProgressItem
-                                        key={upload.id}
-                                        {...upload}
-                                        onPause={() => handlePause(upload.id)}
-                                        onResume={() => handleResume(upload.id)}
-                                        onRetry={() => handleRetry(upload.id)}
-                                        onCancel={() => handleCancel(upload.id)}
-                                    />
-                                ))}
+                                {uploads.map((upload, index) => {
+                                    // Calculate global position (never resets)
+                                    const currentPosition = totalUploadsProcessed - uploads.length + index + 1;
+
+                                    return (
+                                        <UploadProgressItem
+                                            key={upload.id}
+                                            {...upload}
+                                            currentPosition={currentPosition}
+                                            totalUploads={totalUploadsProcessed}
+                                            onPause={() => handlePause(upload.id)}
+                                            onResume={() => handleResume(upload.id)}
+                                            onRetry={() => handleRetry(upload.id)}
+                                            onCancel={() => handleCancel(upload.id)}
+                                        />
+                                    );
+                                })}
                             </div>
                         </motion.div>
                     )}
