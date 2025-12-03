@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "../../components/ui/GlassCard";
 import ProgressRing from "../../components/ui/ProgressRing";
 import AnimatedCounter from "../../components/ui/AnimatedCounter";
+import AddToAlbumModal from "../../components/AddToAlbumModal";
+import FileThumbnail from "../../components/FileThumbnail";
 
 interface FileData {
     _id: string;
@@ -38,6 +40,10 @@ export default function StoragePage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<FileData | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Album modal state
+    const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
+    const [filesToAdd, setFilesToAdd] = useState<string[]>([]);
 
     const fetchContent = useCallback(async () => {
         setLoading(true);
@@ -274,7 +280,7 @@ export default function StoragePage() {
         <div className="min-h-screen bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <motion.div 
+                <motion.div
                     className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -288,7 +294,7 @@ export default function StoragePage() {
                     {/* Bulk action buttons */}
                     <AnimatePresence>
                         {selectedFiles.size > 0 && (
-                            <motion.div 
+                            <motion.div
                                 className="flex gap-3"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -301,6 +307,17 @@ export default function StoragePage() {
                                     whileTap={{ scale: 0.95 }}
                                 >
                                     ⬇ Download ({selectedFiles.size})
+                                </motion.button>
+                                <motion.button
+                                    onClick={() => {
+                                        setFilesToAdd(Array.from(selectedFiles));
+                                        setAddToAlbumModalOpen(true);
+                                    }}
+                                    className="px-4 py-2 glass-card border border-purple-500/30 text-purple-400 rounded-xl hover:bg-purple-500/10 font-medium text-sm transition-all"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    🖼 Add to Album ({selectedFiles.size})
                                 </motion.button>
                                 <motion.button
                                     onClick={handleBulkDelete}
@@ -348,7 +365,7 @@ export default function StoragePage() {
                                 </ProgressRing>
                             </div>
                         </div>
-                        
+
                         {/* Type breakdown */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {Object.entries(stats.typeStats).map(([type, size]) => {
@@ -371,7 +388,7 @@ export default function StoragePage() {
                 </motion.div>
 
                 {/* Controls */}
-                <motion.div 
+                <motion.div
                     className="flex flex-col md:flex-row gap-4 mb-6"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -407,7 +424,7 @@ export default function StoragePage() {
                         <option value="name-asc">Name (A-Z)</option>
                         <option value="size-desc">Size (Largest)</option>
                     </select>
-                    
+
                     {/* View Mode Toggle */}
                     <div className="flex gap-2 glass-card p-1 rounded-xl border border-white/10">
                         <button
@@ -449,7 +466,7 @@ export default function StoragePage() {
                             const isSelected = selectedFiles.has(file._id);
                             const fileType = file.mimeType.split('/')[0];
                             const colors = getTypeColor(fileType);
-                            
+
                             return (
                                 <motion.div
                                     key={file._id}
@@ -478,14 +495,25 @@ export default function StoragePage() {
                                             )}
                                         </div>
 
-                                        {/* File icon */}
-                                        <motion.div 
-                                            className="text-6xl mb-4 text-center"
-                                            whileHover={{ scale: 1.2, rotate: 10 }}
-                                            transition={{ type: "spring" }}
-                                        >
-                                            {getFileIcon(file.mimeType)}
-                                        </motion.div>
+                                        {/* File Preview/Icon */}
+                                        <div className="h-40 mb-4 flex items-center justify-center relative rounded-lg overflow-hidden bg-black/20">
+                                            {(file.mimeType.startsWith('image/') || file.mimeType.startsWith('video/')) ? (
+                                                <FileThumbnail
+                                                    fileId={file._id}
+                                                    fileName={file.originalName}
+                                                    mimeType={file.mimeType}
+                                                    className="w-full h-full"
+                                                />
+                                            ) : (
+                                                <motion.div
+                                                    className="text-6xl"
+                                                    whileHover={{ scale: 1.2, rotate: 10 }}
+                                                    transition={{ type: "spring" }}
+                                                >
+                                                    {getFileIcon(file.mimeType)}
+                                                </motion.div>
+                                            )}
+                                        </div>
 
                                         {/* File info */}
                                         <h3 className="font-semibold truncate mb-2 text-white font-display" title={file.originalName}>
@@ -520,6 +548,18 @@ export default function StoragePage() {
                                                     whileTap={{ scale: 0.95 }}
                                                 >
                                                     ⬇
+                                                </motion.button>
+                                                <motion.button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setFilesToAdd([file._id]);
+                                                        setAddToAlbumModalOpen(true);
+                                                    }}
+                                                    className="flex-1 px-3 py-2 glass-card border border-pink-500/30 text-pink-400 rounded-lg hover:bg-pink-500/10 text-xs transition-all"
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    🖼
                                                 </motion.button>
                                                 <motion.button
                                                     onClick={(e) => {
@@ -617,6 +657,18 @@ export default function StoragePage() {
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    setFilesToAdd([file._id]);
+                                                                    setAddToAlbumModalOpen(true);
+                                                                }}
+                                                                className="p-2 text-pink-400 hover:bg-pink-500/10 rounded-lg transition-colors"
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
+                                                            >
+                                                                🖼
+                                                            </motion.button>
+                                                            <motion.button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     handleDeleteClick(file);
                                                                 }}
                                                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -661,6 +713,18 @@ export default function StoragePage() {
                     hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
                 />
             )}
+
+            {/* Add to Album Modal */}
+            <AddToAlbumModal
+                isOpen={addToAlbumModalOpen}
+                onClose={() => setAddToAlbumModalOpen(false)}
+                fileIds={filesToAdd}
+                onSuccess={() => {
+                    setAddToAlbumModalOpen(false);
+                    setFilesToAdd([]);
+                    setSelectedFiles(new Set());
+                }}
+            />
 
             {/* Delete Confirmation Modal */}
             {fileToDelete && (

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import api from '../../lib/api';
+import AddToAlbumModal from './AddToAlbumModal';
 
 interface FileData {
     _id: string;
@@ -18,6 +19,8 @@ const FileList = ({ refreshTrigger }: { refreshTrigger: number }) => {
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [touchTimer, setTouchTimer] = useState<NodeJS.Timeout | null>(null);
+    const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
+    const [filesToAdd, setFilesToAdd] = useState<string[]>([]);
 
     const fetchFiles = async () => {
         try {
@@ -172,6 +175,16 @@ const FileList = ({ refreshTrigger }: { refreshTrigger: number }) => {
                                     Download ({selectedFiles.size})
                                 </button>
                                 <button
+                                    onClick={() => {
+                                        setFilesToAdd(Array.from(selectedFiles));
+                                        setAddToAlbumModalOpen(true);
+                                    }}
+                                    disabled={selectedFiles.size === 0}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    Add to Album ({selectedFiles.size})
+                                </button>
+                                <button
                                     onClick={handleBulkDelete}
                                     disabled={selectedFiles.size === 0}
                                     className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -252,7 +265,7 @@ const FileList = ({ refreshTrigger }: { refreshTrigger: number }) => {
                                 </div>
 
                                 {!selectionMode && (
-                                    <div className="flex justify-between mt-4">
+                                    <div className="flex justify-between mt-4 gap-2">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -261,6 +274,16 @@ const FileList = ({ refreshTrigger }: { refreshTrigger: number }) => {
                                             className="text-blue-600 hover:text-blue-800 text-sm"
                                         >
                                             Download
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFilesToAdd([file._id]);
+                                                setAddToAlbumModalOpen(true);
+                                            }}
+                                            className="text-purple-600 hover:text-purple-800 text-sm"
+                                        >
+                                            Album
                                         </button>
                                         <button
                                             onClick={(e) => {
@@ -278,6 +301,15 @@ const FileList = ({ refreshTrigger }: { refreshTrigger: number }) => {
                     })}
                 </div>
             )}
+            <AddToAlbumModal
+                isOpen={addToAlbumModalOpen}
+                onClose={() => setAddToAlbumModalOpen(false)}
+                fileIds={filesToAdd}
+                onSuccess={() => {
+                    // Optional: show success toast
+                    setAddToAlbumModalOpen(false);
+                }}
+            />
         </div>
     );
 };

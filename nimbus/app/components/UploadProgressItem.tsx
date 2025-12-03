@@ -8,6 +8,8 @@ export interface UploadProgressItemProps {
     uploadedBytes: number;
     totalBytes: number;
     error?: string;
+    currentPosition?: number;
+    totalUploads?: number;
     onPause: () => void;
     onResume: () => void;
     onCancel: () => void;
@@ -21,6 +23,8 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
     uploadedBytes,
     totalBytes,
     error,
+    currentPosition,
+    totalUploads,
     onPause,
     onResume,
     onCancel,
@@ -51,7 +55,12 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                             <span className="text-red-400">{error || 'Upload failed'}</span>
                         ) : (
                             <>
-                                {formatSize(uploadedBytes)} / {formatSize(totalBytes)}
+                                {formatSize(uploadedBytes)} / {formatSize(totalBytes)} ({progress}%)
+                                {currentPosition && totalUploads && (
+                                    <span className={status === 'uploading' ? 'text-aurora-blue font-semibold' : ''}>
+                                        {' • '}{currentPosition} of {totalUploads}
+                                    </span>
+                                )}
                                 {status === 'uploading' && ' • Uploading...'}
                                 {status === 'paused' && ' • Paused'}
                                 {status === 'completed' && ' • Completed'}
@@ -107,15 +116,13 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
 
             {/* Progress Bar */}
             <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
-                <motion.div
-                    className={`h-full rounded-full ${status === 'error' ? 'bg-red-500' :
+                <div
+                    className={`h-full rounded-full transition-none ${status === 'error' ? 'bg-red-500' :
                         status === 'completed' ? 'bg-green-500' :
                             status === 'paused' ? 'bg-yellow-500' :
                                 'bg-gradient-aurora'
                         }`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.3 }}
+                    style={{ width: `${progress}%` }}
                 />
             </div>
         </motion.div>

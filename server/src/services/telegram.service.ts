@@ -33,9 +33,9 @@ if (!apiId || !apiHash || !botToken || !channelIdStr) {
 const stringSession = new StringSession("");
 
 export const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 10,
+    connectionRetries: 15,
     useWSS: false, // Ensure WSS is disabled for stability
-    timeout: 300, // 5 minutes timeout
+    timeout: 900, // 15 minutes timeout for large files
 });
 
 let isConnected = false;
@@ -71,8 +71,8 @@ export const uploadFileToTelegram = async (filePath: string, filename: string, m
 
     console.log(`Uploading ${filename} to Telegram...`);
 
-    const MAX_RETRIES = 5;
-    const RETRY_DELAY = 5000; // 5 seconds
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 10000; // 10 seconds
 
     let lastError;
 
@@ -160,9 +160,9 @@ export const deleteMessage = async (messageId: number) => {
 export const getUserClient = async (session: string) => {
     const stringSession = new StringSession(session);
     const userClient = new TelegramClient(stringSession, apiId, apiHash, {
-        connectionRetries: 10,
+        connectionRetries: 15,
         useWSS: false,
-        timeout: 300,
+        timeout: 900, // 15 minutes timeout for large files
     });
     await userClient.connect();
     return userClient;
@@ -224,8 +224,8 @@ export const completeLogin = async (phoneNumber: string, code: string, phoneCode
 export const uploadFileToTelegramWithClient = async (clientToUse: TelegramClient, filePath: string, filename: string, mimeType: string) => {
     console.log(`Uploading ${filename} to Telegram (User)...`);
 
-    const MAX_RETRIES = 5;
-    const RETRY_DELAY = 5000; // 5 seconds
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 10000; // 10 seconds
 
     let lastError;
 

@@ -2,16 +2,15 @@ import 'dotenv/config';
 import express, { Application, Request, Response } from 'express';
 import connectDB from './config/db';
 import { connectTelegram } from './services/telegram.service';
-
-const app: Application = express();
-
 import authRoutes from './routes/auth.routes';
 import fileRoutes from './routes/file.routes';
 import telegramRoutes from './routes/telegram.routes';
+import albumRoutes from './routes/album.routes';
 // import { protect } from './middleware/auth.middleware';
-
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+
+const app: Application = express();
 
 // Body parser
 app.use(express.json());
@@ -27,6 +26,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/telegram', telegramRoutes);
+app.use('/api/albums', albumRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('API is running...');
