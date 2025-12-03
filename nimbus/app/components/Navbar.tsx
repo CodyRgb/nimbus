@@ -68,6 +68,9 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                             <Link href={`/${user?.name}/upload`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
                                 Uploads
                             </Link>
+                            <Link href={`/${user?.name}/albums`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                                Albums
+                            </Link>
                         </>
                     ) : (
                         ["About", "Help", "FAQ", "Contact"].map((item) => (
@@ -164,6 +167,13 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                                     className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
                                 >
                                     📤 Uploads
+                                </Link>
+                                <Link
+                                    href={`/${user?.name}/albums`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                >
+                                    🖼️ Albums
                                 </Link>
                                 <div className="border-t border-white/10 my-2"></div>
                                 <div className="px-6 py-2 text-sm text-gray-400">
