@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import File from '../models/File.model';
 import Folder from '../models/Folder.model';
 import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage, getUserClient, uploadFileToTelegramWithClient, downloadFileFromTelegramWithClient, deleteMessageWithClient } from '../services/telegram.service';
+import { generateAndUploadThumbnail, deleteThumbnailFromCloudinary } from '../services/cloudinary.service';
 import fs from 'fs';
 import path from 'path';
 import User from '../models/User.model';
@@ -54,6 +55,22 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                 });
 
                 uploadedFiles.push(newFile);
+
+                // Generate and upload thumbnail asynchronously (don't wait for it)
+                generateAndUploadThumbnail(
+                    newFile._id.toString(),
+                    originalname,
+                    mimetype,
+                    telegramResult.messageId,
+                    userClient
+                ).then(thumbnailUrl => {
+                    if (thumbnailUrl) {
+                        newFile.thumbnailUrl = thumbnailUrl;
+                        newFile.save();
+                    }
+                }).catch(err => {
+                    console.error(`Thumbnail generation failed for ${originalname}:`, err);
+                });
 
                 // Clean up temp file
                 fs.unlink(tempPath, (err) => {
@@ -134,6 +151,62 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+export const getThumbnail = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+
+        if (!file) {
+            res.status(404).json({ message: 'File not found' });
+            return;
+        }
+
+        // If thumbnail URL exists, redirect to Cloudinary
+        if (file.thumbnailUrl) {
+            res.json({ thumbnailUrl: file.thumbnailUrl });
+            return;
+        }
+
+        // If no thumbnail exists, generate one on-demand
+        const isImage = file.mimeType.startsWith('image/');
+        const isVideo = file.mimeType.startsWith('video/');
+
+        if (!isImage && !isVideo) {
+            res.status(404).json({ message: 'No thumbnail available for this file type' });
+            return;
+        }
+
+        // Generate thumbnail
+        let userClient;
+        if (file.storageType === 'user') {
+            const user = await User.findById(req.user._id).select('+telegramSession');
+            if (!user || !user.telegramSession) {
+                res.status(403).json({ message: 'Telegram connection required' });
+                return;
+            }
+            userClient = await getUserClient(user.telegramSession);
+        }
+
+        const thumbnailUrl = await generateAndUploadThumbnail(
+            file._id.toString(),
+            file.originalName,
+            file.mimeType,
+            file.telegramMessageId,
+            userClient
+        );
+
+        if (thumbnailUrl) {
+            file.thumbnailUrl = thumbnailUrl;
+            await file.save();
+            res.json({ thumbnailUrl });
+        } else {
+            res.status(500).json({ message: 'Failed to generate thumbnail' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Thumbnail fetch failed' });
     }
 };
 
@@ -246,6 +319,13 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
             } catch (e) {
                 console.error("Failed to delete message from bot channel", e);
             }
+        }
+
+        // Delete thumbnail from Cloudinary if exists
+        if (file.thumbnailUrl) {
+            deleteThumbnailFromCloudinary(file._id.toString()).catch(err => {
+                console.error("Failed to delete thumbnail from Cloudinary:", err);
+            });
         }
 
         // Delete from DB

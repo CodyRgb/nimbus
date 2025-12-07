@@ -14,6 +14,7 @@ export interface IFile extends Document {
     folder: mongoose.Types.ObjectId | null;
     albums: mongoose.Types.ObjectId[];
     storageType: 'bot' | 'user';
+    thumbnailUrl?: string;
 }
 
 const FileSchema: Schema = new Schema({
@@ -27,6 +28,7 @@ const FileSchema: Schema = new Schema({
     telegramFileId: { type: String, required: true },
     telegramMessageId: { type: Number, required: true },
     storageType: { type: String, enum: ['bot', 'user'], default: 'bot' },
+    thumbnailUrl: { type: String, default: null },
     uploadedAt: { type: Date, default: Date.now },
     lastAccessed: { type: Date, default: Date.now },
     downloadCount: { type: Number, default: 0 },

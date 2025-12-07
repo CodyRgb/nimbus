@@ -119,11 +119,11 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
-            <div 
+            <div
                 className="absolute inset-0 bg-black/95 backdrop-blur-xl"
                 onClick={onClose}
             />
-            
+
             {/* Modal */}
             <div className="relative w-full h-full flex flex-col">
                 {/* Header */}
@@ -203,17 +203,17 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                     {!loading && !error && previewUrl && (
                         <>
                             {isImage && (
-                                <Image 
-                                    width={500} 
+                                <Image
+                                    width={500}
                                     height={500}
-                                    src={previewUrl} 
+                                    src={previewUrl}
                                     alt={fileName}
                                     className="max-w-full max-h-full object-contain rounded-lg"
                                 />
                             )}
 
                             {isVideo && (
-                                <video 
+                                <video
                                     src={previewUrl}
                                     controls
                                     className="max-w-full max-h-full rounded-lg"
@@ -232,20 +232,20 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                         </svg>
                                     </div>
-                                    
+
                                     {/* Audio Player */}
-                                    <audio 
+                                    <audio
                                         src={previewUrl}
                                         controls
                                         className="w-full"
                                         preload="auto"
-                                        style={{ 
+                                        style={{
                                             filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))',
                                         }}
                                     >
                                         Your browser does not support audio playback.
                                     </audio>
-                                    
+
                                     {/* File Info */}
                                     <div className="text-center">
                                         <p className="text-white text-lg font-medium">{fileName}</p>

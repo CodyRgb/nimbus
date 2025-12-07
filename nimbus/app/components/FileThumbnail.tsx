@@ -12,28 +12,29 @@ interface FileThumbnailProps {
 }
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({ fileId, fileName, mimeType, className = "" }) => {
+    const isImage = mimeType.startsWith('image/');
+    const isVideo = mimeType.startsWith('video/');
+
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(isImage || isVideo);
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        let isMounted = true;
-        const isImage = mimeType.startsWith('image/');
-        const isVideo = mimeType.startsWith('video/');
-
         if (!isImage && !isVideo) {
             setLoading(false);
             return;
         }
 
-        const fetchPreview = async () => {
+        setLoading(true);
+        let isMounted = true;
+
+        const fetchThumbnail = async () => {
             try {
-                const response = await api.get(`/files/${fileId}/preview`, {
-                    responseType: 'blob',
-                });
-                if (isMounted) {
-                    const url = URL.createObjectURL(response.data);
-                    setPreviewUrl(url);
+                // First try to get thumbnail URL from the new endpoint
+                const response = await api.get(`/files/${fileId}/thumbnail`);
+
+                if (isMounted && response.data.thumbnailUrl) {
+                    setPreviewUrl(response.data.thumbnailUrl);
                     setLoading(false);
                 }
             } catch (err) {
@@ -45,17 +46,14 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({ fileId, fileName, mimeTyp
             }
         };
 
-        fetchPreview();
+        fetchThumbnail();
 
         return () => {
             isMounted = false;
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
         };
-    }, [fileId, mimeType, fileName]);
+    }, [fileId, mimeType, fileName, isImage, isVideo]);
 
-    if (loading) {
+    if (loading && (isImage || isVideo)) {
         return (
             <div className={`flex items-center justify-center bg-gray-800 ${className}`}>
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
