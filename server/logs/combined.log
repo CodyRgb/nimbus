@@ -430,3 +430,6 @@
 {"level":"http","message":"GET /api/files/6935427dfd4665f11f6a6778/thumbnail?size=medium","timestamp":"2025-12-07 15:28:53:2853"}
 {"level":"http","message":"GET /api/files/693541bcfd4665f11f6a66f6/thumbnail?size=medium","timestamp":"2025-12-07 15:28:53:2853"}
 {"level":"http","message":"GET /api/files?page=3&limit=50","timestamp":"2025-12-07 15:29:00:290"}
+{"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-00.6gq8fvf.mongodb.net","timestamp":"2025-12-07 17:15:07:157"}
+{"level":"warn","message":"Redis not available - caching disabled","timestamp":"2025-12-07 17:15:08:158"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-07 17:15:08:158"}
