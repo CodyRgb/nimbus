@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useInView } from 'react-intersection-observer';
 import api from '../../lib/api';
+import { cacheDB } from '../../lib/db';
 import Image from 'next/image';
 
 interface FileThumbnailProps {
@@ -9,15 +11,32 @@ interface FileThumbnailProps {
     fileName: string;
     mimeType: string;
     className?: string;
+    size?: 'small' | 'medium' | 'large';
+    lazy?: boolean;
 }
 
-const FileThumbnail: React.FC<FileThumbnailProps> = ({ fileId, fileName, mimeType, className = "" }) => {
+const FileThumbnail: React.FC<FileThumbnailProps> = ({
+    fileId,
+    fileName,
+    mimeType,
+    className = "",
+    size = 'medium',
+    lazy = true,
+}) => {
     const isImage = mimeType.startsWith('image/');
     const isVideo = mimeType.startsWith('video/');
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [loading, setLoading] = useState(isImage || isVideo);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const hasFetched = useRef(false);
+
+    // Intersection observer for lazy loading
+    const { ref, inView } = useInView({
+        threshold: 0,
+        triggerOnce: true,
+        skip: !lazy,
+    });
 
     useEffect(() => {
         if (!isImage && !isVideo) {
@@ -25,45 +44,76 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({ fileId, fileName, mimeTyp
             return;
         }
 
-        setLoading(true);
-        let isMounted = true;
+        // Only fetch when in view (or if lazy loading is disabled)
+        if (!lazy || inView) {
+            if (hasFetched.current) return;
+            hasFetched.current = true;
 
-        const fetchThumbnail = async () => {
-            try {
-                // First try to get thumbnail URL from the new endpoint
-                const response = await api.get(`/files/${fileId}/thumbnail`);
+            setLoading(true);
+            let isMounted = true;
 
-                if (isMounted && response.data.thumbnailUrl) {
-                    setPreviewUrl(response.data.thumbnailUrl);
-                    setLoading(false);
+            const fetchThumbnail = async () => {
+                try {
+                    // Check IndexedDB cache first
+                    const cachedUrl = await cacheDB.getThumbnail(fileId);
+
+                    if (cachedUrl && isMounted) {
+                        setPreviewUrl(cachedUrl);
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Fetch from API with size parameter
+                    const response = await api.get(`/files/${fileId}/thumbnail`, {
+                        params: { size },
+                    });
+
+                    if (isMounted && response.data.thumbnailUrl) {
+                        const url = response.data.thumbnailUrl;
+                        setPreviewUrl(url);
+                        setLoading(false);
+
+                        // Cache in IndexedDB
+                        await cacheDB.setThumbnail(fileId, url);
+                    }
+                } catch (err) {
+                    console.error(`Failed to load thumbnail for ${fileName}`, err);
+                    if (isMounted) {
+                        setError(true);
+                        setLoading(false);
+                    }
                 }
-            } catch (err) {
-                console.error(`Failed to load thumbnail for ${fileName}`, err);
-                if (isMounted) {
-                    setError(true);
-                    setLoading(false);
-                }
-            }
-        };
+            };
 
-        fetchThumbnail();
+            fetchThumbnail();
 
-        return () => {
-            isMounted = false;
-        };
-    }, [fileId, mimeType, fileName, isImage, isVideo]);
+            return () => {
+                isMounted = false;
+            };
+        }
+    }, [fileId, mimeType, fileName, isImage, isVideo, inView, lazy, size]);
 
+    // Skeleton loader
     if (loading && (isImage || isVideo)) {
         return (
-            <div className={`flex items-center justify-center bg-gray-800 ${className}`}>
+            <div ref={ref} className={`flex items-center justify-center bg-gray-800 ${className}`}>
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    // Placeholder when not yet in view
+    if (lazy && !inView && !previewUrl) {
+        return (
+            <div ref={ref} className={`flex items-center justify-center bg-gray-800 ${className}`}>
+                <span className="text-2xl opacity-50">⏳</span>
             </div>
         );
     }
 
     if (error || !previewUrl) {
         return (
-            <div className={`flex items-center justify-center bg-gray-800 ${className}`}>
+            <div ref={ref} className={`flex items-center justify-center bg-gray-800 ${className}`}>
                 <span className="text-4xl">
                     {mimeType.startsWith('image/') ? '🖼️' :
                         mimeType.startsWith('video/') ? '🎬' :
@@ -92,13 +142,15 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({ fileId, fileName, mimeTyp
     }
 
     return (
-        <div className={`relative bg-gray-900 ${className}`}>
+        <div ref={ref} className={`relative bg-gray-900 ${className}`}>
             <Image
                 src={previewUrl}
                 alt={fileName}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                loading={lazy ? "lazy" : "eager"}
+                quality={size === 'small' ? 75 : 85}
             />
         </div>
     );

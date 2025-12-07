@@ -49,7 +49,7 @@ export default function StoragePage() {
         setLoading(true);
         try {
             const res = await api.get("/files");
-            setFiles(res.data);
+            setFiles(res.data.files || []);
         } catch (error) {
             console.error("Failed to fetch content", error);
         } finally {

@@ -94,7 +94,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
         setError(null);
 
         try {
-            const response = await api.get(`/files/${fileId}/preview`, {
+            const response = await api.get(`/files/${fileId}/preview?quality=low`, {
                 responseType: 'blob',
             });
 

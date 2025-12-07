@@ -3,10 +3,15 @@ import File from '../models/File.model';
 import Folder from '../models/Folder.model';
 import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage, getUserClient, uploadFileToTelegramWithClient, downloadFileFromTelegramWithClient, deleteMessageWithClient } from '../services/telegram.service';
 import { generateAndUploadThumbnail, deleteThumbnailFromCloudinary } from '../services/cloudinary.service';
+import { generateThumbnails, deleteThumbnails } from '../services/thumbnail.service';
+import { cacheService, CacheKeys, CacheTTL, invalidateUserCache, invalidateFileCache } from '../services/cache.service';
 import fs from 'fs';
 import path from 'path';
 import User from '../models/User.model';
 import archiver from 'archiver';
+import sharp from 'sharp';
+import { Readable } from 'stream';
+import crypto from 'crypto';
 
 // Extend Request to include user (added by auth middleware)
 // We can rely on declaration merging in auth.middleware.ts for 'user'
@@ -56,17 +61,34 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 
                 uploadedFiles.push(newFile);
 
-                // Generate and upload thumbnail asynchronously (don't wait for it)
-                generateAndUploadThumbnail(
+                // Generate cache key for deduplication
+                const fileHash = crypto.createHash('sha256')
+                    .update(`${userId}-${originalname}-${size}`)
+                    .digest('hex');
+                newFile.cacheKey = fileHash;
+
+                // Generate and upload thumbnails asynchronously (don't wait for it)
+                generateThumbnails(
                     newFile._id.toString(),
                     originalname,
                     mimetype,
                     telegramResult.messageId,
                     userClient
-                ).then(thumbnailUrl => {
-                    if (thumbnailUrl) {
-                        newFile.thumbnailUrl = thumbnailUrl;
+                ).then(thumbnails => {
+                    if (thumbnails) {
+                        newFile.thumbnailSmall = thumbnails.small;
+                        newFile.thumbnailMedium = thumbnails.medium;
+                        newFile.thumbnailLarge = thumbnails.large;
+                        newFile.thumbnailUrl = thumbnails.medium; // Backward compatibility
+                        newFile.dimensions = thumbnails.dimensions;
                         newFile.save();
+                        
+                        // Cache thumbnail URLs
+                        cacheService.set(
+                            CacheKeys.thumbnailUrl(newFile._id.toString()),
+                            thumbnails,
+                            CacheTTL.thumbnailUrl
+                        );
                     }
                 }).catch(err => {
                     console.error(`Thumbnail generation failed for ${originalname}:`, err);
@@ -83,6 +105,9 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
             }
         }
 
+        // Invalidate user's file list cache
+        await invalidateUserCache(userId.toString());
+        
         res.status(201).json(uploadedFiles);
     } catch (error) {
         console.error(error);
@@ -132,22 +157,54 @@ export const getFolders = async (req: Request, res: Response): Promise<void> => 
 
 export const getFiles = async (req: Request, res: Response): Promise<void> => {
     try {
-        const folderId = req.query.folderId || null;
-        // If folderId is provided, filter by it. If not, filter by root (folder: null)
-        // However, current frontend might expect all files if no folderId is passed.
-        // Let's support both: if query param exists, filter. If not, return all (legacy behavior) or root.
-        // Given the requirement for folder navigation, we should probably filter by folder.
-        // But for "Storage Overview" (stats), we might need all files.
-        // Let's check if folderId is explicitly passed.
+        const userId = req.user._id.toString();
+        const folderId = req.query.folderId as string || null;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 50;
+        const skip = (page - 1) * limit;
+
+        // Try to get from cache first
+        const cacheKey = CacheKeys.fileList(userId, page, limit, folderId || undefined);
+        const cachedData = await cacheService.get(cacheKey);
+        
+        if (cachedData) {
+            res.setHeader('X-Cache-Status', 'HIT');
+            res.json(cachedData);
+            return;
+        }
 
         let query: any = { user: req.user._id };
         if (req.query.folderId !== undefined) {
             query.folder = req.query.folderId === 'root' ? null : req.query.folderId;
         }
-        // If no folderId param, return all files (for stats/search)
 
-        const files = await File.find(query).sort({ uploadedAt: -1 });
-        res.json(files);
+        // Get total count for pagination
+        const total = await File.countDocuments(query);
+        
+        // Get files with pagination
+        const files = await File.find(query)
+            .sort({ uploadedAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .select('-__v')
+            .lean();
+
+        const response = {
+            files,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            cache_hint: 'stale-while-revalidate=60',
+        };
+
+        // Cache the response
+        await cacheService.set(cacheKey, response, CacheTTL.fileList);
+        
+        res.setHeader('X-Cache-Status', 'MISS');
+        res.json(response);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -156,16 +213,44 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
 
 export const getThumbnail = async (req: Request, res: Response): Promise<void> => {
     try {
-        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const fileId = req.params.id;
+        const size = (req.query.size as string) || 'medium';
+
+        // Check cache first
+        const cacheKey = CacheKeys.thumbnailUrl(fileId);
+        const cachedThumbnails = await cacheService.get(cacheKey);
+        
+        if (cachedThumbnails) {
+            const cachedUrl = (cachedThumbnails as any)[size] || (cachedThumbnails as any).medium;
+            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            res.setHeader('X-Cache-Status', 'HIT');
+            res.json({ thumbnailUrl: cachedUrl, size });
+            return;
+        }
+
+        const file = await File.findOne({ _id: fileId, user: req.user._id });
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
             return;
         }
 
-        // If thumbnail URL exists, redirect to Cloudinary
-        if (file.thumbnailUrl) {
-            res.json({ thumbnailUrl: file.thumbnailUrl });
+        // Return appropriate thumbnail size
+        const thumbnails = {
+            small: file.thumbnailSmall,
+            medium: file.thumbnailMedium,
+            large: file.thumbnailLarge,
+        };
+
+        const selectedThumbnail = thumbnails[size as keyof typeof thumbnails] || file.thumbnailUrl;
+
+        if (selectedThumbnail) {
+            // Cache the thumbnails
+            await cacheService.set(cacheKey, thumbnails, CacheTTL.thumbnailUrl);
+            
+            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            res.setHeader('X-Cache-Status', 'MISS');
+            res.json({ thumbnailUrl: selectedThumbnail, size });
             return;
         }
 
@@ -213,6 +298,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
 export const previewFile = async (req: Request, res: Response): Promise<void> => {
     try {
         const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const quality = req.query.quality as string;
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
@@ -232,7 +318,33 @@ export const previewFile = async (req: Request, res: Response): Promise<void> =>
             chunks = await downloadFileFromTelegram(file.telegramMessageId);
         }
 
-        // Use inline disposition for preview
+        // Handle low quality preview for images
+        if (quality === 'low' && file.mimeType.startsWith('image/')) {
+            // Create a readable stream from the async iterable chunks
+            const readableStream = Readable.from(chunks);
+
+            // Create sharp pipeline for resizing and compression
+            const transform = sharp()
+                .resize({ width: 800, withoutEnlargement: true }) // Reasonable preview size
+                .jpeg({ quality: 60, mozjpeg: true }); // Lower quality for speed
+
+            res.setHeader('Content-Disposition', `inline; filename="preview-${file.originalName}"`);
+            res.setHeader('Content-Type', 'image/jpeg'); // We are converting to jpeg
+
+            // Pipe: Source (Telegram) -> Sharp -> Response
+            readableStream
+                .pipe(transform)
+                .on('error', (err) => {
+                    console.error('Streaming resize error:', err);
+                    // If headers aren't sent, we could try to send error, but usually too late
+                    if (!res.headersSent) res.status(500).end();
+                })
+                .pipe(res);
+
+            return;
+        }
+
+        // Default: Full quality stream
         res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
         res.setHeader('Content-Type', file.mimeType);
         res.setHeader('Content-Length', file.size);
@@ -249,7 +361,9 @@ export const previewFile = async (req: Request, res: Response): Promise<void> =>
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Preview failed' });
+        if (!res.headersSent) {
+            res.status(500).json({ message: 'Preview failed' });
+        }
     }
 };
 
@@ -321,12 +435,21 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
             }
         }
 
-        // Delete thumbnail from Cloudinary if exists
-        if (file.thumbnailUrl) {
-            deleteThumbnailFromCloudinary(file._id.toString()).catch(err => {
-                console.error("Failed to delete thumbnail from Cloudinary:", err);
+        // Delete thumbnails from Cloudinary if exist
+        const thumbnailUrls = {
+            small: file.thumbnailSmall,
+            medium: file.thumbnailMedium,
+            large: file.thumbnailLarge,
+        };
+        
+        if (thumbnailUrls.small || thumbnailUrls.medium || thumbnailUrls.large) {
+            deleteThumbnails(thumbnailUrls).catch(err => {
+                console.error("Failed to delete thumbnails from Cloudinary:", err);
             });
         }
+
+        // Invalidate cache
+        await invalidateFileCache(file._id.toString(), req.user._id.toString());
 
         // Delete from DB
         await file.deleteOne();

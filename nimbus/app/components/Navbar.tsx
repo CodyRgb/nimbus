@@ -51,6 +51,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                             width={36}
                             height={36}
                             className="object-contain"
+                            priority
                         />
                     </motion.div>
                     <span className="text-2xl font-bold text-white font-display hidden sm:block tracking-tight">

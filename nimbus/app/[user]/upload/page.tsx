@@ -26,7 +26,7 @@ export default function UploadPage() {
         setLoadingFiles(true);
         try {
             const res = await api.get("/files");
-            setRecentFiles(res.data.slice(0, 5));
+            setRecentFiles((res.data.files || []).slice(0, 5));
         } catch (error) {
             console.error("Failed to fetch recent files", error);
         } finally {

@@ -181,9 +181,24 @@ export const generateAndUploadThumbnail = async (
         console.error(`Failed to generate thumbnail for ${fileName}:`, error);
         return null;
     } finally {
-        // Clean up temp file
+        // Clean up temp file with retry for Windows EBUSY
         if (tempFilePath && fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
+            // Explicitly tell sharp to release cache if it's holding it
+            sharp.cache(false);
+
+            setTimeout(() => {
+                fs.unlink(tempFilePath!, (err) => {
+                    if (err) {
+                        console.error(`First cleanup attempt failed for ${tempFilePath}:`, err);
+                        // Retry once after a longer delay
+                        setTimeout(() => {
+                            fs.unlink(tempFilePath!, (retryErr) => {
+                                if (retryErr) console.error(`Final cleanup attempt failed for ${tempFilePath}:`, retryErr);
+                            });
+                        }, 1000);
+                    }
+                });
+            }, 100);
         }
     }
 };
