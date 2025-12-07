@@ -8,9 +8,10 @@ interface FavoriteButtonProps {
     fileId: string;
     isFavorite: boolean;
     onToggle: (fileId: string, newFavoriteStatus: boolean) => void;
+    inline?: boolean; // For list view (inline) vs grid view (absolute positioned)
 }
 
-export default function FavoriteButton({ fileId, isFavorite, onToggle }: FavoriteButtonProps) {
+export default function FavoriteButton({ fileId, isFavorite, onToggle, inline = false }: FavoriteButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [localFavorite, setLocalFavorite] = useState(isFavorite);
 
@@ -45,7 +46,7 @@ export default function FavoriteButton({ fileId, isFavorite, onToggle }: Favorit
     return (
         <motion.button
             onClick={handleToggleFavorite}
-            className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all ${localFavorite
+            className={`${inline ? 'p-2' : 'absolute top-4 right-4 z-10 p-2'} rounded-full transition-all ${localFavorite
                     ? "bg-red-500/20 hover:bg-red-500/30"
                     : "bg-white/10 hover:bg-white/20"
                 }`}
