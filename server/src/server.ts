@@ -3,7 +3,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import connectDB from './config/db';
 import { connectTelegram } from './services/telegram.service';
-import { initRedis } from './services/cache.service';
+
 import authRoutes from './routes/auth.routes';
 import fileRoutes from './routes/file.routes';
 import telegramRoutes from './routes/telegram.routes';
@@ -105,14 +105,7 @@ const startServer = async () => {
         await connectDB();
         await connectTelegram();
 
-        // Initialize Redis (optional - will work without it)
-        try {
-            const redis = initRedis();
-            await redis.connect();
-            logger.info('Redis cache initialized');
-        } catch (redisErr) {
-            logger.warn('Redis not available - caching disabled');
-        }
+
 
         server = app.listen(PORT, () => {
             logger.info(`Server running in ${env.NODE_ENV} mode on port ${PORT}`);

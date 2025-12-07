@@ -430,3 +430,95 @@
 {"level":"http","message":"GET /api/files/6935427dfd4665f11f6a6778/thumbnail?size=medium","timestamp":"2025-12-07 15:28:53:2853"}
 {"level":"http","message":"GET /api/files/693541bcfd4665f11f6a66f6/thumbnail?size=medium","timestamp":"2025-12-07 15:28:53:2853"}
 {"level":"http","message":"GET /api/files?page=3&limit=50","timestamp":"2025-12-07 15:29:00:290"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:32:46:3246"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:33:32:3332"}
+{"level":"http","message":"GET /api/files/69354bc8fd4665f11f6a6960/thumbnail?size=medium","timestamp":"2025-12-07 15:33:35:3335"}
+{"level":"http","message":"GET /api/files?page=2&limit=50","timestamp":"2025-12-07 15:33:38:3338"}
+{"level":"http","message":"GET /api/files/69354260fd4665f11f6a6762/thumbnail?size=medium","timestamp":"2025-12-07 15:33:41:3341"}
+{"level":"http","message":"GET /api/files?page=3&limit=50","timestamp":"2025-12-07 15:33:53:3353"}
+{"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-00.6gq8fvf.mongodb.net","timestamp":"2025-12-07 15:41:09:419"}
+{"level":"info","message":"Redis cache initialized","timestamp":"2025-12-07 15:41:10:4110"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-07 15:41:10:4110"}
+{"level":"http","message":"POST /api/auth/login","timestamp":"2025-12-07 15:42:17:4217"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:42:21:4221"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:42:22:4222"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:42:33:4233"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:42:34:4234"}
+{"level":"http","message":"GET /api/files?page=2&limit=50","timestamp":"2025-12-07 15:42:41:4241"}
+{"level":"http","message":"GET /api/files?page=3&limit=50","timestamp":"2025-12-07 15:42:50:4250"}
+{"level":"http","message":"PATCH /api/files/69354d05fd4665f11f6a6a27/favorite","timestamp":"2025-12-07 15:43:21:4321"}
+{"level":"http","message":"PATCH /api/files/69354cfbfd4665f11f6a6a20/favorite","timestamp":"2025-12-07 15:43:23:4323"}
+{"level":"http","message":"PATCH /api/files/69354c83fd4665f11f6a69de/favorite","timestamp":"2025-12-07 15:43:24:4324"}
+{"level":"http","message":"PATCH /api/files/69354d21fd4665f11f6a6a30/favorite","timestamp":"2025-12-07 15:43:26:4326"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 15:43:31:4331"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 15:43:31:4331"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:43:37:4337"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:43:37:4337"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:43:41:4341"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:43:41:4341"}
+{"level":"http","message":"GET /api/albums","timestamp":"2025-12-07 15:43:45:4345"}
+{"level":"http","message":"GET /api/albums","timestamp":"2025-12-07 15:43:46:4346"}
+{"level":"http","message":"GET /api/albums/693004b32702fdf81c0d6195","timestamp":"2025-12-07 15:43:51:4351"}
+{"level":"http","message":"GET /api/albums/693004b32702fdf81c0d6195","timestamp":"2025-12-07 15:43:51:4351"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:43:56:4356"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 15:43:58:4358"}
+{"level":"http","message":"GET /api/albums","timestamp":"2025-12-07 15:44:05:445"}
+{"level":"http","message":"DELETE /api/files/69354d05fd4665f11f6a6a27","timestamp":"2025-12-07 15:44:11:4411"}
+{"level":"http","message":"GET /api/files/69354cfbfd4665f11f6a6a20/preview?quality=low","timestamp":"2025-12-07 15:44:14:4414"}
+{"level":"http","message":"GET /api/files/69354cfbfd4665f11f6a6a20/preview?quality=low","timestamp":"2025-12-07 15:44:19:4419"}
+{"level":"http","message":"GET /api/files/69354bc8fd4665f11f6a6960/download","timestamp":"2025-12-07 15:44:26:4426"}
+{"level":"http","message":"POST /api/auth/login","timestamp":"2025-12-07 15:47:45:4745"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:47:49:4749"}
+{"level":"http","message":"GET /api/files","timestamp":"2025-12-07 15:47:54:4754"}
+{"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-00.6gq8fvf.mongodb.net","timestamp":"2025-12-07 17:04:47:447"}
+{"level":"info","message":"Redis cache initialized","timestamp":"2025-12-07 17:04:49:449"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-07 17:04:49:449"}
+{"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-00.6gq8fvf.mongodb.net","timestamp":"2025-12-07 22:00:39:039"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-07 22:00:41:041"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 22:01:11:111"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 22:01:12:112"}
+{"level":"http","message":"GET /api/files/69354d21fd4665f11f6a6a30/thumbnail?size=medium","timestamp":"2025-12-07 22:01:16:116"}
+{"level":"http","message":"GET /api/files/69354cfbfd4665f11f6a6a20/thumbnail?size=medium","timestamp":"2025-12-07 22:01:16:116"}
+{"level":"http","message":"GET /api/files/69354c83fd4665f11f6a69de/thumbnail?size=medium","timestamp":"2025-12-07 22:01:16:116"}
+{"level":"http","message":"GET /api/files/69354c57fd4665f11f6a69a6/thumbnail?size=medium","timestamp":"2025-12-07 22:01:16:116"}
+{"level":"http","message":"GET /api/files/69354bf7fd4665f11f6a698a/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354bc8fd4665f11f6a6960/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354bb8fd4665f11f6a6958/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b9efd4665f11f6a6950/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b56fd4665f11f6a6940/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b86fd4665f11f6a6948/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b2efd4665f11f6a6938/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b0bfd4665f11f6a692f/thumbnail?size=medium","timestamp":"2025-12-07 22:01:21:121"}
+{"level":"http","message":"GET /api/files/69354b06fd4665f11f6a6928/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354a99fd4665f11f6a6920/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354a5efd4665f11f6a6918/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354a43fd4665f11f6a6910/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354a21fd4665f11f6a6908/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/693549fefd4665f11f6a6900/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/693549e4fd4665f11f6a68f8/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/6935498dfd4665f11f6a68ef/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354988fd4665f11f6a68e8/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354965fd4665f11f6a68e0/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/6935494bfd4665f11f6a68d8/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354909fd4665f11f6a68d0/thumbnail?size=medium","timestamp":"2025-12-07 22:01:26:126"}
+{"level":"http","message":"GET /api/files/69354840fd4665f11f6a68a7/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/69354838fd4665f11f6a68a0/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/69354809fd4665f11f6a6898/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/693547c0fd4665f11f6a6890/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/693547a1fd4665f11f6a6888/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/6935477cfd4665f11f6a6880/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/6935472bfd4665f11f6a6878/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/69354717fd4665f11f6a6870/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/693546fefd4665f11f6a6868/thumbnail?size=medium","timestamp":"2025-12-07 22:01:30:130"}
+{"level":"http","message":"GET /api/files/693546e8fd4665f11f6a6860/thumbnail?size=medium","timestamp":"2025-12-07 22:01:31:131"}
+{"level":"http","message":"GET /api/files/693546bdfd4665f11f6a6858/thumbnail?size=medium","timestamp":"2025-12-07 22:01:31:131"}
+{"level":"http","message":"GET /api/files/6935466efd4665f11f6a684f/thumbnail?size=medium","timestamp":"2025-12-07 22:01:31:131"}
+{"level":"http","message":"PATCH /api/files/6935477cfd4665f11f6a6880/favorite","timestamp":"2025-12-07 22:01:31:131"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 22:01:35:135"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 22:01:35:135"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 22:01:43:143"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 22:01:45:145"}
+{"level":"http","message":"GET /api/files?page=1&limit=50","timestamp":"2025-12-07 22:01:45:145"}
+{"level":"http","message":"PATCH /api/files/69354cfbfd4665f11f6a6a20/favorite","timestamp":"2025-12-07 22:01:47:147"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 22:01:49:149"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-07 22:01:49:149"}
