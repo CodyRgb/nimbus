@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import api from '../../lib/api';
-import { cacheDB } from '../../lib/db';
 import Image from 'next/image';
 
 interface FileThumbnailProps {
@@ -54,15 +53,6 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
             const fetchThumbnail = async () => {
                 try {
-                    // Check IndexedDB cache first
-                    const cachedUrl = await cacheDB.getThumbnail(fileId);
-
-                    if (cachedUrl && isMounted) {
-                        setPreviewUrl(cachedUrl);
-                        setLoading(false);
-                        return;
-                    }
-
                     // Fetch from API with size parameter
                     const response = await api.get(`/files/${fileId}/thumbnail`, {
                         params: { size },
@@ -72,9 +62,6 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                         const url = response.data.thumbnailUrl;
                         setPreviewUrl(url);
                         setLoading(false);
-
-                        // Cache in IndexedDB
-                        await cacheDB.setThumbnail(fileId, url);
                     }
                 } catch (err) {
                     console.error(`Failed to load thumbnail for ${fileName}`, err);

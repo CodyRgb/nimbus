@@ -597,3 +597,36 @@ export const bulkDeleteFiles = async (req: Request, res: Response): Promise<void
         res.status(500).json({ message: 'Bulk delete failed', error: (error as Error).message });
     }
 };
+
+export const toggleFavorite = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+
+        if (!file) {
+            res.status(404).json({ message: 'File not found' });
+            return;
+        }
+
+        // Toggle the favorite status
+        file.isFavorite = !file.isFavorite;
+        await file.save();
+
+        res.json({
+            message: file.isFavorite ? 'File added to favorites' : 'File removed from favorites',
+            isFavorite: file.isFavorite
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to toggle favorite', error: (error as Error).message });
+    }
+};
+
+export const getFavoriteFiles = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const files = await File.find({ user: req.user._id, isFavorite: true }).sort({ uploadedAt: -1 });
+        res.json(files);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch favorite files', error: (error as Error).message });
+    }
+};

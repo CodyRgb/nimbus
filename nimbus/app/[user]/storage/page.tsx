@@ -10,6 +10,7 @@ import ProgressRing from "../../components/ui/ProgressRing";
 import AnimatedCounter from "../../components/ui/AnimatedCounter";
 import AddToAlbumModal from "../../components/AddToAlbumModal";
 import FileThumbnail from "../../components/FileThumbnail";
+import FavoriteButton from "../../components/FavoriteButton";
 
 interface FileData {
     _id: string;
@@ -18,6 +19,7 @@ interface FileData {
     mimeType: string;
     createdAt: string;
     folder: string | null;
+    isFavorite: boolean;
 }
 
 export default function StoragePage() {
@@ -138,6 +140,10 @@ export default function StoragePage() {
     const handleDeleteCancel = () => {
         setDeleteModalOpen(false);
         setFileToDelete(null);
+    };
+
+    const handleToggleFavorite = (fileId: string, newFavoriteStatus: boolean) => {
+        setFiles(files.map(f => f._id === fileId ? { ...f, isFavorite: newFavoriteStatus } : f));
     };
 
     // Selection handlers
@@ -497,11 +503,17 @@ export default function StoragePage() {
                                     layout
                                 >
                                     <GlassCard
-                                        className={`p-6 cursor-pointer bg-linear-to-br ${colors.bg} border ${isSelected ? 'border-aurora-blue' : colors.border} ${isSelected ? 'glow-blue' : ''}`}
+                                        className={`p-6 cursor-pointer bg-linear-to-br ${colors.bg} border ${isSelected ? 'border-aurora-blue' : colors.border} ${isSelected ? 'glow-blue' : ''} relative`}
                                         onClick={() => selectedFiles.size > 0 ? toggleFileSelection(file._id) : handlePreview(index)}
                                         onTouchStart={() => handleTouchStart(file._id)}
                                         onTouchEnd={handleTouchEnd}
                                     >
+                                        {/* Favorite Button */}
+                                        <FavoriteButton
+                                            fileId={file._id}
+                                            isFavorite={file.isFavorite}
+                                            onToggle={handleToggleFavorite}
+                                        />
                                         {/* Selection checkbox */}
                                         <div className="flex justify-between items-start mb-4">
                                             <input
@@ -557,7 +569,7 @@ export default function StoragePage() {
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                 >
-                                                    👁 Preview
+                                                    👁
                                                 </motion.button>
                                                 <motion.button
                                                     onClick={(e) => {
@@ -698,6 +710,13 @@ export default function StoragePage() {
                                                             >
                                                                 🗑
                                                             </motion.button>
+                                                            <div onClick={(e) => e.stopPropagation()} className="relative">
+                                                                <FavoriteButton
+                                                                    fileId={file._id}
+                                                                    isFavorite={file.isFavorite}
+                                                                    onToggle={handleToggleFavorite}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </td>
