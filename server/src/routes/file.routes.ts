@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth.middleware';
-import { uploadFile, getFiles, downloadFile, deleteFile, createFolder, getFolders, previewFile, getThumbnail, bulkDownloadFiles, bulkDeleteFiles } from '../controllers/file.controller';
+import { uploadFile, getFiles, downloadFile, deleteFile, createFolder, getFolders, previewFile, getThumbnail, bulkDownloadFiles, bulkDeleteFiles, toggleFavorite, getFavoriteFiles } from '../controllers/file.controller';
 import path from 'path';
 import fs from 'fs';
 
@@ -40,5 +40,7 @@ router.get('/:id/download', protect, downloadFile);
 router.delete('/:id', protect, deleteFile);
 router.post('/bulk-download', protect, bulkDownloadFiles);
 router.post('/bulk-delete', protect, bulkDeleteFiles);
+router.patch('/:id/favorite', protect, toggleFavorite);
+router.get('/favorites', protect, getFavoriteFiles);
 
 export default router;
