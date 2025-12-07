@@ -277,7 +277,7 @@ export default function StoragePage() {
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
+        <div className="min-h-screen bg-linear-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -346,7 +346,7 @@ export default function StoragePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <GlassCard className="p-8 mb-8 bg-gradient-to-br from-aurora-purple/10 to-aurora-blue/10 border-aurora-blue/20" glow="blue">
+                    <GlassCard className="p-8 mb-8 bg-linear-to-br from-aurora-purple/10 to-aurora-blue/10 border-aurora-blue/20" glow="blue">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
                             <div>
                                 <p className="text-sm text-gray-400 mb-2 font-body">Total Storage Usage</p>
@@ -373,7 +373,7 @@ export default function StoragePage() {
                                 return (
                                     <motion.div
                                         key={type}
-                                        className={`glass-card p-4 bg-gradient-to-br ${colors.bg} border ${colors.border}`}
+                                        className={`glass-card p-4 bg-linear-to-br ${colors.bg} border ${colors.border}`}
                                         whileHover={{ scale: 1.05 }}
                                     >
                                         <div className={`text-2xl font-bold ${colors.text} mb-1 font-display`}>
@@ -476,7 +476,7 @@ export default function StoragePage() {
                                     layout
                                 >
                                     <GlassCard
-                                        className={`p-6 cursor-pointer bg-gradient-to-br ${colors.bg} border ${isSelected ? 'border-aurora-blue' : colors.border} ${isSelected ? 'glow-blue' : ''}`}
+                                        className={`p-6 cursor-pointer bg-linear-to-br ${colors.bg} border ${isSelected ? 'border-aurora-blue' : colors.border} ${isSelected ? 'glow-blue' : ''}`}
                                         onClick={() => selectedFiles.size > 0 ? toggleFileSelection(file._id) : handlePreview(index)}
                                         onTouchStart={() => handleTouchStart(file._id)}
                                         onTouchEnd={handleTouchEnd}
