@@ -5,7 +5,6 @@ import fs from "fs/promises";
 import path from "path";
 import dotenv from "dotenv";
 
-dotenv.config();
 
 const apiId = parseInt(process.env.TELEGRAM_API_ID || "0");
 const apiHash = process.env.TELEGRAM_API_HASH || "";
@@ -149,6 +148,19 @@ class TelegramService {
 
                 if (error.seconds) {
                     console.error(`[Telegram] FATAL: FloodWait detected. You must wait ${error.seconds} seconds before restarting.`);
+                }
+
+                if (error.code === 406 || error.message.includes('AUTH_KEY_DUPLICATED')) {
+                    console.error("[Telegram] Session invalid (AUTH_KEY_DUPLICATED). Deleting session file and retrying...");
+                    try {
+                        await fs.unlink(SESSION_FILE_PATH);
+                        console.log("[Telegram] Session file deleted.");
+                        // We could recursively call connect() here, but for safety in this strict startup phase,
+                        // let's just clear the client and let the next attempt (or restart) handle it.
+                        // Ideally, we should retry immediately.
+                    } catch (unlinkErr) {
+                        console.error("[Telegram] Failed to delete session file:", unlinkErr);
+                    }
                 }
 
                 this.client = null; // Ensure we retry next time

@@ -28,6 +28,12 @@ export default function StoragePage() {
     const [sortOrder, setSortOrder] = useState("date-desc");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalFiles, setTotalFiles] = useState(0);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
     // Selection state
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
     const [touchTimer, setTouchTimer] = useState<NodeJS.Timeout | null>(null);
@@ -45,21 +51,35 @@ export default function StoragePage() {
     const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
     const [filesToAdd, setFilesToAdd] = useState<string[]>([]);
 
-    const fetchContent = useCallback(async () => {
-        setLoading(true);
+    const fetchContent = useCallback(async (page = 1, append = false) => {
+        if (!append) setLoading(true);
+        else setIsLoadingMore(true);
+
         try {
-            const res = await api.get("/files");
-            setFiles(res.data.files || []);
+            const res = await api.get(`/files?page=${page}&limit=50`);
+            const newFiles = res.data.files || [];
+
+            setFiles(prev => append ? [...prev, ...newFiles] : newFiles);
+            setTotalPages(res.data.pagination?.totalPages || 1);
+            setTotalFiles(res.data.pagination?.total || 0);
+            setCurrentPage(page);
         } catch (error) {
             console.error("Failed to fetch content", error);
         } finally {
             setLoading(false);
+            setIsLoadingMore(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchContent();
+        fetchContent(1, false);
     }, [fetchContent]);
+
+    const handleLoadMore = () => {
+        if (currentPage < totalPages && !isLoadingMore) {
+            fetchContent(currentPage + 1, true);
+        }
+    };
 
     const handleDownload = async (fileId: string, fileName: string) => {
         try {
@@ -96,6 +116,7 @@ export default function StoragePage() {
         try {
             await api.delete(`/files/${fileToDelete._id}`);
             setFiles(files.filter(f => f._id !== fileToDelete._id));
+            setTotalFiles(prev => Math.max(0, prev - 1)); // Decrement total count
             setDeleteModalOpen(false);
             setFileToDelete(null);
 
@@ -174,7 +195,7 @@ export default function StoragePage() {
             });
 
             setSelectedFiles(new Set());
-            fetchContent();
+            fetchContent(1, false); // Reload first page to ensure sync
         } catch (err) {
             console.error("Bulk delete failed", err);
             alert("Failed to delete files. Please try again.");
@@ -358,7 +379,7 @@ export default function StoragePage() {
                                 <ProgressRing progress={Math.min((stats.totalSize / (1024 * 1024 * 1024)) * 100, 100)} size={100}>
                                     <div className="text-center">
                                         <div className="text-xl font-bold text-white">
-                                            <AnimatedCounter value={files.length} duration={1} />
+                                            <AnimatedCounter value={totalFiles} duration={1} />
                                         </div>
                                         <div className="text-xs text-gray-400">Files</div>
                                     </div>
@@ -689,6 +710,35 @@ export default function StoragePage() {
                     </GlassCard>
                 )}
             </div>
+
+            {/* Load More Button */}
+            {currentPage < totalPages && (
+                <div className="flex justify-center mt-8 pb-8">
+                    <motion.button
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        className="px-8 py-3 glass-card border border-aurora-blue/30 text-aurora-blue rounded-xl hover:bg-aurora-blue/10 font-bold transition-all flex items-center gap-2 group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        {isLoadingMore ? (
+                            <>
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    className="w-5 h-5 border-2 border-current border-t-transparent rounded-full"
+                                />
+                                Loading...
+                            </>
+                        ) : (
+                            <>
+                                <span>Load More Files</span>
+                                <span className="text-sm opacity-60 group-hover:translate-y-1 transition-transform">⬇</span>
+                            </>
+                        )}
+                    </motion.button>
+                </div>
+            )}
 
             {/* Preview Modal */}
             {selectedFile && (
