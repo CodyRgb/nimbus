@@ -28,7 +28,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)] max-w-7xl w-full relative overflow-hidden"
+                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)] max-w-8xl w-full relative overflow-hidden"
             >
                 {/* Subtle Aurora Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
