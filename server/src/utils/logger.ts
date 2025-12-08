@@ -29,15 +29,15 @@ const format = winston.format.combine(
 
 const transports = [
     new winston.transports.Console(),
-    new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        format: winston.format.combine(winston.format.uncolorize(), winston.format.json())
-    }),
-    new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: winston.format.combine(winston.format.uncolorize(), winston.format.json())
-    }),
+    // new winston.transports.File({
+    //     filename: 'logs/error.log',
+    //     level: 'error',
+    //     format: winston.format.combine(winston.format.uncolorize(), winston.format.json())
+    // }),
+    // new winston.transports.File({
+    //     filename: 'logs/combined.log',
+    //     format: winston.format.combine(winston.format.uncolorize(), winston.format.json())
+    // }),
 ];
 
 export const logger = winston.createLogger({
