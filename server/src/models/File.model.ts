@@ -15,6 +15,7 @@ export interface IFile extends Document {
     folder: mongoose.Types.ObjectId | null;
     albums: mongoose.Types.ObjectId[];
     storageType: 'bot' | 'user';
+    isFavorite: boolean;
     thumbnailUrl?: string;
     thumbnailTelegramId?: string;
     thumbnailSmall?: string;
@@ -37,6 +38,7 @@ const FileSchema: Schema = new Schema({
     telegramUniqueId: { type: String, index: true },
     telegramMessageId: { type: Number, required: true },
     storageType: { type: String, enum: ['bot', 'user'], default: 'bot' },
+    isFavorite: { type: Boolean, default: false, index: true },
     thumbnailUrl: { type: String, default: null },
     thumbnailTelegramId: { type: String },
     thumbnailSmall: { type: String },
@@ -53,7 +55,7 @@ const FileSchema: Schema = new Schema({
 });
 
 // Generate ETag before saving
-FileSchema.pre('save', function(next) {
+FileSchema.pre('save', function (next) {
     if (this.isModified()) {
         const crypto = require('crypto');
         this.etag = crypto
