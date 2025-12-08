@@ -3,7 +3,6 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import connectDB from './config/db';
 import { connectTelegram } from './services/telegram.service';
-
 import authRoutes from './routes/auth.routes';
 import fileRoutes from './routes/file.routes';
 import telegramRoutes from './routes/telegram.routes';
