@@ -617,3 +617,9 @@
 {"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-08 11:36:07:367"}
 {"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-02.6gq8fvf.mongodb.net","timestamp":"2025-12-08 11:36:36:3636"}
 {"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-08 11:36:38:3638"}
+{"level":"info","message":"MongoDB Connected: ac-genyzji-shard-00-02.6gq8fvf.mongodb.net","timestamp":"2025-12-08 11:36:49:3649"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2025-12-08 11:36:50:3650"}
+{"level":"http","message":"PATCH /api/files/693668a8179facf223fce0d9/favorite","timestamp":"2025-12-08 11:38:41:3841"}
+{"level":"http","message":"PATCH /api/files/693668ac179facf223fce0ea/favorite","timestamp":"2025-12-08 11:38:43:3843"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-08 11:38:46:3846"}
+{"level":"http","message":"GET /api/files/favorites","timestamp":"2025-12-08 11:38:46:3846"}
