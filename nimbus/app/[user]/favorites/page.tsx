@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import GlassCard from "../../components/ui/GlassCard";
 import FavoriteButton from "../../components/FavoriteButton";
 import FileThumbnail from "../../components/FileThumbnail";
+import Pagination from "../../components/ui/Pagination";
 
 interface FileData {
     _id: string;
@@ -34,6 +35,10 @@ export default function FavoritesPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<FileData | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Client-side Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 40;
 
     const fetchFavorites = useCallback(async () => {
         setLoading(true);
@@ -147,6 +152,21 @@ export default function FavoritesPage() {
             });
     }, [files, searchTerm, sortOrder]);
 
+    // Calculate paginated files for display
+    const paginatedFiles = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return filteredFiles.slice(startIndex, endIndex);
+    }, [filteredFiles, currentPage]);
+
+    // Calculate total pages for client-side pagination
+    const totalPaginationPages = Math.ceil(filteredFiles.length / ITEMS_PER_PAGE);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, sortOrder]);
+
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 Bytes";
         const k = 1024;
@@ -259,7 +279,7 @@ export default function FavoritesPage() {
                 ) : viewMode === "grid" ? (
                     /* Grid View */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredFiles.map((file, index) => {
+                        {paginatedFiles.map((file, index) => {
                             const fileType = file.mimeType.split('/')[0];
                             const colors = getTypeColor(fileType);
 
@@ -366,7 +386,7 @@ export default function FavoritesPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/10">
-                                    {filteredFiles.map((file, index) => {
+                                    {paginatedFiles.map((file, index) => {
                                         return (
                                             <motion.tr
                                                 key={file._id}
@@ -436,6 +456,15 @@ export default function FavoritesPage() {
                         </div>
                     </GlassCard>
                 )}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="mt-8 pb-8">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPaginationPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
 
             {/* Preview Modal */}

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '../../../lib/api';
 import Navbar from '../../components/Navbar';
 import { useAuth } from '../../context/AuthContext';
+import Pagination from '../../components/ui/Pagination';
 
 interface Album {
     _id: string;
@@ -22,6 +23,10 @@ export default function AlbumsPage() {
     const router = useRouter();
     const [albums, setAlbums] = useState<Album[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Client-side Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 40;
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -41,6 +46,21 @@ export default function AlbumsPage() {
             setLoading(false);
         }
     };
+
+    // Calculate paginated albums for display
+    const paginatedAlbums = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return albums.slice(startIndex, endIndex);
+    }, [albums, currentPage]);
+
+    // Calculate total pages for client-side pagination
+    const totalPaginationPages = Math.ceil(albums.length / ITEMS_PER_PAGE);
+
+    // Reset to page 1 when albums change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [albums.length]);
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-blue-500/30">
@@ -71,34 +91,45 @@ export default function AlbumsPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {albums.map((album) => (
-                            <Link
-                                key={album._id}
-                                href={`/${user?.name}/albums/${album._id}`}
-                                className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
-                            >
-                                {album.coverImage ? (
-                                    <img
-                                        src={album.coverImage}
-                                        alt={album.name}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                                        <span className="text-4xl">📁</span>
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {paginatedAlbums.map((album) => (
+                                <Link
+                                    key={album._id}
+                                    href={`/${user?.name}/albums/${album._id}`}
+                                    className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
+                                >
+                                    {album.coverImage ? (
+                                        <img
+                                            src={album.coverImage}
+                                            alt={album.name}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                                            <span className="text-4xl">📁</span>
+                                        </div>
+                                    )}
+
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
+                                        <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
+                                        <p className="text-sm text-gray-400">{album.fileCount} items</p>
                                     </div>
-                                )}
+                                </Link>
+                            ))}
+                        </div>
 
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-
-                                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
-                                    <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
-                                    <p className="text-sm text-gray-400">{album.fileCount} items</p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                        {/* Pagination Controls */}
+                        <div className="mt-8 pb-8">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPaginationPages}
+                                onPageChange={setCurrentPage}
+                            />
+                        </div>
+                    </>
                 )}
             </main>
         </div>

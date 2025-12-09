@@ -11,6 +11,7 @@ import AnimatedCounter from "../../components/ui/AnimatedCounter";
 import AddToAlbumModal from "../../components/AddToAlbumModal";
 import FileThumbnail from "../../components/FileThumbnail";
 import FavoriteButton from "../../components/FavoriteButton";
+import Pagination from "../../components/ui/Pagination";
 
 interface FileData {
     _id: string;
@@ -30,11 +31,12 @@ export default function StoragePage() {
     const [sortOrder, setSortOrder] = useState("date-desc");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    // File stats
     const [totalFiles, setTotalFiles] = useState(0);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    // Client-side Pagination State (for display)
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 40;
 
     // Selection state
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
@@ -53,35 +55,26 @@ export default function StoragePage() {
     const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
     const [filesToAdd, setFilesToAdd] = useState<string[]>([]);
 
-    const fetchContent = useCallback(async (page = 1, append = false) => {
-        if (!append) setLoading(true);
-        else setIsLoadingMore(true);
+    const fetchContent = useCallback(async () => {
+        setLoading(true);
 
         try {
-            const res = await api.get(`/files?page=${page}&limit=50`);
-            const newFiles = res.data.files || [];
+            // Fetch all files from server with a large limit
+            const res = await api.get(`/files?page=1&limit=10000`);
+            const allFiles = res.data.files || [];
 
-            setFiles(prev => append ? [...prev, ...newFiles] : newFiles);
-            setTotalPages(res.data.pagination?.totalPages || 1);
+            setFiles(allFiles);
             setTotalFiles(res.data.pagination?.total || 0);
-            setCurrentPage(page);
         } catch (error) {
             console.error("Failed to fetch content", error);
         } finally {
             setLoading(false);
-            setIsLoadingMore(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchContent(1, false);
+        fetchContent();
     }, [fetchContent]);
-
-    const handleLoadMore = () => {
-        if (currentPage < totalPages && !isLoadingMore) {
-            fetchContent(currentPage + 1, true);
-        }
-    };
 
     const handleDownload = async (fileId: string, fileName: string) => {
         try {
@@ -201,7 +194,7 @@ export default function StoragePage() {
             });
 
             setSelectedFiles(new Set());
-            fetchContent(1, false); // Reload first page to ensure sync
+            fetchContent(); // Reload all files to ensure sync
         } catch (err) {
             console.error("Bulk delete failed", err);
             alert("Failed to delete files. Please try again.");
@@ -271,6 +264,21 @@ export default function StoragePage() {
                 return 0;
             });
     }, [files, searchTerm, filterType, sortOrder]);
+
+    // Calculate paginated files for display
+    const paginatedFiles = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return filteredFiles.slice(startIndex, endIndex);
+    }, [filteredFiles, currentPage]);
+
+    // Calculate total pages for client-side pagination
+    const totalPaginationPages = Math.ceil(filteredFiles.length / ITEMS_PER_PAGE);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType, sortOrder]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 Bytes";
@@ -489,7 +497,7 @@ export default function StoragePage() {
                 ) : viewMode === "grid" ? (
                     /* Grid View */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredFiles.map((file, index) => {
+                        {paginatedFiles.map((file, index) => {
                             const isSelected = selectedFiles.has(file._id);
                             const fileType = file.mimeType.split('/')[0];
                             const colors = getTypeColor(fileType);
@@ -634,7 +642,7 @@ export default function StoragePage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/10">
-                                    {filteredFiles.map((file, index) => {
+                                    {paginatedFiles.map((file, index) => {
                                         const isSelected = selectedFiles.has(file._id);
                                         return (
                                             <motion.tr
@@ -730,34 +738,15 @@ export default function StoragePage() {
                 )}
             </div>
 
-            {/* Load More Button */}
-            {currentPage < totalPages && (
-                <div className="flex justify-center mt-8 pb-8">
-                    <motion.button
-                        onClick={handleLoadMore}
-                        disabled={isLoadingMore}
-                        className="px-8 py-3 glass-card border border-aurora-blue/30 text-aurora-blue rounded-xl hover:bg-aurora-blue/10 font-bold transition-all flex items-center gap-2 group"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        {isLoadingMore ? (
-                            <>
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                    className="w-5 h-5 border-2 border-current border-t-transparent rounded-full"
-                                />
-                                Loading...
-                            </>
-                        ) : (
-                            <>
-                                <span>Load More Files</span>
-                                <span className="text-sm opacity-60 group-hover:translate-y-1 transition-transform">⬇</span>
-                            </>
-                        )}
-                    </motion.button>
-                </div>
-            )}
+            {/* Pagination Controls */}
+            <div className="mt-8 pb-8">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPaginationPages}
+                    onPageChange={setCurrentPage}
+                />
+            </div>
+
 
             {/* Preview Modal */}
             {selectedFile && (
