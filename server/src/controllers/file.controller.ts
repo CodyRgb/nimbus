@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import File from '../models/File.model';
 import Folder from '../models/Folder.model';
 import { uploadFileToTelegram, downloadFileFromTelegram, deleteMessage, getUserClient, uploadFileToTelegramWithClient, downloadFileFromTelegramWithClient, deleteMessageWithClient } from '../services/telegram.service';
+import { logger } from '../utils/logger';
 import { generateAndUploadThumbnail, deleteThumbnailFromCloudinary } from '../services/cloudinary.service';
 import { generateThumbnails, deleteThumbnails } from '../services/thumbnail.service';
 import { cacheService, CacheKeys, CacheTTL, invalidateUserCache, invalidateFileCache } from '../services/cache.service';
@@ -26,7 +27,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        const userId = req.user._id;
+        const userId = req.user!._id;
 
         // Fetch user to get telegram session
         const user = await User.findById(userId).select('+telegramSession');
@@ -38,12 +39,15 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 
         const userClient = await getUserClient(user.telegramSession);
         const uploadedFiles = [];
+        const failedFiles: { filename: string; error: string }[] = [];
 
         for (const file of files) {
             const { originalname, mimetype, size, path: tempPath, filename } = file;
 
             try {
-                // Upload to Telegram (User)
+                logger.info(`[Upload] Starting upload for ${originalname} (${(size / 1024 / 1024).toFixed(2)} MB)`);
+                
+                // Upload to Telegram (User) with automatic retry
                 const telegramResult = await uploadFileToTelegramWithClient(userClient, tempPath, originalname, mimetype);
 
                 // Create DB record
@@ -98,17 +102,39 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                 fs.unlink(tempPath, (err) => {
                     if (err) console.error("Error deleting temp file:", err);
                 });
-            } catch (err) {
-                console.error(`Failed to upload file ${originalname}:`, err);
+            } catch (err: any) {
+                logger.error(`[Upload] Failed to upload file ${originalname}:`, err.message);
+                failedFiles.push({ 
+                    filename: originalname, 
+                    error: err.message || 'Upload failed' 
+                });
+                
                 // Try to clean up temp file even if upload failed
-                fs.unlink(tempPath, (e) => { });
+                fs.unlink(tempPath, (e) => { 
+                    if (e) logger.error(`[Upload] Failed to delete temp file ${tempPath}:`, e);
+                });
             }
         }
 
         // Invalidate user's file list cache
         await invalidateUserCache(userId.toString());
         
-        res.status(201).json(uploadedFiles);
+        // Return results with success and failure information
+        const response: any = {
+            success: uploadedFiles.length > 0,
+            uploaded: uploadedFiles,
+            uploadedCount: uploadedFiles.length,
+            totalCount: files.length,
+        };
+
+        if (failedFiles.length > 0) {
+            response.failed = failedFiles;
+            response.failedCount = failedFiles.length;
+            response.message = `${uploadedFiles.length} file(s) uploaded successfully, ${failedFiles.length} failed`;
+        }
+
+        const statusCode = uploadedFiles.length > 0 ? 201 : 500;
+        res.status(statusCode).json(response);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error', error: (error as Error).message });
@@ -118,7 +144,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 export const createFolder = async (req: Request, res: Response): Promise<void> => {
     try {
         const { name, parentId } = req.body;
-        const userId = req.user._id;
+        const userId = req.user!._id;
 
         let path: string[] = [];
         if (parentId) {
@@ -147,7 +173,7 @@ export const createFolder = async (req: Request, res: Response): Promise<void> =
 export const getFolders = async (req: Request, res: Response): Promise<void> => {
     try {
         const parentId = req.params.parentId || null;
-        const folders = await Folder.find({ user: req.user._id, parent: parentId }).sort({ name: 1 });
+        const folders = await Folder.find({ user: req.user!._id, parent: parentId }).sort({ name: 1 });
         res.json(folders);
     } catch (error) {
         console.error(error);
@@ -157,7 +183,7 @@ export const getFolders = async (req: Request, res: Response): Promise<void> => 
 
 export const getFiles = async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = req.user._id.toString();
+        const userId = req.user!._id.toString();
         const folderId = req.query.folderId as string || null;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 50;
@@ -173,7 +199,7 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        let query: any = { user: req.user._id };
+        let query: any = { user: req.user!._id };
         if (req.query.folderId !== undefined) {
             query.folder = req.query.folderId === 'root' ? null : req.query.folderId;
         }
@@ -228,7 +254,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        const file = await File.findOne({ _id: fileId, user: req.user._id });
+        const file = await File.findOne({ _id: fileId, user: req.user!._id });
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
@@ -266,7 +292,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
         // Generate thumbnail
         let userClient;
         if (file.storageType === 'user') {
-            const user = await User.findById(req.user._id).select('+telegramSession');
+            const user = await User.findById(req.user!._id).select('+telegramSession');
             if (!user || !user.telegramSession) {
                 res.status(403).json({ message: 'Telegram connection required' });
                 return;
@@ -297,7 +323,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
 
 export const previewFile = async (req: Request, res: Response): Promise<void> => {
     try {
-        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const file = await File.findOne({ _id: req.params.id, user: req.user!._id });
         const quality = req.query.quality as string;
 
         if (!file) {
@@ -307,7 +333,7 @@ export const previewFile = async (req: Request, res: Response): Promise<void> =>
 
         let chunks;
         if (file.storageType === 'user') {
-            const user = await User.findById(req.user._id).select('+telegramSession');
+            const user = await User.findById(req.user!._id).select('+telegramSession');
             if (!user || !user.telegramSession) {
                 res.status(403).json({ message: 'Telegram connection required to preview this file.' });
                 return;
@@ -369,7 +395,7 @@ export const previewFile = async (req: Request, res: Response): Promise<void> =>
 
 export const downloadFile = async (req: Request, res: Response): Promise<void> => {
     try {
-        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const file = await File.findOne({ _id: req.params.id, user: req.user!._id });
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
@@ -378,7 +404,7 @@ export const downloadFile = async (req: Request, res: Response): Promise<void> =
 
         let chunks;
         if (file.storageType === 'user') {
-            const user = await User.findById(req.user._id).select('+telegramSession');
+            const user = await User.findById(req.user!._id).select('+telegramSession');
             if (!user || !user.telegramSession) {
                 res.status(403).json({ message: 'Telegram connection required to download this file.' });
                 return;
@@ -412,7 +438,7 @@ export const downloadFile = async (req: Request, res: Response): Promise<void> =
 
 export const deleteFile = async (req: Request, res: Response): Promise<void> => {
     try {
-        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const file = await File.findOne({ _id: req.params.id, user: req.user!._id });
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
@@ -449,7 +475,7 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
         }
 
         // Invalidate cache
-        await invalidateFileCache(file._id.toString(), req.user._id.toString());
+        await invalidateFileCache(file._id.toString(), req.user!._id.toString());
 
         // Delete from DB
         await file.deleteOne();
@@ -471,7 +497,7 @@ export const bulkDownloadFiles = async (req: Request, res: Response): Promise<vo
         }
 
         // Fetch all files and verify ownership
-        const files = await File.find({ _id: { $in: fileIds }, user: req.user._id });
+        const files = await File.find({ _id: { $in: fileIds }, user: req.user!._id });
 
         if (files.length === 0) {
             res.status(404).json({ message: 'No files found' });
@@ -479,7 +505,7 @@ export const bulkDownloadFiles = async (req: Request, res: Response): Promise<vo
         }
 
         // Get user for Telegram session if needed
-        const user = await User.findById(req.user._id).select('+telegramSession');
+        const user = await User.findById(req.user!._id).select('+telegramSession');
 
         // Create ZIP archive
         const archive = archiver('zip', {
@@ -549,7 +575,7 @@ export const bulkDeleteFiles = async (req: Request, res: Response): Promise<void
         }
 
         // Fetch all files and verify ownership
-        const files = await File.find({ _id: { $in: fileIds }, user: req.user._id });
+        const files = await File.find({ _id: { $in: fileIds }, user: req.user!._id });
 
         if (files.length === 0) {
             res.status(404).json({ message: 'No files found' });
@@ -600,7 +626,7 @@ export const bulkDeleteFiles = async (req: Request, res: Response): Promise<void
 
 export const toggleFavorite = async (req: Request, res: Response): Promise<void> => {
     try {
-        const file = await File.findOne({ _id: req.params.id, user: req.user._id });
+        const file = await File.findOne({ _id: req.params.id, user: req.user!._id });
 
         if (!file) {
             res.status(404).json({ message: 'File not found' });
@@ -623,7 +649,7 @@ export const toggleFavorite = async (req: Request, res: Response): Promise<void>
 
 export const getFavoriteFiles = async (req: Request, res: Response): Promise<void> => {
     try {
-        const files = await File.find({ user: req.user._id, isFavorite: true }).sort({ uploadedAt: -1 });
+        const files = await File.find({ user: req.user!._id, isFavorite: true }).sort({ uploadedAt: -1 });
         res.json(files);
     } catch (error) {
         console.error(error);
