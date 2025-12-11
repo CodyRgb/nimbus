@@ -19,7 +19,7 @@ interface FileData {
     originalName: string;
     size: number;
     mimeType: string;
-    createdAt: string;
+    uploadedAt: string;
     folder: string | null;
     isFavorite: boolean;
 }
@@ -42,6 +42,9 @@ export default function StoragePage() {
     // Selection state
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
     const [touchTimer, setTouchTimer] = useState<NodeJS.Timeout | null>(null);
+
+    // Active file state for mobile touch interactions
+    const [activeFileId, setActiveFileId] = useState<string | null>(null);
 
     // Preview modal state
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -249,6 +252,56 @@ export default function StoragePage() {
         return { totalSize, typeStats };
     }, [files]);
 
+    // Date formatting helper
+    const formatDateHeader = (dateString: string) => {
+        if (!dateString) {
+            return "Unknown Date";
+        }
+
+        const date = new Date(dateString);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return "Unknown Date";
+        }
+
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Reset time to compare only dates
+        const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+
+        if (dateOnly.getTime() === todayOnly.getTime()) {
+            return "Today";
+        } else if (dateOnly.getTime() === yesterdayOnly.getTime()) {
+            return "Yesterday";
+        } else {
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    };
+
+    // Group files by date
+    const groupFilesByDate = (files: FileData[]) => {
+        const groups: { [key: string]: FileData[] } = {};
+
+        files.forEach(file => {
+            const dateKey = new Date(file.uploadedAt).toDateString();
+            if (!groups[dateKey]) {
+                groups[dateKey] = [];
+            }
+            groups[dateKey].push(file);
+        });
+
+        return groups;
+    };
+
     // Filter and Sort
     const filteredFiles = useMemo(() => {
         return files
@@ -258,8 +311,8 @@ export default function StoragePage() {
                 return matchesSearch && matchesType;
             })
             .sort((a, b) => {
-                if (sortOrder === "date-desc") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                if (sortOrder === "date-asc") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                if (sortOrder === "date-desc") return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
+                if (sortOrder === "date-asc") return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
                 if (sortOrder === "name-asc") return a.originalName.localeCompare(b.originalName);
                 if (sortOrder === "size-desc") return b.size - a.size;
                 return 0;
@@ -496,91 +549,213 @@ export default function StoragePage() {
                         <p className="text-gray-400 text-lg font-body">No files found.</p>
                     </GlassCard>
                 ) : viewMode === "grid" ? (
-                    /* Grid View */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {paginatedFiles.map((file, index) => {
-                            const isSelected = selectedFiles.has(file._id);
-                            const fileType = file.mimeType.split('/')[0];
-                            const colors = getTypeColor(fileType);
+                    /* Grid View with Date Grouping */
+                    <div className="space-y-8">
+                        {(() => {
+                            const groupedFiles = groupFilesByDate(paginatedFiles);
+                            const sortedDateKeys = Object.keys(groupedFiles).sort((a, b) => {
+                                return new Date(b).getTime() - new Date(a).getTime();
+                            });
 
+                            return sortedDateKeys.map((dateKey) => {
+                                const filesInGroup = groupedFiles[dateKey];
+                                const firstFile = filesInGroup[0];
 
-                            return (
-                                <motion.div
-                                    key={file._id}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                                    layout
-                                >
-                                    <StorageFileCard
-                                        file={file}
-                                        isSelected={isSelected}
-                                        isSelectionMode={selectedFiles.size > 0}
-                                        onSelect={() => toggleFileSelection(file._id)}
-                                        onToggleFavorite={handleToggleFavorite}
-                                        onPreview={() => handlePreview(index)}
-                                        onDownload={() => handleDownload(file._id, file.originalName)}
-                                        onAddToAlbum={() => {
-                                            setFilesToAdd([file._id]);
-                                            setAddToAlbumModalOpen(true);
-                                        }}
-                                        onDelete={() => handleDeleteClick(file)}
-                                    />
-                                </motion.div>
-                            );
-                        })}
+                                return (
+                                    <div key={dateKey}>
+                                        {/* Date Header */}
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="mb-4"
+                                        >
+                                            <h2 className="text-2xl font-bold text-white font-display">
+                                                {formatDateHeader(firstFile.uploadedAt)}
+                                            </h2>
+                                            <div className="h-px bg-gradient-to-r from-aurora-blue/50 to-transparent mt-2"></div>
+                                        </motion.div>
+
+                                        {/* Files Grid */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                            {filesInGroup.map((file, index) => {
+                                                const isSelected = selectedFiles.has(file._id);
+                                                const globalIndex = paginatedFiles.findIndex(f => f._id === file._id);
+
+                                                return (
+                                                    <motion.div
+                                                        key={file._id}
+                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                        layout
+                                                    >
+                                                        <StorageFileCard
+                                                            file={file}
+                                                            isSelected={isSelected}
+                                                            isSelectionMode={selectedFiles.size > 0}
+                                                            isActive={activeFileId === file._id}
+                                                            onSelect={() => toggleFileSelection(file._id)}
+                                                            onToggleFavorite={handleToggleFavorite}
+                                                            onPreview={() => handlePreview(globalIndex)}
+                                                            onDownload={() => handleDownload(file._id, file.originalName)}
+                                                            onAddToAlbum={() => {
+                                                                setFilesToAdd([file._id]);
+                                                                setAddToAlbumModalOpen(true);
+                                                            }}
+                                                            onDelete={() => handleDeleteClick(file)}
+                                                            onActivate={() => {
+                                                                setActiveFileId(activeFileId === file._id ? null : file._id);
+                                                            }}
+                                                        />
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 ) : (
                     /* List View */
                     <GlassCard className="overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
+                        <div className="overflow-x-auto md:overflow-x-visible">
+                            <table className="w-full text-left text-xs md:text-sm">
                                 <thead className="glass-card border-b border-white/10">
                                     <tr>
-                                        <th className="px-6 py-4">
+                                        <th className={`px-2 md:px-6 py-3 md:py-4 ${selectedFiles.size > 0 ? '' : 'hidden md:table-cell'}`}>
                                             <input
                                                 type="checkbox"
                                                 checked={selectedFiles.size === filteredFiles.length && filteredFiles.length > 0}
                                                 onChange={selectAll}
-                                                className="w-5 h-5 cursor-pointer accent-aurora-blue"
+                                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-aurora-blue"
                                             />
                                         </th>
-                                        <th className="px-6 py-4 font-semibold text-white font-display">Name</th>
-                                        <th className="px-6 py-4 font-semibold text-white font-display">Size</th>
-                                        <th className="px-6 py-4 font-semibold text-white font-display">Type</th>
-                                        <th className="px-6 py-4 text-right font-semibold text-white font-display">Actions</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display">Name</th>
+                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Date Uploaded</th>
+                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Type</th>
+                                        <th className="hidden md:table-cell px-6 py-4 font-semibold text-white font-display">Size</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/10">
                                     {paginatedFiles.map((file, index) => {
                                         const isSelected = selectedFiles.has(file._id);
+
+                                        const handleTouchStart = () => {
+                                            const timer = setTimeout(() => {
+                                                // Enter selection mode and select this file
+                                                toggleFileSelection(file._id);
+                                            }, 500); // 500ms long press
+                                            setTouchTimer(timer);
+                                        };
+
+                                        const handleTouchEnd = () => {
+                                            if (touchTimer) {
+                                                clearTimeout(touchTimer);
+                                                setTouchTimer(null);
+                                            }
+                                        };
+
                                         return (
                                             <motion.tr
                                                 key={file._id}
-                                                className={`transition-colors cursor-pointer ${isSelected ? 'bg-aurora-blue/10' : 'hover:bg-white/5'}`}
+                                                className={`group transition-colors cursor-pointer relative ${isSelected ? 'bg-aurora-blue/10' : 'hover:bg-white/5'}`}
                                                 onClick={(e) => handleRowClick(file._id, e)}
+                                                onTouchStart={handleTouchStart}
+                                                onTouchEnd={handleTouchEnd}
+                                                onTouchMove={handleTouchEnd}
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ duration: 0.3, delay: index * 0.02 }}
                                             >
-                                                <td className="px-6 py-4">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => toggleFileSelection(file._id)}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="w-5 h-5 cursor-pointer accent-aurora-blue"
-                                                    />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
-                                                        <span className="font-medium text-white font-body">{file.originalName}</span>
+                                                <td className={`px-2 md:px-6 py-3 md:py-4 ${selectedFiles.size > 0 ? '' : 'hidden md:table-cell'}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleFileSelection(file._id)}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-aurora-blue"
+                                                        />
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-400 font-body">{formatSize(file.size)}</td>
-                                                <td className="px-6 py-4 text-gray-400 capitalize font-body">{file.mimeType.split('/')[1]}</td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-2 md:px-6 py-3 md:py-4" colSpan={5}>
+                                                    {/* Mobile card layout */}
+                                                    <div className="md:hidden flex flex-col gap-2">
+                                                        {/* Name and icon */}
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xl">{getFileIcon(file.mimeType)}</span>
+                                                            <span className="font-medium text-white font-body truncate flex-1">{file.originalName}</span>
+                                                        </div>
+                                                        {/* Actions and favorite */}
+                                                        <div className="flex items-center gap-2">
+                                                            <div onClick={(e) => e.stopPropagation()}>
+                                                                <FavoriteButton
+                                                                    fileId={file._id}
+                                                                    isFavorite={file.isFavorite}
+                                                                    onToggle={handleToggleFavorite}
+                                                                    inline={true}
+                                                                />
+                                                            </div>
+                                                            <div className="flex items-center gap-1 ml-auto">
+                                                                <motion.button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handlePreview(index);
+                                                                    }}
+                                                                    className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    title="Preview"
+                                                                >
+                                                                    👁️
+                                                                </motion.button>
+                                                                <motion.button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDownload(file._id, file.originalName);
+                                                                    }}
+                                                                    className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    title="Download"
+                                                                >
+                                                                    ⬇️
+                                                                </motion.button>
+                                                                <motion.button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteClick(file);
+                                                                    }}
+                                                                    className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9 }}
+                                                                    title="Delete"
+                                                                >
+                                                                    🗑️
+                                                                </motion.button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {/* Desktop layout */}
+                                                    <div className="hidden md:flex items-center gap-3">
+                                                        <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
+                                                        <span className="font-medium text-white font-body truncate">{file.originalName}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="hidden lg:table-cell px-6 py-4 text-gray-400 font-body">
+                                                    {new Date(file.uploadedAt).toLocaleString('en-US', {
+                                                        year: 'numeric',
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </td>
+                                                <td className="hidden lg:table-cell px-6 py-4 text-gray-400 capitalize font-body">{file.mimeType.split('/')[1]}</td>
+                                                <td className="hidden lg:table-cell px-6 py-4 text-gray-400 font-body">{formatSize(file.size)}</td>
+                                                <td className="hidden md:table-cell px-6 py-4 text-right">
                                                     {!isSelected && (
                                                         <div className="flex items-center justify-end gap-2">
                                                             <motion.button
@@ -588,22 +763,24 @@ export default function StoragePage() {
                                                                     e.stopPropagation();
                                                                     handlePreview(index);
                                                                 }}
-                                                                className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                                                className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
+                                                                title="Preview"
                                                             >
-                                                                👁
+                                                                👁️
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDownload(file._id, file.originalName);
                                                                 }}
-                                                                className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                                className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
+                                                                title="Download"
                                                             >
-                                                                ⬇
+                                                                ⬇️
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
@@ -611,30 +788,25 @@ export default function StoragePage() {
                                                                     setFilesToAdd([file._id]);
                                                                     setAddToAlbumModalOpen(true);
                                                                 }}
-                                                                className="p-2 text-pink-400 hover:bg-pink-500/10 rounded-lg transition-colors"
+                                                                className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
+                                                                title="Add to Album"
                                                             >
-                                                                🖼
+                                                                🖼️
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDeleteClick(file);
                                                                 }}
-                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                                className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
+                                                                title="Delete"
                                                             >
-                                                                🗑
+                                                                🗑️
                                                             </motion.button>
-                                                            <div onClick={(e) => e.stopPropagation()} className="relative">
-                                                                <FavoriteButton
-                                                                    fileId={file._id}
-                                                                    isFavorite={file.isFavorite}
-                                                                    onToggle={handleToggleFavorite}
-                                                                />
-                                                            </div>
                                                         </div>
                                                     )}
                                                 </td>

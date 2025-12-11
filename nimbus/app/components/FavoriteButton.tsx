@@ -46,7 +46,7 @@ export default function FavoriteButton({ fileId, isFavorite, onToggle, inline = 
     return (
         <motion.button
             onClick={handleToggleFavorite}
-            className={`${inline ? 'p-2' : 'absolute top-4 right-4 z-10 pl-2 pr-2'} rounded-full transition-all ${localFavorite
+            className={`${inline ? 'pl-2 pr-2' : 'absolute top-4 right-4 z-10 pl-2 pr-2'} rounded-full transition-all ${localFavorite
                     ? "bg-red-500/20 hover:bg-red-500/30"
                     : "bg-white/10 hover:bg-white/20"
                 }`}

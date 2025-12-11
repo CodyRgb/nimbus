@@ -15,6 +15,7 @@ interface StorageFileCardProps {
     };
     isSelected: boolean;
     isSelectionMode: boolean;
+    isActive?: boolean; // For mobile touch interactions
     onSelect: () => void;
     onToggleFavorite: (fileId: string, status: boolean) => void;
     onPreview: () => void;
@@ -22,19 +23,22 @@ interface StorageFileCardProps {
     onAddToAlbum?: () => void;
     onDelete?: () => void;
     showActions?: boolean;
+    onActivate?: () => void; // Called when card is clicked/tapped
 }
 
 export default function StorageFileCard({
     file,
     isSelected,
     isSelectionMode,
+    isActive = false,
     onSelect,
     onToggleFavorite,
     onPreview,
     onDownload,
     onAddToAlbum,
     onDelete,
-    showActions = true
+    showActions = true,
+    onActivate
 }: StorageFileCardProps) {
 
     const formatSize = (bytes: number) => {
@@ -45,17 +49,32 @@ export default function StorageFileCard({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
+    const handleCardClick = (e: React.MouseEvent) => {
+        // If clicking on action buttons, don't activate the card
+        const target = e.target as HTMLElement;
+        if (target.closest('button') || target.closest('input[type="checkbox"]')) {
+            return;
+        }
+
+        if (onActivate) {
+            onActivate();
+        }
+    };
+
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`group relative bg-gray-900 rounded-xl overflow-hidden border transition-all ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' : 'border-white/10 hover:border-white/20'
+            onClick={handleCardClick}
+            className={`group relative bg-gray-900 rounded-xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
+                    isActive ? 'border-white/30' :
+                        'border-white/10 hover:border-white/20'
                 }`}
         >
             {/* Selection Checkbox */}
             <div
-                className={`absolute top-2 left-2 z-20 transition-opacity duration-200 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                className={`absolute top-2 left-2 z-20 transition-opacity duration-200 ${isSelected || isSelectionMode || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                     }`}
             >
                 <input
@@ -69,7 +88,7 @@ export default function StorageFileCard({
 
             {/* Favorite Button */}
             <div
-                className={`absolute top-2 right-2 z-20 transition-opacity duration-200 ${file.isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                className={`absolute top-2 right-2 z-20 transition-opacity duration-200 ${file.isFavorite || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                     }`}
             >
                 <div className="bg-black/40 backdrop-blur-sm rounded-full p-1">
@@ -101,9 +120,10 @@ export default function StorageFileCard({
                 </p>
             </div>
 
-            {/* Hover Actions Overlay */}
+            {/* Hover/Active Actions Overlay */}
             {showActions && (
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10">
+                <div className={`absolute inset-0 bg-black/60 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`}>
                     <button
                         onClick={(e) => { e.stopPropagation(); onPreview(); }}
                         className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"

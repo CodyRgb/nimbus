@@ -83,11 +83,64 @@ export default function AlbumsPage() {
         }
     };
 
-    // Calculate paginated albums for display
+    // Date formatting helper
+    const formatDateHeader = (dateString: string) => {
+        if (!dateString) {
+            return "Unknown Date";
+        }
+
+        const date = new Date(dateString);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            return "Unknown Date";
+        }
+
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Reset time to compare only dates
+        const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+
+        if (dateOnly.getTime() === todayOnly.getTime()) {
+            return "Today";
+        } else if (dateOnly.getTime() === yesterdayOnly.getTime()) {
+            return "Yesterday";
+        } else {
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    };
+
+    // Group albums by date
+    const groupAlbumsByDate = (albums: Album[]) => {
+        const groups: { [key: string]: Album[] } = {};
+
+        albums.forEach(album => {
+            const dateKey = new Date(album.createdAt).toDateString();
+            if (!groups[dateKey]) {
+                groups[dateKey] = [];
+            }
+            groups[dateKey].push(album);
+        });
+
+        return groups;
+    };
+
+    // Calculate paginated albums for display (sorted by date, newest first)
     const paginatedAlbums = useMemo(() => {
+        const sortedAlbums = [...albums].sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
-        return albums.slice(startIndex, endIndex);
+        return sortedAlbums.slice(startIndex, endIndex);
     }, [albums, currentPage]);
 
     // Calculate total pages for client-side pagination
@@ -167,75 +220,106 @@ export default function AlbumsPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {paginatedAlbums.map((album) => {
-                                const isSelected = selectedAlbums.has(album._id);
+                        <div className="space-y-8">
+                            {(() => {
+                                const groupedAlbums = groupAlbumsByDate(paginatedAlbums);
+                                const sortedDateKeys = Object.keys(groupedAlbums).sort((a, b) => {
+                                    return new Date(b).getTime() - new Date(a).getTime();
+                                });
 
-                                const CardContent = (
-                                    <>
-                                        {/* Selection Checkbox Overlay */}
-                                        <AnimatePresence>
-                                            {(isSelectionMode || isSelected) && (
-                                                <motion.div
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    exit={{ opacity: 0 }}
-                                                    className="absolute top-3 left-3 z-20"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => toggleAlbumSelection(album._id)}
-                                                        className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
-                                                    />
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                return sortedDateKeys.map((dateKey) => {
+                                    const albumsInGroup = groupedAlbums[dateKey];
+                                    const firstAlbum = albumsInGroup[0];
 
-                                        {album.coverImage ? (
-                                            <img
-                                                src={album.coverImage}
-                                                alt={album.name}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                                                <span className="text-4xl">📁</span>
-                                            </div>
-                                        )}
-
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-
-                                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
-                                            <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
-                                            <p className="text-sm text-gray-400">{album.fileCount} items</p>
-                                        </div>
-                                    </>
-                                );
-
-                                if (isSelectionMode) {
                                     return (
-                                        <div
-                                            key={album._id}
-                                            onClick={() => toggleAlbumSelection(album._id)}
-                                            className={`group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
-                                                }`}
-                                        >
-                                            {CardContent}
+                                        <div key={dateKey}>
+                                            {/* Date Header */}
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="mb-4"
+                                            >
+                                                <h2 className="text-2xl font-bold text-white">
+                                                    {formatDateHeader(firstAlbum.createdAt)}
+                                                </h2>
+                                                <div className="h-px bg-gradient-to-r from-blue-500/50 to-transparent mt-2"></div>
+                                            </motion.div>
+
+                                            {/* Albums Grid */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                                {albumsInGroup.map((album) => {
+                                                    const isSelected = selectedAlbums.has(album._id);
+
+                                                    const CardContent = (
+                                                        <>
+                                                            {/* Selection Checkbox Overlay */}
+                                                            <AnimatePresence>
+                                                                {(isSelectionMode || isSelected) && (
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0 }}
+                                                                        className="absolute top-3 left-3 z-20"
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isSelected}
+                                                                            onChange={() => toggleAlbumSelection(album._id)}
+                                                                            className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
+                                                                        />
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+
+                                                            {album.coverImage ? (
+                                                                <img
+                                                                    src={album.coverImage}
+                                                                    alt={album.name}
+                                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                                                                    <span className="text-4xl">📁</span>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                                                            <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
+                                                                <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
+                                                                <p className="text-sm text-gray-400">{album.fileCount} items</p>
+                                                            </div>
+                                                        </>
+                                                    );
+
+                                                    if (isSelectionMode) {
+                                                        return (
+                                                            <div
+                                                                key={album._id}
+                                                                onClick={() => toggleAlbumSelection(album._id)}
+                                                                className={`group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
+                                                                    }`}
+                                                            >
+                                                                {CardContent}
+                                                            </div>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <Link
+                                                            key={album._id}
+                                                            href={`/${user?.name}/albums/${album._id}`}
+                                                            className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
+                                                        >
+                                                            {CardContent}
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     );
-                                }
-
-                                return (
-                                    <Link
-                                        key={album._id}
-                                        href={`/${user?.name}/albums/${album._id}`}
-                                        className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
-                                    >
-                                        {CardContent}
-                                    </Link>
-                                );
-                            })}
+                                });
+                            })()}
                         </div>
 
                         {/* Pagination Controls */}
