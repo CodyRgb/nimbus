@@ -19,8 +19,9 @@ interface StorageFileCardProps {
     onToggleFavorite: (fileId: string, status: boolean) => void;
     onPreview: () => void;
     onDownload: () => void;
-    onAddToAlbum: () => void;
-    onDelete: () => void;
+    onAddToAlbum?: () => void;
+    onDelete?: () => void;
+    showActions?: boolean;
 }
 
 export default function StorageFileCard({
@@ -32,7 +33,8 @@ export default function StorageFileCard({
     onPreview,
     onDownload,
     onAddToAlbum,
-    onDelete
+    onDelete,
+    showActions = true
 }: StorageFileCardProps) {
 
     const formatSize = (bytes: number) => {
@@ -100,36 +102,42 @@ export default function StorageFileCard({
             </div>
 
             {/* Hover Actions Overlay */}
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10">
-                <button
-                    onClick={(e) => { e.stopPropagation(); onPreview(); }}
-                    className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                    title="Preview"
-                >
-                    👁️
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onDownload(); }}
-                    className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                    title="Download"
-                >
-                    ⬇️
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onAddToAlbum(); }}
-                    className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                    title="Add to Album"
-                >
-                    🖼️
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                    className="p-2.5 bg-red-500/20 hover:bg-red-500/40 hover:scale-110 rounded-full text-red-400 transition-all duration-200"
-                    title="Delete"
-                >
-                    ❌
-                </button>
-            </div>
+            {showActions && (
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onPreview(); }}
+                        className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
+                        title="Preview"
+                    >
+                        👁️
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDownload(); }}
+                        className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
+                        title="Download"
+                    >
+                        ⬇️
+                    </button>
+                    {onAddToAlbum && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAddToAlbum(); }}
+                            className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
+                            title="Add to Album"
+                        >
+                            🖼️
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                            className="p-2.5 bg-red-500/20 hover:bg-red-500/40 hover:scale-110 rounded-full text-red-400 transition-all duration-200"
+                            title="Delete"
+                        >
+                            ❌
+                        </button>
+                    )}
+                </div>
+            )}
         </motion.div>
     );
 }
