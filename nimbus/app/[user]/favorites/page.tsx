@@ -5,10 +5,10 @@ import api from "../../../lib/api";
 import MediaPreviewModal from "../../components/MediaPreviewModal";
 import DeleteConfirmModal from "../../components/DeleteConfirmModal";
 import { motion } from "framer-motion";
-import GlassCard from "../../components/ui/GlassCard";
 import FavoriteButton from "../../components/FavoriteButton";
-import FileThumbnail from "../../components/FileThumbnail";
 import Pagination from "../../components/ui/Pagination";
+import StorageFileCard from "../../components/StorageFileCard";
+import GlassCard from "../../components/ui/GlassCard";
 
 interface FileData {
     _id: string;
@@ -186,16 +186,6 @@ export default function FavoritesPage() {
         return '📄';
     };
 
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'image': return { bg: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' };
-            case 'video': return { bg: 'from-purple-500/20 to-purple-600/20', border: 'border-purple-500/30', text: 'text-purple-400' };
-            case 'audio': return { bg: 'from-pink-500/20 to-pink-600/20', border: 'border-pink-500/30', text: 'text-pink-400' };
-            case 'application': return { bg: 'from-orange-500/20 to-orange-600/20', border: 'border-orange-500/30', text: 'text-orange-400' };
-            default: return { bg: 'from-gray-500/20 to-gray-600/20', border: 'border-gray-500/30', text: 'text-gray-400' };
-        }
-    };
-
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
@@ -280,9 +270,6 @@ export default function FavoritesPage() {
                     /* Grid View */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {paginatedFiles.map((file, index) => {
-                            const fileType = file.mimeType.split('/')[0];
-                            const colors = getTypeColor(fileType);
-
                             return (
                                 <motion.div
                                     key={file._id}
@@ -291,83 +278,17 @@ export default function FavoritesPage() {
                                     transition={{ duration: 0.3, delay: index * 0.05 }}
                                     layout
                                 >
-                                    <GlassCard
-                                        className={`p-6 cursor-pointer bg-linear-to-br ${colors.bg} border ${colors.border} relative`}
-                                        onClick={() => handlePreview(index)}
-                                    >
-                                        {/* Favorite Button */}
-                                        <FavoriteButton
-                                            fileId={file._id}
-                                            isFavorite={file.isFavorite}
-                                            onToggle={handleToggleFavorite}
-                                        />
-
-                                        {/* File Preview/Icon */}
-                                        <div className="h-40 mb-4 flex items-center justify-center relative rounded-lg overflow-hidden bg-black/20">
-                                            {(file.mimeType.startsWith('image/') || file.mimeType.startsWith('video/')) ? (
-                                                <FileThumbnail
-                                                    fileId={file._id}
-                                                    fileName={file.originalName}
-                                                    mimeType={file.mimeType}
-                                                    className="w-full h-full"
-                                                />
-                                            ) : (
-                                                <motion.div
-                                                    className="text-6xl"
-                                                    whileHover={{ scale: 1.2, rotate: 10 }}
-                                                    transition={{ type: "spring" }}
-                                                >
-                                                    {getFileIcon(file.mimeType)}
-                                                </motion.div>
-                                            )}
-                                        </div>
-
-                                        {/* File info */}
-                                        <h3 className="font-semibold truncate mb-2 text-white font-display" title={file.originalName}>
-                                            {file.originalName}
-                                        </h3>
-                                        <div className="flex justify-between items-center text-sm text-gray-400 mb-4 font-body">
-                                            <span>{formatSize(file.size)}</span>
-                                            <span className="capitalize">{fileType}</span>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="flex gap-2">
-                                            <motion.button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handlePreview(index);
-                                                }}
-                                                className="flex-1 px-3 py-2 glass-card border border-purple-500/30 text-purple-400 rounded-lg hover:bg-purple-500/10 text-xs transition-all"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                👁
-                                            </motion.button>
-                                            <motion.button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDownload(file._id, file.originalName);
-                                                }}
-                                                className="flex-1 px-3 py-2 glass-card border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 text-xs transition-all"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                ⬇
-                                            </motion.button>
-                                            <motion.button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteClick(file);
-                                                }}
-                                                className="px-3 py-2 glass-card border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/10 text-xs transition-all"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                🗑
-                                            </motion.button>
-                                        </div>
-                                    </GlassCard>
+                                    <StorageFileCard
+                                        file={file}
+                                        isSelected={false}
+                                        isSelectionMode={false}
+                                        onSelect={() => { }}
+                                        onToggleFavorite={handleToggleFavorite}
+                                        onPreview={() => handlePreview(index)}
+                                        onDownload={() => handleDownload(file._id, file.originalName)}
+                                        onAddToAlbum={() => { }}
+                                        onDelete={() => handleDeleteClick(file)}
+                                    />
                                 </motion.div>
                             );
                         })}
