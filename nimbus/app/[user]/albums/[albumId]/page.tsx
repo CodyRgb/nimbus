@@ -10,6 +10,7 @@ import FileCard from '../../../components/FileCard'; // Assuming FileCard is reu
 import { motion } from 'framer-motion';
 import FileThumbnail from '../../../components/FileThumbnail';
 import MediaPreviewModal from '../../../components/MediaPreviewModal';
+import FileSelectionModal from '../../../components/FileSelectionModal';
 
 interface FileData {
     _id: string;
@@ -35,8 +36,20 @@ export default function AlbumDetailsPage() {
     const [files, setFiles] = useState<FileData[]>([]);
     const [loading, setLoading] = useState(true);
     const [previewFile, setPreviewFile] = useState<FileData | null>(null);
+    const [isFileSelectionOpen, setIsFileSelectionOpen] = useState(false);
 
     const albumId = params.albumId as string;
+
+    const handleAddFiles = async (fileIds: string[]) => {
+        try {
+            await api.post(`/albums/${albumId}/files`, { fileIds });
+            fetchAlbumDetails(); // Refresh list
+            setIsFileSelectionOpen(false);
+        } catch (error) {
+            console.error('Error adding files to album:', error);
+            alert('Failed to add files');
+        }
+    };
 
     const fetchAlbumDetails = useCallback(async () => {
         try {
@@ -153,12 +166,20 @@ export default function AlbumDetailsPage() {
                             {album.description && <p className="text-gray-400">{album.description}</p>}
                             <p className="text-sm text-gray-500 mt-2">{files.length} items</p>
                         </div>
-                        <button
-                            onClick={handleDeleteAlbum}
-                            className="px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors text-sm font-medium"
-                        >
-                            Delete Album
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setIsFileSelectionOpen(true)}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors text-sm font-medium flex items-center gap-2"
+                            >
+                                <span>+ Add Files</span>
+                            </button>
+                            <button
+                                onClick={handleDeleteAlbum}
+                                className="px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors text-sm font-medium"
+                            >
+                                Delete Album
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -244,6 +265,14 @@ export default function AlbumDetailsPage() {
                     hasPrevious={files.findIndex(f => f._id === previewFile._id) > 0}
                 />
             )}
+
+            <FileSelectionModal
+                isOpen={isFileSelectionOpen}
+                onClose={() => setIsFileSelectionOpen(false)}
+                onConfirm={handleAddFiles}
+                title="Add Photos to Album"
+                confirmLabel="Add to Album"
+            />
         </div>
     );
 }

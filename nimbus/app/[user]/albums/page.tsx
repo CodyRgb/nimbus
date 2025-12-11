@@ -16,6 +16,8 @@ interface Album {
     fileCount: number;
     createdAt: string;
 }
+import { AnimatePresence, motion } from 'framer-motion';
+import CreateAlbumModal from '../../components/CreateAlbumModal';
 
 export default function AlbumsPage() {
     const { isLoggedIn, user } = useAuth();
@@ -23,6 +25,11 @@ export default function AlbumsPage() {
     const router = useRouter();
     const [albums, setAlbums] = useState<Album[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Selection & Modal State
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set());
+    const [createModalOpen, setCreateModalOpen] = useState(false);
 
     // Client-side Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +54,35 @@ export default function AlbumsPage() {
         }
     };
 
+    const toggleAlbumSelection = (albumId: string) => {
+        const newSelected = new Set(selectedAlbums);
+        if (newSelected.has(albumId)) {
+            newSelected.delete(albumId);
+        } else {
+            newSelected.add(albumId);
+        }
+        setSelectedAlbums(newSelected);
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedAlbums.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${selectedAlbums.size} albums? This action cannot be undone.`)) return;
+
+        try {
+            await api.post('/albums/bulk-delete', {
+                albumIds: Array.from(selectedAlbums)
+            });
+
+            // Refresh albums
+            fetchAlbums();
+            setSelectedAlbums(new Set());
+            setIsSelectionMode(false);
+        } catch (error) {
+            console.error('Error deleting albums:', error);
+            alert('Failed to delete albums');
+        }
+    };
+
     // Calculate paginated albums for display
     const paginatedAlbums = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -68,10 +104,49 @@ export default function AlbumsPage() {
 
             <main className="pt-32 px-4 md:px-8 max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                        Albums
-                    </h1>
-                    {/* Create Album button could go here, but we have it in the modal for now */}
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                            Albums
+                        </h1>
+                    </div>
+
+                    <div className="flex gap-3">
+                        {isSelectionMode ? (
+                            <>
+                                <button
+                                    onClick={handleBulkDelete}
+                                    disabled={selectedAlbums.size === 0}
+                                    className="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Delete ({selectedAlbums.size})
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsSelectionMode(false);
+                                        setSelectedAlbums(new Set());
+                                    }}
+                                    className="px-4 py-2 bg-white/5 text-gray-400 hover:bg-white/10 rounded-xl transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => setIsSelectionMode(true)}
+                                    className="px-4 py-2 bg-white/5 text-gray-300 hover:bg-white/10 rounded-xl transition-colors"
+                                >
+                                    Select
+                                </button>
+                                <button
+                                    onClick={() => setCreateModalOpen(true)}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors flex items-center gap-2"
+                                >
+                                    <span>+ Create Album</span>
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {loading ? (
@@ -93,32 +168,74 @@ export default function AlbumsPage() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {paginatedAlbums.map((album) => (
-                                <Link
-                                    key={album._id}
-                                    href={`/${user?.name}/albums/${album._id}`}
-                                    className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
-                                >
-                                    {album.coverImage ? (
-                                        <img
-                                            src={album.coverImage}
-                                            alt={album.name}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                                            <span className="text-4xl">📁</span>
+                            {paginatedAlbums.map((album) => {
+                                const isSelected = selectedAlbums.has(album._id);
+
+                                const CardContent = (
+                                    <>
+                                        {/* Selection Checkbox Overlay */}
+                                        <AnimatePresence>
+                                            {(isSelectionMode || isSelected) && (
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="absolute top-3 left-3 z-20"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleAlbumSelection(album._id)}
+                                                        className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
+                                                    />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {album.coverImage ? (
+                                            <img
+                                                src={album.coverImage}
+                                                alt={album.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                                                <span className="text-4xl">📁</span>
+                                            </div>
+                                        )}
+
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
+                                            <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
+                                            <p className="text-sm text-gray-400">{album.fileCount} items</p>
                                         </div>
-                                    )}
+                                    </>
+                                );
 
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                                if (isSelectionMode) {
+                                    return (
+                                        <div
+                                            key={album._id}
+                                            onClick={() => toggleAlbumSelection(album._id)}
+                                            className={`group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
+                                                }`}
+                                        >
+                                            {CardContent}
+                                        </div>
+                                    );
+                                }
 
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
-                                        <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
-                                        <p className="text-sm text-gray-400">{album.fileCount} items</p>
-                                    </div>
-                                </Link>
-                            ))}
+                                return (
+                                    <Link
+                                        key={album._id}
+                                        href={`/${user?.name}/albums/${album._id}`}
+                                        className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
+                                    >
+                                        {CardContent}
+                                    </Link>
+                                );
+                            })}
                         </div>
 
                         {/* Pagination Controls */}
@@ -131,6 +248,15 @@ export default function AlbumsPage() {
                         </div>
                     </>
                 )}
+
+                {/* Create Album Modal */}
+                <CreateAlbumModal
+                    isOpen={createModalOpen}
+                    onClose={() => setCreateModalOpen(false)}
+                    onSuccess={() => {
+                        fetchAlbums();
+                    }}
+                />
             </main>
         </div>
     );
