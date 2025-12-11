@@ -13,6 +13,7 @@ import archiver from 'archiver';
 import sharp from 'sharp';
 import { Readable } from 'stream';
 import crypto from 'crypto';
+import ExifParser from 'exif-parser';
 
 // Extend Request to include user (added by auth middleware)
 // We can rely on declaration merging in auth.middleware.ts for 'user'
@@ -46,9 +47,33 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 
             try {
                 logger.info(`[Upload] Starting upload for ${originalname} (${(size / 1024 / 1024).toFixed(2)} MB)`);
-                
+
                 // Upload to Telegram (User) with automatic retry
                 const telegramResult = await uploadFileToTelegramWithClient(userClient, tempPath, originalname, mimetype);
+
+                // Extract date taken from EXIF metadata for images
+                let dateTaken: Date | undefined;
+                if (mimetype.startsWith('image/')) {
+                    try {
+                        const fileBuffer = fs.readFileSync(tempPath);
+                        const parser = ExifParser.create(fileBuffer);
+                        const result = parser.parse();
+
+                        // Try to get the date from EXIF tags
+                        if (result.tags?.DateTimeOriginal) {
+                            dateTaken = new Date(result.tags.DateTimeOriginal * 1000); // Convert Unix timestamp to Date
+                        } else if (result.tags?.CreateDate) {
+                            dateTaken = new Date(result.tags.CreateDate * 1000);
+                        }
+
+                        if (dateTaken && !isNaN(dateTaken.getTime())) {
+                            logger.info(`[Upload] Extracted date taken: ${dateTaken.toISOString()} for ${originalname}`);
+                        }
+                    } catch (exifError) {
+                        // Not all images have EXIF data, this is expected
+                        logger.debug(`[Upload] No EXIF data found for ${originalname}`);
+                    }
+                }
 
                 // Create DB record
                 const newFile = await File.create({
@@ -61,6 +86,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                     telegramFileId: 'N/A',
                     telegramMessageId: telegramResult.messageId,
                     storageType: 'user',
+                    dateTaken: dateTaken,
                 });
 
                 uploadedFiles.push(newFile);
@@ -86,7 +112,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                         newFile.thumbnailUrl = thumbnails.medium; // Backward compatibility
                         newFile.dimensions = thumbnails.dimensions;
                         newFile.save();
-                        
+
                         // Cache thumbnail URLs
                         cacheService.set(
                             CacheKeys.thumbnailUrl(newFile._id.toString()),
@@ -104,13 +130,13 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
                 });
             } catch (err: any) {
                 logger.error(`[Upload] Failed to upload file ${originalname}:`, err.message);
-                failedFiles.push({ 
-                    filename: originalname, 
-                    error: err.message || 'Upload failed' 
+                failedFiles.push({
+                    filename: originalname,
+                    error: err.message || 'Upload failed'
                 });
-                
+
                 // Try to clean up temp file even if upload failed
-                fs.unlink(tempPath, (e) => { 
+                fs.unlink(tempPath, (e) => {
                     if (e) logger.error(`[Upload] Failed to delete temp file ${tempPath}:`, e);
                 });
             }
@@ -118,7 +144,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 
         // Invalidate user's file list cache
         await invalidateUserCache(userId.toString());
-        
+
         // Return results with success and failure information
         const response: any = {
             success: uploadedFiles.length > 0,
@@ -192,7 +218,7 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
         // Try to get from cache first
         const cacheKey = CacheKeys.fileList(userId, page, limit, folderId || undefined);
         const cachedData = await cacheService.get(cacheKey);
-        
+
         if (cachedData) {
             res.setHeader('X-Cache-Status', 'HIT');
             res.json(cachedData);
@@ -206,7 +232,7 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
 
         // Get total count for pagination
         const total = await File.countDocuments(query);
-        
+
         // Get files with pagination
         const files = await File.find(query)
             .sort({ uploadedAt: -1 })
@@ -228,7 +254,7 @@ export const getFiles = async (req: Request, res: Response): Promise<void> => {
 
         // Cache the response
         await cacheService.set(cacheKey, response, CacheTTL.fileList);
-        
+
         res.setHeader('X-Cache-Status', 'MISS');
         res.json(response);
     } catch (error) {
@@ -245,7 +271,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
         // Check cache first
         const cacheKey = CacheKeys.thumbnailUrl(fileId);
         const cachedThumbnails = await cacheService.get(cacheKey);
-        
+
         if (cachedThumbnails) {
             const cachedUrl = (cachedThumbnails as any)[size] || (cachedThumbnails as any).medium;
             res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
@@ -273,7 +299,7 @@ export const getThumbnail = async (req: Request, res: Response): Promise<void> =
         if (selectedThumbnail) {
             // Cache the thumbnails
             await cacheService.set(cacheKey, thumbnails, CacheTTL.thumbnailUrl);
-            
+
             res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
             res.setHeader('X-Cache-Status', 'MISS');
             res.json({ thumbnailUrl: selectedThumbnail, size });
@@ -467,7 +493,7 @@ export const deleteFile = async (req: Request, res: Response): Promise<void> => 
             medium: file.thumbnailMedium,
             large: file.thumbnailLarge,
         };
-        
+
         if (thumbnailUrls.small || thumbnailUrls.medium || thumbnailUrls.large) {
             deleteThumbnails(thumbnailUrls).catch(err => {
                 console.error("Failed to delete thumbnails from Cloudinary:", err);
@@ -654,5 +680,50 @@ export const getFavoriteFiles = async (req: Request, res: Response): Promise<voi
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch favorite files', error: (error as Error).message });
+    }
+};
+
+export const renameFile = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { newName } = req.body;
+
+        // Validation
+        if (!newName || typeof newName !== 'string') {
+            res.status(400).json({ message: 'New name is required' });
+            return;
+        }
+
+        const trimmedName = newName.trim();
+        if (trimmedName.length === 0) {
+            res.status(400).json({ message: 'File name cannot be empty' });
+            return;
+        }
+
+        if (trimmedName.length > 255) {
+            res.status(400).json({ message: 'File name is too long (max 255 characters)' });
+            return;
+        }
+
+        const file = await File.findOne({ _id: req.params.id, user: req.user!._id });
+
+        if (!file) {
+            res.status(404).json({ message: 'File not found' });
+            return;
+        }
+
+        // Update the file name
+        file.originalName = trimmedName;
+        await file.save();
+
+        // Invalidate cache
+        await invalidateFileCache(file._id.toString(), req.user!._id.toString());
+
+        res.json({
+            message: 'File renamed successfully',
+            file: file
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to rename file', error: (error as Error).message });
     }
 };

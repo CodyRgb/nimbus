@@ -9,6 +9,7 @@ import FavoriteButton from "../../components/FavoriteButton";
 import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
 import GlassCard from "../../components/ui/GlassCard";
+import RenameModal from "../../components/RenameModal";
 
 interface FileData {
     _id: string;
@@ -16,6 +17,7 @@ interface FileData {
     size: number;
     mimeType: string;
     uploadedAt: string;
+    dateTaken?: string;
     folder: string | null;
     isFavorite: boolean;
 }
@@ -42,6 +44,10 @@ export default function FavoritesPage() {
 
     // Active file state for mobile touch interactions
     const [activeFileId, setActiveFileId] = useState<string | null>(null);
+
+    // Rename modal state
+    const [renameModalOpen, setRenameModalOpen] = useState(false);
+    const [fileToRename, setFileToRename] = useState<FileData | null>(null);
 
     const fetchFavorites = useCallback(async () => {
         setLoading(true);
@@ -127,6 +133,22 @@ export default function FavoritesPage() {
         }
     };
 
+    const handleRenameClick = (file: FileData) => {
+        setFileToRename(file);
+        setRenameModalOpen(true);
+    };
+
+    const handleRename = async (newName: string) => {
+        if (!fileToRename) return;
+
+        await api.put(`/files/${fileToRename._id}/rename`, { newName });
+
+        // Update the file in the list
+        setFiles(files.map(f =>
+            f._id === fileToRename._id ? { ...f, originalName: newName } : f
+        ));
+    };
+
     const handlePreviewNext = () => {
         if (selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1) {
             setSelectedFileIndex(selectedFileIndex + 1);
@@ -179,7 +201,9 @@ export default function FavoritesPage() {
         const groups: { [key: string]: FileData[] } = {};
 
         files.forEach(file => {
-            const dateKey = new Date(file.uploadedAt).toDateString();
+            // Use dateTaken if available, otherwise fall back to uploadedAt
+            const dateToUse = file.dateTaken || file.uploadedAt;
+            const dateKey = new Date(dateToUse).toDateString();
             if (!groups[dateKey]) {
                 groups[dateKey] = [];
             }
@@ -197,8 +221,12 @@ export default function FavoritesPage() {
                 return matchesSearch;
             })
             .sort((a, b) => {
-                if (sortOrder === "date-desc") return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
-                if (sortOrder === "date-asc") return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+                // Use dateTaken if available, otherwise fall back to uploadedAt
+                const dateA = a.dateTaken || a.uploadedAt;
+                const dateB = b.dateTaken || b.uploadedAt;
+
+                if (sortOrder === "date-desc") return new Date(dateB).getTime() - new Date(dateA).getTime();
+                if (sortOrder === "date-asc") return new Date(dateA).getTime() - new Date(dateB).getTime();
                 if (sortOrder === "name-asc") return a.originalName.localeCompare(b.originalName);
                 if (sortOrder === "size-desc") return b.size - a.size;
                 return 0;
@@ -341,7 +369,7 @@ export default function FavoritesPage() {
                                             className="mb-4"
                                         >
                                             <h2 className="text-2xl font-bold text-white font-display">
-                                                {formatDateHeader(firstFile.uploadedAt)}
+                                                {formatDateHeader(firstFile.dateTaken || firstFile.uploadedAt)}
                                             </h2>
                                             <div className="h-px bg-gradient-to-r from-aurora-blue/50 to-transparent mt-2"></div>
                                         </motion.div>
@@ -370,6 +398,7 @@ export default function FavoritesPage() {
                                                             onDownload={() => handleDownload(file._id, file.originalName)}
                                                             onAddToAlbum={() => { }}
                                                             onDelete={() => handleDeleteClick(file)}
+                                                            onRename={() => handleRenameClick(file)}
                                                             onActivate={() => {
                                                                 setActiveFileId(activeFileId === file._id ? null : file._id);
                                                             }}
@@ -587,6 +616,20 @@ export default function FavoritesPage() {
                     onConfirm={handleDeleteConfirm}
                     onCancel={handleDeleteCancel}
                     isDeleting={isDeleting}
+                />
+            )}
+
+            {/* Rename Modal */}
+            {fileToRename && (
+                <RenameModal
+                    isOpen={renameModalOpen}
+                    onClose={() => {
+                        setRenameModalOpen(false);
+                        setFileToRename(null);
+                    }}
+                    currentName={fileToRename.originalName}
+                    onRename={handleRename}
+                    itemType="file"
                 />
             )}
         </div>

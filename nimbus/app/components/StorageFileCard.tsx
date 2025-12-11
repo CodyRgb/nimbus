@@ -22,6 +22,7 @@ interface StorageFileCardProps {
     onDownload: () => void;
     onAddToAlbum?: () => void;
     onDelete?: () => void;
+    onRename?: () => void;
     showActions?: boolean;
     onActivate?: () => void; // Called when card is clicked/tapped
 }
@@ -37,6 +38,7 @@ export default function StorageFileCard({
     onDownload,
     onAddToAlbum,
     onDelete,
+    onRename,
     showActions = true,
     onActivate
 }: StorageFileCardProps) {
@@ -68,8 +70,8 @@ export default function StorageFileCard({
             animate={{ opacity: 1, scale: 1 }}
             onClick={handleCardClick}
             className={`group relative bg-gray-900 rounded-xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
-                    isActive ? 'border-white/30' :
-                        'border-white/10 hover:border-white/20'
+                isActive ? 'border-white/30' :
+                    'border-white/10 hover:border-white/20'
                 }`}
         >
             {/* Selection Checkbox */}
@@ -145,6 +147,15 @@ export default function StorageFileCard({
                             title="Add to Album"
                         >
                             🖼️
+                        </button>
+                    )}
+                    {onRename && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onRename(); }}
+                            className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
+                            title="Rename"
+                        >
+                            ✏️
                         </button>
                     )}
                     {onDelete && (

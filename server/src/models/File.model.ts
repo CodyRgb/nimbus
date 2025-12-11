@@ -24,6 +24,7 @@ export interface IFile extends Document {
     dimensions?: { width: number; height: number };
     cacheKey?: string;
     etag: string;
+    dateTaken?: Date;
 }
 
 const FileSchema: Schema = new Schema({
@@ -52,6 +53,7 @@ const FileSchema: Schema = new Schema({
     uploadedAt: { type: Date, default: Date.now, index: true },
     lastAccessed: { type: Date, default: Date.now, index: true },
     downloadCount: { type: Number, default: 0 },
+    dateTaken: { type: Date, index: true },
 });
 
 // Generate ETag before saving

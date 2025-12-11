@@ -13,6 +13,7 @@ import FileThumbnail from "../../components/FileThumbnail";
 import FavoriteButton from "../../components/FavoriteButton";
 import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
+import RenameModal from "../../components/RenameModal";
 
 interface FileData {
     _id: string;
@@ -20,6 +21,7 @@ interface FileData {
     size: number;
     mimeType: string;
     uploadedAt: string;
+    dateTaken?: string;
     folder: string | null;
     isFavorite: boolean;
 }
@@ -58,6 +60,10 @@ export default function StoragePage() {
     // Album modal state
     const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
     const [filesToAdd, setFilesToAdd] = useState<string[]>([]);
+
+    // Rename modal state
+    const [renameModalOpen, setRenameModalOpen] = useState(false);
+    const [fileToRename, setFileToRename] = useState<FileData | null>(null);
 
     const fetchContent = useCallback(async () => {
         setLoading(true);
@@ -141,6 +147,22 @@ export default function StoragePage() {
 
     const handleToggleFavorite = (fileId: string, newFavoriteStatus: boolean) => {
         setFiles(files.map(f => f._id === fileId ? { ...f, isFavorite: newFavoriteStatus } : f));
+    };
+
+    const handleRenameClick = (file: FileData) => {
+        setFileToRename(file);
+        setRenameModalOpen(true);
+    };
+
+    const handleRename = async (newName: string) => {
+        if (!fileToRename) return;
+
+        await api.put(`/files/${fileToRename._id}/rename`, { newName });
+
+        // Update the file in the list
+        setFiles(files.map(f =>
+            f._id === fileToRename._id ? { ...f, originalName: newName } : f
+        ));
     };
 
     // Selection handlers
@@ -292,7 +314,9 @@ export default function StoragePage() {
         const groups: { [key: string]: FileData[] } = {};
 
         files.forEach(file => {
-            const dateKey = new Date(file.uploadedAt).toDateString();
+            // Use dateTaken if available, otherwise fall back to uploadedAt
+            const dateToUse = file.dateTaken || file.uploadedAt;
+            const dateKey = new Date(dateToUse).toDateString();
             if (!groups[dateKey]) {
                 groups[dateKey] = [];
             }
@@ -311,8 +335,12 @@ export default function StoragePage() {
                 return matchesSearch && matchesType;
             })
             .sort((a, b) => {
-                if (sortOrder === "date-desc") return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
-                if (sortOrder === "date-asc") return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+                // Use dateTaken if available, otherwise fall back to uploadedAt
+                const dateA = a.dateTaken || a.uploadedAt;
+                const dateB = b.dateTaken || b.uploadedAt;
+
+                if (sortOrder === "date-desc") return new Date(dateB).getTime() - new Date(dateA).getTime();
+                if (sortOrder === "date-asc") return new Date(dateA).getTime() - new Date(dateB).getTime();
                 if (sortOrder === "name-asc") return a.originalName.localeCompare(b.originalName);
                 if (sortOrder === "size-desc") return b.size - a.size;
                 return 0;
@@ -570,7 +598,7 @@ export default function StoragePage() {
                                             className="mb-4"
                                         >
                                             <h2 className="text-2xl font-bold text-white font-display">
-                                                {formatDateHeader(firstFile.uploadedAt)}
+                                                {formatDateHeader(firstFile.dateTaken || firstFile.uploadedAt)}
                                             </h2>
                                             <div className="h-px bg-gradient-to-r from-aurora-blue/50 to-transparent mt-2"></div>
                                         </motion.div>
@@ -603,6 +631,7 @@ export default function StoragePage() {
                                                                 setAddToAlbumModalOpen(true);
                                                             }}
                                                             onDelete={() => handleDeleteClick(file)}
+                                                            onRename={() => handleRenameClick(file)}
                                                             onActivate={() => {
                                                                 setActiveFileId(activeFileId === file._id ? null : file._id);
                                                             }}
@@ -865,6 +894,20 @@ export default function StoragePage() {
                     setSelectedFiles(new Set());
                 }}
             />
+
+            {/* Rename Modal */}
+            {fileToRename && (
+                <RenameModal
+                    isOpen={renameModalOpen}
+                    onClose={() => {
+                        setRenameModalOpen(false);
+                        setFileToRename(null);
+                    }}
+                    currentName={fileToRename.originalName}
+                    onRename={handleRename}
+                    itemType="file"
+                />
+            )}
 
             {/* Delete Confirmation Modal */}
             {fileToDelete && (

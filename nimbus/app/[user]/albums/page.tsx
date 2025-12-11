@@ -18,6 +18,7 @@ interface Album {
 }
 import { AnimatePresence, motion } from 'framer-motion';
 import CreateAlbumModal from '../../components/CreateAlbumModal';
+import RenameModal from '../../components/RenameModal';
 
 export default function AlbumsPage() {
     const { isLoggedIn, user } = useAuth();
@@ -34,6 +35,10 @@ export default function AlbumsPage() {
     // Client-side Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 40;
+
+    // Rename modal state
+    const [renameModalOpen, setRenameModalOpen] = useState(false);
+    const [albumToRename, setAlbumToRename] = useState<Album | null>(null);
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -81,6 +86,25 @@ export default function AlbumsPage() {
             console.error('Error deleting albums:', error);
             alert('Failed to delete albums');
         }
+    };
+
+    const handleRenameClick = (album: Album) => {
+        setAlbumToRename(album);
+        setRenameModalOpen(true);
+    };
+
+    const handleRename = async (newName: string) => {
+        if (!albumToRename) return;
+
+        await api.put(`/albums/${albumToRename._id}`, {
+            name: newName,
+            description: albumToRename.description
+        });
+
+        // Update the album in the list
+        setAlbums(albums.map(a =>
+            a._id === albumToRename._id ? { ...a, name: newName } : a
+        ));
     };
 
     // Date formatting helper
@@ -285,6 +309,21 @@ export default function AlbumsPage() {
 
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
 
+                                                            {/* Rename button - appears on hover */}
+                                                            {!isSelectionMode && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        handleRenameClick(album);
+                                                                    }}
+                                                                    className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
+                                                                    title="Rename album"
+                                                                >
+                                                                    ✏️
+                                                                </button>
+                                                            )}
+
                                                             <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
                                                                 <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
                                                                 <p className="text-sm text-gray-400">{album.fileCount} items</p>
@@ -341,6 +380,20 @@ export default function AlbumsPage() {
                         fetchAlbums();
                     }}
                 />
+
+                {/* Rename Modal */}
+                {albumToRename && (
+                    <RenameModal
+                        isOpen={renameModalOpen}
+                        onClose={() => {
+                            setRenameModalOpen(false);
+                            setAlbumToRename(null);
+                        }}
+                        currentName={albumToRename.name}
+                        onRename={handleRename}
+                        itemType="album"
+                    />
+                )}
             </main>
         </div>
     );
