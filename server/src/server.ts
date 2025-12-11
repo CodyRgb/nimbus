@@ -10,11 +10,11 @@ import albumRoutes from './routes/album.routes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import { logger } from './utils/logger';
 import { globalErrorHandler } from './middleware/error.middleware';
+import { mongoSanitize } from './middleware/security.middleware';
 import { AppError } from './utils/AppError';
 import http from 'http';
 
@@ -38,11 +38,6 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Data Sanitization against NoSQL query injection
-// app.use(mongoSanitize());
-
-// Prevent Parameter Pollution
-// app.use(hpp());
 
 // Compression middleware
 app.use(compression({
@@ -58,6 +53,12 @@ app.use(compression({
 // Body parser
 app.use(express.json({ limit: '10kb' })); // Limit body size
 app.use(cookieParser());
+
+// Data Sanitization against NoSQL query injection
+app.use(mongoSanitize);
+
+// Prevent Parameter Pollution
+app.use(hpp());
 
 // Enable CORS
 app.use(cors({

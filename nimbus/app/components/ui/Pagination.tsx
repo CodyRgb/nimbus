@@ -49,15 +49,20 @@ export default function Pagination({
         return pages;
     }, [currentPage, totalPages]);
 
+    const handlePageChange = (page: number) => {
+        onPageChange(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const handlePrevious = () => {
         if (currentPage > 1) {
-            onPageChange(currentPage - 1);
+            handlePageChange(currentPage - 1);
         }
     };
 
     const handleNext = () => {
         if (currentPage < totalPages) {
-            onPageChange(currentPage + 1);
+            handlePageChange(currentPage + 1);
         }
     };
 
@@ -68,8 +73,8 @@ export default function Pagination({
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
                 className={`px-4 py-2 glass-card border rounded-xl font-medium text-sm transition-all ${currentPage === 1
-                        ? "border-gray-500/30 text-gray-500 cursor-not-allowed opacity-50"
-                        : "border-aurora-blue/30 text-aurora-blue hover:bg-aurora-blue/10"
+                    ? "border-gray-500/30 text-gray-500 cursor-not-allowed opacity-50"
+                    : "border-aurora-blue/30 text-aurora-blue hover:bg-aurora-blue/10"
                     }`}
                 whileHover={currentPage > 1 ? { scale: 1.05 } : {}}
                 whileTap={currentPage > 1 ? { scale: 0.95 } : {}}
@@ -83,7 +88,7 @@ export default function Pagination({
                 {pageNumbers[0] > 1 && (
                     <>
                         <motion.button
-                            onClick={() => onPageChange(1)}
+                            onClick={() => handlePageChange(1)}
                             className="px-3 py-2 glass-card border border-white/10 rounded-lg text-white hover:bg-white/5 transition-all"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -100,10 +105,10 @@ export default function Pagination({
                 {pageNumbers.map((page) => (
                     <motion.button
                         key={page}
-                        onClick={() => onPageChange(page)}
+                        onClick={() => handlePageChange(page)}
                         className={`px-3 py-2 glass-card border rounded-lg font-medium transition-all ${page === currentPage
-                                ? "border-aurora-blue bg-aurora-blue text-white"
-                                : "border-white/10 text-white hover:bg-white/5"
+                            ? "border-aurora-blue bg-aurora-blue text-white"
+                            : "border-white/10 text-white hover:bg-white/5"
                             }`}
                         whileHover={page !== currentPage ? { scale: 1.05 } : {}}
                         whileTap={page !== currentPage ? { scale: 0.95 } : {}}
@@ -119,7 +124,7 @@ export default function Pagination({
                             <span className="px-2 py-2 text-gray-500">...</span>
                         )}
                         <motion.button
-                            onClick={() => onPageChange(totalPages)}
+                            onClick={() => handlePageChange(totalPages)}
                             className="px-3 py-2 glass-card border border-white/10 rounded-lg text-white hover:bg-white/5 transition-all"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -135,8 +140,8 @@ export default function Pagination({
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
                 className={`px-4 py-2 glass-card border rounded-xl font-medium text-sm transition-all ${currentPage === totalPages
-                        ? "border-gray-500/30 text-gray-500 cursor-not-allowed opacity-50"
-                        : "border-aurora-blue/30 text-aurora-blue hover:bg-aurora-blue/10"
+                    ? "border-gray-500/30 text-gray-500 cursor-not-allowed opacity-50"
+                    : "border-aurora-blue/30 text-aurora-blue hover:bg-aurora-blue/10"
                     }`}
                 whileHover={currentPage < totalPages ? { scale: 1.05 } : {}}
                 whileTap={currentPage < totalPages ? { scale: 0.95 } : {}}
