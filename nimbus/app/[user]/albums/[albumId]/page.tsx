@@ -9,6 +9,7 @@ import { useAuth } from '../../../context/AuthContext';
 import FileCard from '../../../components/FileCard'; // Assuming FileCard is reusable or I'll use a similar card
 import { motion } from 'framer-motion';
 import FileThumbnail from '../../../components/FileThumbnail';
+import MediaPreviewModal from '../../../components/MediaPreviewModal';
 
 interface FileData {
     _id: string;
@@ -33,6 +34,7 @@ export default function AlbumDetailsPage() {
     const [album, setAlbum] = useState<Album | null>(null);
     const [files, setFiles] = useState<FileData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [previewFile, setPreviewFile] = useState<FileData | null>(null);
 
     const albumId = params.albumId as string;
 
@@ -94,6 +96,26 @@ export default function AlbumDetailsPage() {
             link.remove();
         } catch (err) {
             console.error("Download failed", err);
+        }
+    };
+
+    const handlePreview = (file: FileData) => {
+        setPreviewFile(file);
+    };
+
+    const handleNext = () => {
+        if (!previewFile) return;
+        const currentIndex = files.findIndex(f => f._id === previewFile._id);
+        if (currentIndex < files.length - 1) {
+            setPreviewFile(files[currentIndex + 1]);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (!previewFile) return;
+        const currentIndex = files.findIndex(f => f._id === previewFile._id);
+        if (currentIndex > 0) {
+            setPreviewFile(files[currentIndex - 1]);
         }
     };
 
@@ -176,6 +198,13 @@ export default function AlbumDetailsPage() {
 
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
                                     <button
+                                        onClick={() => handlePreview(file)}
+                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                                        title="Preview"
+                                    >
+                                        👁️
+                                    </button>
+                                    <button
                                         onClick={() => handleDownload(file._id, file.originalName)}
                                         className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
                                         title="Download"
@@ -195,6 +224,26 @@ export default function AlbumDetailsPage() {
                     </div>
                 )}
             </main>
+
+            {previewFile && (
+                <MediaPreviewModal
+                    isOpen={!!previewFile}
+                    fileId={previewFile._id}
+                    fileName={previewFile.originalName}
+                    fileType={previewFile.mimeType}
+                    fileSize={(previewFile.size / 1024 / 1024).toFixed(2) + ' MB'}
+                    onClose={() => setPreviewFile(null)}
+                    onDownload={() => handleDownload(previewFile._id, previewFile.originalName)}
+                    onDelete={() => {
+                        handleRemoveFromAlbum(previewFile._id);
+                        setPreviewFile(null);
+                    }}
+                    onNext={handleNext}
+                    onPrevious={handlePrevious}
+                    hasNext={files.findIndex(f => f._id === previewFile._id) < files.length - 1}
+                    hasPrevious={files.findIndex(f => f._id === previewFile._id) > 0}
+                />
+            )}
         </div>
     );
 }
