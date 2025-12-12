@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 interface User {
     _id: string;
@@ -21,6 +22,33 @@ interface NavbarProps {
 export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) {
     const { logout } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
+    const [activeSection, setActiveSection] = useState("");
+
+    // Track active section on landing page
+    useEffect(() => {
+        if (!isLoggedIn && !isOnAuthPage) {
+            const handleScroll = () => {
+                const sections = ["about", "help", "faq", "contact"];
+                const scrollPosition = window.scrollY + 100;
+
+                for (const section of sections) {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        const { offsetTop, offsetHeight } = element;
+                        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                            setActiveSection(section);
+                            break;
+                        }
+                    }
+                }
+            };
+
+            window.addEventListener("scroll", handleScroll);
+            handleScroll();
+            return () => window.removeEventListener("scroll", handleScroll);
+        }
+    }, [isLoggedIn, isOnAuthPage]);
 
     return (
         <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none">
@@ -61,16 +89,20 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 <div className="hidden md:flex items-center gap-1 relative z-10">
                     {isOnAuthPage ? null : isLoggedIn ? (
                         <>
-                            <Link href={`/${user?.name}/storage`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            <Link href={`/${user?.name}/storage`} className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${pathname?.includes('/storage') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                }`}>
                                 Storage
                             </Link>
-                            <Link href={`/${user?.name}/upload`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            <Link href={`/${user?.name}/upload`} className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${pathname?.includes('/upload') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                }`}>
                                 Uploads
                             </Link>
-                            <Link href={`/${user?.name}/albums`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            <Link href={`/${user?.name}/albums`} className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${pathname?.includes('/albums') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                }`}>
                                 Albums
                             </Link>
-                            <Link href={`/${user?.name}/favorites`} className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
+                            <Link href={`/${user?.name}/favorites`} className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${pathname?.includes('/favorites') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                }`}>
                                 Favorites
                             </Link>
                         </>
@@ -79,7 +111,8 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                             <Link
                                 key={item}
                                 href={`/#${item.toLowerCase()}`}
-                                className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105"
+                                className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${activeSection === item.toLowerCase() ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                    }`}
                             >
                                 {item}
                             </Link>
@@ -159,28 +192,32 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                                 <Link
                                     href={`/${user?.name}/storage`}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/storage') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                        }`}
                                 >
                                     📂 Storage
                                 </Link>
                                 <Link
                                     href={`/${user?.name}/favorites`}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/favorites') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                        }`}
                                 >
                                     ❤️ Favorites
                                 </Link>
                                 <Link
                                     href={`/${user?.name}/upload`}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/upload') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                        }`}
                                 >
                                     📤 Uploads
                                 </Link>
                                 <Link
                                     href={`/${user?.name}/albums`}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-xl hover:bg-white/10"
+                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/albums') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                        }`}
                                 >
                                     🖼️ Albums
                                 </Link>
