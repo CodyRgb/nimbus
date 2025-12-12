@@ -7,7 +7,13 @@ import Navbar from "../components/Navbar";
 export default function ConditionalNavbar() {
     const { isLoggedIn, user } = useAuth();
     const pathname = usePathname();
+    const isLandingPage = pathname === '/';
+    const isLoginPage = pathname === '/login';
     const isOnAuthPage = pathname === '/login' || pathname === '/register';
+
+    const isRegisterPage = pathname === '/register';
+
+    if (isLandingPage || isLoginPage || isRegisterPage) return null;
 
     return <Navbar isLoggedIn={isLoggedIn} user={user} isOnAuthPage={isOnAuthPage} />;
 }

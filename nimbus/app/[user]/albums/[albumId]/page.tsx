@@ -6,11 +6,12 @@ import Link from 'next/link';
 import api from '../../../../lib/api';
 import Navbar from '../../../components/Navbar';
 import { useAuth } from '../../../context/AuthContext';
-import FileCard from '../../../components/FileCard'; // Assuming FileCard is reusable or I'll use a similar card
 import { motion } from 'framer-motion';
-import FileThumbnail from '../../../components/FileThumbnail';
 import MediaPreviewModal from '../../../components/MediaPreviewModal';
 import FileSelectionModal from '../../../components/FileSelectionModal';
+import AddToAlbumModal from '../../../components/AddToAlbumModal';
+import StorageFileCard from '../../../components/StorageFileCard';
+import RenameModal from '../../../components/RenameModal';
 
 interface FileData {
     _id: string;
@@ -19,6 +20,7 @@ interface FileData {
     mimeType: string;
     size: number;
     uploadedAt: string;
+    isFavorite?: boolean; // Optional in case we add it later or mock it
 }
 
 interface Album {
@@ -37,6 +39,14 @@ export default function AlbumDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [previewFile, setPreviewFile] = useState<FileData | null>(null);
     const [isFileSelectionOpen, setIsFileSelectionOpen] = useState(false);
+
+    // Rename modal state
+    const [renameModalOpen, setRenameModalOpen] = useState(false);
+    const [fileToRename, setFileToRename] = useState<FileData | null>(null);
+
+    // Add to Album modal state
+    const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
+    const [fileToAddToAlbum, setFileToAddToAlbum] = useState<string[]>([]);
 
     const albumId = params.albumId as string;
 
@@ -112,6 +122,27 @@ export default function AlbumDetailsPage() {
         }
     };
 
+    const handleRenameClick = (file: FileData) => {
+        setFileToRename(file);
+        setRenameModalOpen(true);
+    };
+
+    const handleRename = async (newName: string) => {
+        if (!fileToRename) return;
+
+        try {
+            await api.put(`/files/${fileToRename._id}/rename`, { newName });
+
+            // Update the file in the list
+            setFiles(files.map(f =>
+                f._id === fileToRename._id ? { ...f, originalName: newName } : f
+            ));
+        } catch (err) {
+            console.error("Rename failed", err);
+            alert("Failed to rename file");
+        }
+    };
+
     const handlePreview = (file: FileData) => {
         setPreviewFile(file);
     };
@@ -130,6 +161,16 @@ export default function AlbumDetailsPage() {
         if (currentIndex > 0) {
             setPreviewFile(files[currentIndex - 1]);
         }
+    };
+
+    // Toggle favorite state update (API called by StorageFileCard)
+    const handleToggleFavorite = (fileId: string, status: boolean) => {
+        setFiles(files.map(f => f._id === fileId ? { ...f, isFavorite: status } : f));
+    };
+
+    const handleAddToAlbumClick = (fileId: string) => {
+        setFileToAddToAlbum([fileId]);
+        setAddToAlbumModalOpen(true);
     };
 
     if (loading) {
@@ -201,45 +242,23 @@ export default function AlbumDetailsPage() {
                                 layout
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="group relative bg-gray-900 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 transition-all"
                             >
-                                <div className="aspect-square bg-gray-800 flex items-center justify-center relative">
-                                    <FileThumbnail
-                                        fileId={file._id}
-                                        fileName={file.originalName}
-                                        mimeType={file.mimeType}
-                                        className="w-full h-full"
-                                    />
-                                </div>
-
-                                <div className="p-3">
-                                    <p className="text-sm font-medium text-white truncate">{file.originalName}</p>
-                                    <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                                </div>
-
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
-                                    <button
-                                        onClick={() => handlePreview(file)}
-                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                                        title="Preview"
-                                    >
-                                        👁️
-                                    </button>
-                                    <button
-                                        onClick={() => handleDownload(file._id, file.originalName)}
-                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                                        title="Download"
-                                    >
-                                        ⬇️
-                                    </button>
-                                    <button
-                                        onClick={() => handleRemoveFromAlbum(file._id)}
-                                        className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-full text-red-400 transition-colors"
-                                        title="Remove from Album"
-                                    >
-                                        ❌
-                                    </button>
-                                </div>
+                                <StorageFileCard
+                                    file={{
+                                        ...file,
+                                        isFavorite: file.isFavorite || false
+                                    }}
+                                    isSelected={false}
+                                    isSelectionMode={false}
+                                    onSelect={() => { }}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onPreview={() => handlePreview(file)}
+                                    onDownload={() => handleDownload(file._id, file.originalName)}
+                                    onAddToAlbum={() => handleAddToAlbumClick(file._id)}
+                                    onDelete={() => handleRemoveFromAlbum(file._id)}
+                                    deleteLabel="Remove from Album"
+                                    onRename={() => handleRenameClick(file)}
+                                />
                             </motion.div>
                         ))}
                     </div>
@@ -272,6 +291,34 @@ export default function AlbumDetailsPage() {
                 onConfirm={handleAddFiles}
                 title="Add Photos to Album"
                 confirmLabel="Add to Album"
+            />
+
+            {/* Rename Modal */}
+            {fileToRename && (
+                <RenameModal
+                    isOpen={renameModalOpen}
+                    onClose={() => {
+                        setRenameModalOpen(false);
+                        setFileToRename(null);
+                    }}
+                    currentName={fileToRename.originalName}
+                    onRename={handleRename}
+                    itemType="file"
+                />
+            )}
+
+            <AddToAlbumModal
+                isOpen={addToAlbumModalOpen}
+                onClose={() => {
+                    setAddToAlbumModalOpen(false);
+                    setFileToAddToAlbum([]);
+                }}
+                fileIds={fileToAddToAlbum}
+                onSuccess={() => {
+                    setAddToAlbumModalOpen(false);
+                    setFileToAddToAlbum([]);
+                    alert("Added to album successfully!");
+                }}
             />
         </div>
     );

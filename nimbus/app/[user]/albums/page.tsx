@@ -17,8 +17,10 @@ interface Album {
     createdAt: string;
 }
 import { AnimatePresence, motion } from 'framer-motion';
+import { BsThreeDotsVertical, BsPencil, BsTrash, BsImage } from 'react-icons/bs';
 import CreateAlbumModal from '../../components/CreateAlbumModal';
 import RenameModal from '../../components/RenameModal';
+import FileSelectionModal from '../../components/FileSelectionModal';
 
 export default function AlbumsPage() {
     const { isLoggedIn, user } = useAuth();
@@ -39,6 +41,11 @@ export default function AlbumsPage() {
     // Rename modal state
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [albumToRename, setAlbumToRename] = useState<Album | null>(null);
+
+    // Thumbnail selection state
+    const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+    const [albumToUpdateThumbnail, setAlbumToUpdateThumbnail] = useState<Album | null>(null);
+    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -105,6 +112,36 @@ export default function AlbumsPage() {
         setAlbums(albums.map(a =>
             a._id === albumToRename._id ? { ...a, name: newName } : a
         ));
+    };
+
+    const handleChangeThumbnail = async (fileIds: string[], selectedFilesData?: any[]) => {
+        if (!albumToUpdateThumbnail || !selectedFilesData || selectedFilesData.length === 0) return;
+
+        const selectedFile = selectedFilesData[0];
+        // Construct the thumbnail URL. Assuming we can use the file serve URL or similar.
+        // Based on other parts of the app, images are served via /api/files/:id/view or similar, 
+        // but here the backend likely expects a URL or we need to know how images are served.
+        // Checking StoragePage, FileThumbnail uses `/api/files/${fileId}/view`.
+        // Let's assume the Album model stores a fully qualified URL or a relative path.
+        // If the existing coverImage is a URL, we should match that format.
+        // Let's construct a standard API URL for the image.
+        const thumbnailUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${selectedFile._id}/view`;
+
+        try {
+            await api.put(`/albums/${albumToUpdateThumbnail._id}`, {
+                coverImage: thumbnailUrl
+            });
+
+            setAlbums(albums.map(a =>
+                a._id === albumToUpdateThumbnail._id ? { ...a, coverImage: thumbnailUrl } : a
+            ));
+
+            setThumbnailModalOpen(false);
+            setAlbumToUpdateThumbnail(null);
+        } catch (error) {
+            console.error("Failed to update thumbnail", error);
+            alert("Failed to update album thumbnail");
+        }
     };
 
     // Date formatting helper
@@ -274,27 +311,9 @@ export default function AlbumsPage() {
                                                 {albumsInGroup.map((album) => {
                                                     const isSelected = selectedAlbums.has(album._id);
 
-                                                    const CardContent = (
-                                                        <>
-                                                            {/* Selection Checkbox Overlay */}
-                                                            <AnimatePresence>
-                                                                {(isSelectionMode || isSelected) && (
-                                                                    <motion.div
-                                                                        initial={{ opacity: 0 }}
-                                                                        animate={{ opacity: 1 }}
-                                                                        exit={{ opacity: 0 }}
-                                                                        className="absolute top-3 left-3 z-20"
-                                                                    >
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={isSelected}
-                                                                            onChange={() => toggleAlbumSelection(album._id)}
-                                                                            className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
-                                                                        />
-                                                                    </motion.div>
-                                                                )}
-                                                            </AnimatePresence>
-
+                                                    // Visual Content (Image, Gradient, Text) - wrapped in overflow-hidden
+                                                    const VisualContent = (
+                                                        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
                                                             {album.coverImage ? (
                                                                 <img
                                                                     src={album.coverImage}
@@ -309,26 +328,103 @@ export default function AlbumsPage() {
 
                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
 
-                                                            {/* Rename button - appears on hover */}
-                                                            {!isSelectionMode && (
+                                                            <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform z-10">
+                                                                <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
+                                                                <p className="text-sm text-gray-400">{album.fileCount} items</p>
+                                                            </div>
+                                                        </div>
+                                                    );
+
+                                                    const SelectionOverlay = (
+                                                        <AnimatePresence>
+                                                            {(isSelectionMode || isSelected) && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0 }}
+                                                                    animate={{ opacity: 1 }}
+                                                                    exit={{ opacity: 0 }}
+                                                                    className="absolute top-3 left-3 z-30"
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={() => toggleAlbumSelection(album._id)}
+                                                                        className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
+                                                                    />
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    );
+
+                                                    const MenuOverlay = (
+                                                        !isSelectionMode && (
+                                                            <div className="absolute top-3 right-3 z-40">
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.preventDefault();
                                                                         e.stopPropagation();
-                                                                        handleRenameClick(album);
+                                                                        setActiveMenuId(activeMenuId === album._id ? null : album._id);
                                                                     }}
-                                                                    className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
-                                                                    title="Rename album"
+                                                                    className={`p-2 rounded-full backdrop-blur-sm transition-all ${activeMenuId === album._id
+                                                                        ? 'bg-black/80 text-white opacity-100'
+                                                                        : 'bg-black/60 hover:bg-black/80 text-white opacity-0 group-hover:opacity-100'
+                                                                        }`}
                                                                 >
-                                                                    ✏️
+                                                                    <BsThreeDotsVertical size={16} />
                                                                 </button>
-                                                            )}
 
-                                                            <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
-                                                                <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
-                                                                <p className="text-sm text-gray-400">{album.fileCount} items</p>
+                                                                <AnimatePresence>
+                                                                    {activeMenuId === album._id && (
+                                                                        <motion.div
+                                                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            className="absolute right-0 top-full mt-2 w-48 bg-[#1A1A1A] border border-white/10 rounded-xl shadow-xl overflow-hidden py-1"
+                                                                        >
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.preventDefault();
+                                                                                    setAlbumToUpdateThumbnail(album);
+                                                                                    setThumbnailModalOpen(true);
+                                                                                    setActiveMenuId(null);
+                                                                                }}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                                                            >
+                                                                                <BsImage size={16} />
+                                                                                <span>Change Thumbnail</span>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.preventDefault();
+                                                                                    handleRenameClick(album);
+                                                                                    setActiveMenuId(null);
+                                                                                }}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                                                            >
+                                                                                <BsPencil size={16} />
+                                                                                <span>Rename</span>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.preventDefault();
+                                                                                    if (confirm("Are you sure you want to delete this album?")) {
+                                                                                        setSelectedAlbums(new Set([album._id]));
+                                                                                        api.delete(`/albums/${album._id}`).then(() => {
+                                                                                            fetchAlbums();
+                                                                                        });
+                                                                                    }
+                                                                                    setActiveMenuId(null);
+                                                                                }}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
+                                                                            >
+                                                                                <BsTrash size={16} />
+                                                                                <span>Delete</span>
+                                                                            </button>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
                                                             </div>
-                                                        </>
+                                                        )
                                                     );
 
                                                     if (isSelectionMode) {
@@ -336,22 +432,34 @@ export default function AlbumsPage() {
                                                             <div
                                                                 key={album._id}
                                                                 onClick={() => toggleAlbumSelection(album._id)}
-                                                                className={`group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
+                                                                className={`group relative block aspect-square bg-gray-900 rounded-2xl border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
                                                                     }`}
                                                             >
-                                                                {CardContent}
+                                                                {VisualContent}
+                                                                {SelectionOverlay}
                                                             </div>
                                                         );
                                                     }
 
                                                     return (
-                                                        <Link
+                                                        <div
                                                             key={album._id}
-                                                            href={`/${user?.name}/albums/${album._id}`}
-                                                            className="group relative block aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
+                                                            className="group relative block aspect-square bg-gray-900 rounded-2xl border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
                                                         >
-                                                            {CardContent}
-                                                        </Link>
+                                                            {/* Visually clipped content */}
+                                                            {VisualContent}
+
+                                                            {/* Navigation Link Overlay - z-10 */}
+                                                            <Link
+                                                                href={`/${user?.name}/albums/${album._id}`}
+                                                                className="absolute inset-0 z-10 rounded-2xl"
+                                                                aria-label={`View ${album.name}`}
+                                                            />
+
+                                                            {/* Interactive Overlays - z-30/40 */}
+                                                            {SelectionOverlay}
+                                                            {MenuOverlay}
+                                                        </div>
                                                     );
                                                 })}
                                             </div>
@@ -394,6 +502,18 @@ export default function AlbumsPage() {
                         itemType="album"
                     />
                 )}
+
+                <FileSelectionModal
+                    isOpen={thumbnailModalOpen}
+                    onClose={() => {
+                        setThumbnailModalOpen(false);
+                        setAlbumToUpdateThumbnail(null);
+                    }}
+                    onConfirm={handleChangeThumbnail}
+                    title="Select Album Cover"
+                    confirmLabel="Set Cover"
+                    selectionMode="single"
+                />
             </main>
         </div>
     );

@@ -396,7 +396,7 @@ export default function FavoritesPage() {
                                                             onToggleFavorite={handleToggleFavorite}
                                                             onPreview={() => handlePreview(globalIndex)}
                                                             onDownload={() => handleDownload(file._id, file.originalName)}
-                                                            onAddToAlbum={() => { }}
+                                                            onAddToAlbum={undefined}
                                                             onDelete={() => handleDeleteClick(file)}
                                                             onRename={() => handleRenameClick(file)}
                                                             onActivate={() => {

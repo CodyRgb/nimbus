@@ -105,6 +105,10 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                                 }`}>
                                 Favorites
                             </Link>
+                            <Link href={`/${user?.name}/recents`} className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-full hover:scale-105 ${pathname?.includes('/recents') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                }`}>
+                                Recents
+                            </Link>
                         </>
                     ) : (
                         ["About", "Help", "FAQ", "Contact"].map((item) => (
