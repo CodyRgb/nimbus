@@ -13,7 +13,8 @@ export default function ConditionalNavbar() {
 
     const isRegisterPage = pathname === '/register';
 
-    if (isLandingPage || isLoginPage || isRegisterPage) return null;
+    // Navbar is now enabled on all pages including Landing, Login and Register
+
 
     return <Navbar isLoggedIn={isLoggedIn} user={user} isOnAuthPage={isOnAuthPage} />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../../lib/api';
 import Image from 'next/image';
 
@@ -108,7 +109,13 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
         }
     };
 
-    if (!isOpen) return null;
+    // Ensure we only render on the client
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted || !isOpen) return null;
 
     const isImage = fileType.startsWith('image/');
     const isVideo = fileType.startsWith('video/');
@@ -116,8 +123,8 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
     const isPDF = fileType === 'application/pdf';
     const canPreview = isImage || isVideo || isAudio || isPDF;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+    return createPortal(
+        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9999 }}>
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/95 backdrop-blur-xl"
@@ -208,7 +215,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                                     height={500}
                                     src={previewUrl}
                                     alt={fileName}
-                                    className="max-w-full max-h-full object-contain rounded-lg"
+                                    className="max-w-full max-h-full object-contain"
                                 />
                             )}
 
@@ -216,7 +223,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                                 <video
                                     src={previewUrl}
                                     controls
-                                    className="max-w-full max-h-full rounded-lg"
+                                    className="max-w-full max-h-full"
                                     autoPlay
                                     preload="auto"
                                 >
@@ -257,7 +264,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                             {isPDF && (
                                 <iframe
                                     src={previewUrl}
-                                    className="w-full h-full rounded-lg"
+                                    className="w-full h-full"
                                     title={fileName}
                                 />
                             )}
@@ -314,7 +321,8 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                     </p>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

@@ -244,10 +244,10 @@ export default function UploadPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0f1729] text-white selection:bg-primary selection:text-white overflow-x-hidden">
+        <div className="w-full text-white selection:bg-primary selection:text-white overflow-x-hidden">
             {/* Main Content */}
             <div className="px-1 md:px-2 lg:px-10 py-2 md:py-4 lg:py-10">
-                <div className="max-w-[1800px] mx-auto md:mx-0">
+                <div className="max-w-[1500px] mx-auto w-full">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         {/* Left Column - Upload Area & Queue */}
                         <div className="lg:col-span-8 space-y-6">

@@ -2,8 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FiHeart, FiDownload, FiEdit2, FiTrash2, FiSmartphone } from "react-icons/fi";
-import { MdPhotoAlbum } from "react-icons/md";
+import { LuHeart, LuDownload, LuPencil, LuTrash2, LuSmartphone, LuImagePlus } from "react-icons/lu";
 import { AiFillHeart } from "react-icons/ai";
 import FileThumbnail from "./FileThumbnail";
 import FavoriteButton from "./FavoriteButton"; // Keeping if needed elsewhere, though unused in render
@@ -165,13 +164,13 @@ export default function StorageFileCard({
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                                 onMouseLeave={() => setMenuOpen(false)}
-                                className="absolute right-0 top-full mt-1 w-56 bg-[#1e1e1e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-30 flex flex-col py-1"
+                                className="absolute right-0 top-full mt-1 w-56 bg-[#1e1e1e] border border-white/10 shadow-xl overflow-hidden z-30 flex flex-col py-1"
                             >
                                 <button
                                     onClick={(e) => handleAction(e, handleToggleFavoriteInternal)}
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                 >
-                                    {file.isFavorite ? <AiFillHeart className="text-red-500" size={18} /> : <FiHeart size={18} />}
+                                    {file.isFavorite ? <AiFillHeart className="text-red-500" size={18} /> : <LuHeart size={18} />}
                                     <span>{file.isFavorite ? "Remove from favorites" : "Add to favorites"}</span>
                                 </button>
 
@@ -180,7 +179,7 @@ export default function StorageFileCard({
                                         onClick={(e) => handleAction(e, onAddToAlbum)}
                                         className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                     >
-                                        <MdPhotoAlbum size={18} />
+                                        <LuImagePlus size={18} />
                                         <span>Add to album</span>
                                     </button>
                                 )}
@@ -191,7 +190,7 @@ export default function StorageFileCard({
                                     }}
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                 >
-                                    <FiSmartphone size={18} />
+                                    <LuSmartphone size={18} />
                                     <span>Open with devices</span>
                                 </button>
 
@@ -201,7 +200,7 @@ export default function StorageFileCard({
                                     onClick={(e) => handleAction(e, onDownload)}
                                     className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                 >
-                                    <FiDownload size={18} />
+                                    <LuDownload size={18} />
                                     <span>Download</span>
                                 </button>
 
@@ -210,7 +209,7 @@ export default function StorageFileCard({
                                         onClick={(e) => handleAction(e, onRename)}
                                         className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                     >
-                                        <FiEdit2 size={18} />
+                                        <LuPencil size={18} />
                                         <span>Rename</span>
                                     </button>
                                 )}
@@ -222,7 +221,7 @@ export default function StorageFileCard({
                                         onClick={(e) => handleAction(e, onDelete)}
                                         className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                                     >
-                                        <FiTrash2 size={18} />
+                                        <LuTrash2 size={18} />
                                         <span>{deleteLabel}</span>
                                     </button>
                                 )}

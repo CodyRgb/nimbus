@@ -14,6 +14,7 @@ import FavoriteButton from "../../components/FavoriteButton";
 import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
 import RenameModal from "../../components/RenameModal";
+import { LuEye, LuDownload, LuTrash2, LuImagePlus, LuX } from "react-icons/lu";
 
 interface FileData {
     _id: string;
@@ -388,8 +389,8 @@ export default function StoragePage() {
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="min-h-screen bg-black text-white p-6">
-            <div className="max-w-7xl md:mx-0 mx-auto">
+        <div className="w-full">
+            <div className="max-w-[1500px] mx-auto w-full">
                 {/* Header */}
                 <motion.div
                     className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
@@ -413,38 +414,38 @@ export default function StoragePage() {
                             >
                                 <motion.button
                                     onClick={handleBulkDownload}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    ⬇ Download ({selectedFiles.size})
+                                    <LuDownload size={16} /> Download ({selectedFiles.size})
                                 </motion.button>
                                 <motion.button
                                     onClick={() => {
                                         setFilesToAdd(Array.from(selectedFiles));
                                         setAddToAlbumModalOpen(true);
                                     }}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    🖼 Add to Album ({selectedFiles.size})
+                                    <LuImagePlus size={16} /> Add to Album ({selectedFiles.size})
                                 </motion.button>
                                 <motion.button
                                     onClick={handleBulkDelete}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    🗑 Delete ({selectedFiles.size})
+                                    <LuTrash2 size={16} /> Delete ({selectedFiles.size})
                                 </motion.button>
                                 <motion.button
                                     onClick={() => setSelectedFiles(new Set())}
-                                    className="px-4 py-2 glass-card border border-gray-500/30 text-gray-400 rounded-xl hover:bg-gray-500/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-gray-500/30 text-gray-400 rounded-xl hover:bg-gray-500/10 font-medium text-sm transition-all flex items-center gap-2"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    ✕ Cancel
+                                    <LuX size={16} /> Cancel
                                 </motion.button>
                             </motion.div>
                         )}
@@ -507,13 +508,13 @@ export default function StoragePage() {
                             placeholder="🔍 Search files..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white placeholder-gray-500 bg-white/5 font-body"
+                            className="w-full px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white placeholder-gray-500 bg-transparent font-display transition-all"
                         />
                     </div>
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
-                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white bg-white/5 font-body"
+                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display transition-all cursor-pointer"
                     >
                         <option value="all">All Types</option>
                         <option value="image">Images</option>
@@ -524,7 +525,7 @@ export default function StoragePage() {
                     <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white bg-white/5 font-body"
+                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display transition-all cursor-pointer"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -594,10 +595,10 @@ export default function StoragePage() {
                                         </motion.div>
 
                                         {/* Files Grid */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                                             {filesInGroup.map((file, index) => {
                                                 const isSelected = selectedFiles.has(file._id);
-                                                const globalIndex = paginatedFiles.findIndex(f => f._id === file._id);
+                                                const globalIndex = filteredFiles.indexOf(file);
 
                                                 return (
                                                     <motion.div
@@ -721,14 +722,14 @@ export default function StoragePage() {
                                                                 <motion.button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        handlePreview(index);
+                                                                        handlePreview((currentPage - 1) * ITEMS_PER_PAGE + index);
                                                                     }}
                                                                     className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                     whileHover={{ scale: 1.1 }}
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Preview"
                                                                 >
-                                                                    👁️
+                                                                    <LuEye size={18} />
                                                                 </motion.button>
                                                                 <motion.button
                                                                     onClick={(e) => {
@@ -740,7 +741,7 @@ export default function StoragePage() {
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Download"
                                                                 >
-                                                                    ⬇️
+                                                                    <LuDownload size={18} />
                                                                 </motion.button>
                                                                 <motion.button
                                                                     onClick={(e) => {
@@ -752,7 +753,7 @@ export default function StoragePage() {
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Delete"
                                                                 >
-                                                                    🗑️
+                                                                    <LuTrash2 size={18} />
                                                                 </motion.button>
                                                             </div>
                                                         </div>
@@ -788,14 +789,14 @@ export default function StoragePage() {
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    handlePreview(index);
+                                                                    handlePreview((currentPage - 1) * ITEMS_PER_PAGE + index);
                                                                 }}
                                                                 className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                 whileHover={{ scale: 1.1 }}
                                                                 whileTap={{ scale: 0.9 }}
                                                                 title="Preview"
                                                             >
-                                                                👁️
+                                                                <LuEye size={18} />
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
@@ -807,7 +808,7 @@ export default function StoragePage() {
                                                                 whileTap={{ scale: 0.9 }}
                                                                 title="Download"
                                                             >
-                                                                ⬇️
+                                                                <LuDownload size={18} />
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
@@ -820,7 +821,7 @@ export default function StoragePage() {
                                                                 whileTap={{ scale: 0.9 }}
                                                                 title="Add to Album"
                                                             >
-                                                                🖼️
+                                                                <LuImagePlus size={18} />
                                                             </motion.button>
                                                             <motion.button
                                                                 onClick={(e) => {
@@ -832,7 +833,7 @@ export default function StoragePage() {
                                                                 whileTap={{ scale: 0.9 }}
                                                                 title="Delete"
                                                             >
-                                                                🗑️
+                                                                <LuTrash2 size={18} />
                                                             </motion.button>
                                                         </div>
                                                     )}
@@ -843,43 +844,46 @@ export default function StoragePage() {
                                 </tbody>
                             </table>
                         </div>
-                    </GlassCard>
-                )}
-            </div>
+                    </GlassCard >
+                )
+                }
+            </div >
 
             {/* Pagination Controls */}
-            <div className="mt-8 pb-8">
+            < div className="mt-8 pb-8" >
                 <Pagination
                     currentPage={currentPage}
                     totalPages={totalPaginationPages}
                     onPageChange={setCurrentPage}
                 />
-            </div>
+            </div >
 
 
             {/* Preview Modal */}
-            {selectedFile && (
-                <MediaPreviewModal
-                    isOpen={previewModalOpen}
-                    fileId={selectedFile._id}
-                    fileName={selectedFile.originalName}
-                    fileType={selectedFile.mimeType}
-                    fileSize={formatSize(selectedFile.size)}
-                    onClose={() => {
-                        setPreviewModalOpen(false);
-                        setSelectedFileIndex(null);
-                    }}
-                    onDelete={() => {
-                        setPreviewModalOpen(false);
-                        handleDeleteClick(selectedFile);
-                    }}
-                    onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
-                    onNext={handlePreviewNext}
-                    onPrevious={handlePreviewPrevious}
-                    hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
-                    hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
-                />
-            )}
+            {
+                selectedFile && (
+                    <MediaPreviewModal
+                        isOpen={previewModalOpen}
+                        fileId={selectedFile._id}
+                        fileName={selectedFile.originalName}
+                        fileType={selectedFile.mimeType}
+                        fileSize={formatSize(selectedFile.size)}
+                        onClose={() => {
+                            setPreviewModalOpen(false);
+                            setSelectedFileIndex(null);
+                        }}
+                        onDelete={() => {
+                            setPreviewModalOpen(false);
+                            handleDeleteClick(selectedFile);
+                        }}
+                        onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
+                        onNext={handlePreviewNext}
+                        onPrevious={handlePreviewPrevious}
+                        hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
+                        hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
+                    />
+                )
+            }
 
             {/* Add to Album Modal */}
             <AddToAlbumModal
@@ -894,31 +898,35 @@ export default function StoragePage() {
             />
 
             {/* Rename Modal */}
-            {fileToRename && (
-                <RenameModal
-                    isOpen={renameModalOpen}
-                    onClose={() => {
-                        setRenameModalOpen(false);
-                        setFileToRename(null);
-                    }}
-                    currentName={fileToRename.originalName}
-                    onRename={handleRename}
-                    itemType="file"
-                />
-            )}
+            {
+                fileToRename && (
+                    <RenameModal
+                        isOpen={renameModalOpen}
+                        onClose={() => {
+                            setRenameModalOpen(false);
+                            setFileToRename(null);
+                        }}
+                        currentName={fileToRename.originalName}
+                        onRename={handleRename}
+                        itemType="file"
+                    />
+                )
+            }
 
             {/* Delete Confirmation Modal */}
-            {fileToDelete && (
-                <DeleteConfirmModal
-                    isOpen={deleteModalOpen}
-                    fileName={fileToDelete.originalName}
-                    fileSize={formatSize(fileToDelete.size)}
-                    fileType={fileToDelete.mimeType.split('/')[1]?.toUpperCase() || 'Unknown'}
-                    onConfirm={handleDeleteConfirm}
-                    onCancel={handleDeleteCancel}
-                    isDeleting={isDeleting}
-                />
-            )}
-        </div>
+            {
+                fileToDelete && (
+                    <DeleteConfirmModal
+                        isOpen={deleteModalOpen}
+                        fileName={fileToDelete.originalName}
+                        fileSize={formatSize(fileToDelete.size)}
+                        fileType={fileToDelete.mimeType.split('/')[1]?.toUpperCase() || 'Unknown'}
+                        onConfirm={handleDeleteConfirm}
+                        onCancel={handleDeleteCancel}
+                        isDeleting={isDeleting}
+                    />
+                )
+            }
+        </div >
     );
 }

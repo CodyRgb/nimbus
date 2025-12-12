@@ -54,32 +54,7 @@ export default function LoginPage() {
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-white overflow-x-hidden min-h-screen flex flex-col">
             {/* Header */}
-            <header className="relative z-20 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#1e293b] px-10 py-4 bg-background-dark/80 backdrop-blur-md">
-                <div className="flex items-center gap-4 text-white">
-                    <div className="size-6 text-primary">
-                        <svg className="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z" fill="currentColor"></path>
-                        </svg>
-                    </div>
-                    <Link href="/" className="text-white text-xl font-bold leading-tight tracking-[-0.015em] hover:opacity-80 transition-opacity">
-                        Nimbus
-                    </Link>
-                </div>
-                <div className="flex flex-1 justify-end gap-8 hidden md:flex">
-                    <div className="flex items-center gap-9">
-                        <Link className="text-accent-text hover:text-white transition-colors text-sm font-medium leading-normal" href="/">Home</Link>
-                        <a className="text-accent-text hover:text-white transition-colors text-sm font-medium leading-normal" href="#">Features</a>
-                        <a className="text-accent-text hover:text-white transition-colors text-sm font-medium leading-normal" href="#">Pricing</a>
-                    </div>
-                    <div className="flex gap-2">
-                        <Link href="/register">
-                            <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-opacity">
-                                <span className="truncate">Sign Up</span>
-                            </button>
-                        </Link>
-                    </div>
-                </div>
-            </header>
+
 
             {/* Main Content */}
             <main className="relative flex-1 flex items-center justify-center p-4">

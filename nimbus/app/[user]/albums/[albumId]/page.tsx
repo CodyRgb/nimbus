@@ -193,10 +193,9 @@ export default function AlbumDetailsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-blue-500/30">
-            <Navbar isLoggedIn={isLoggedIn} user={user} isOnAuthPage={false} />
+        <div className="w-full text-white selection:bg-blue-500/30">
 
-            <main className="pt-32 px-4 md:px-8 max-w-7xl mx-auto">
+            <main className="px-4 md:px-8 max-w-[1800px] mx-auto">
                 <div className="mb-8">
                     <Link href={`/${user?.name}/albums`} className="text-gray-400 hover:text-white mb-4 inline-block transition-colors">
                         ← Back to Albums
@@ -235,7 +234,7 @@ export default function AlbumDetailsPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                         {files.map((file) => (
                             <motion.div
                                 key={file._id}

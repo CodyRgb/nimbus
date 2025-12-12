@@ -17,7 +17,8 @@ interface Album {
     createdAt: string;
 }
 import { AnimatePresence, motion } from 'framer-motion';
-import { BsThreeDotsVertical, BsPencil, BsTrash, BsImage } from 'react-icons/bs';
+import { BsThreeDotsVertical } from 'react-icons/bs';
+import { LuPencil, LuTrash2, LuImage } from 'react-icons/lu';
 import CreateAlbumModal from '../../components/CreateAlbumModal';
 import RenameModal from '../../components/RenameModal';
 import FileSelectionModal from '../../components/FileSelectionModal';
@@ -213,10 +214,9 @@ export default function AlbumsPage() {
     }, [albums.length]);
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-blue-500/30">
-            <Navbar isLoggedIn={isLoggedIn} user={user} isOnAuthPage={false} />
+        <div className="w-full text-white selection:bg-blue-500/30">
 
-            <main className="pt-32 px-4 md:px-8 max-w-7xl mx-auto">
+            <main className="px-4 md:px-8 max-w-[1500px] mx-auto w-full">
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-4">
                         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
@@ -307,7 +307,7 @@ export default function AlbumsPage() {
                                             </motion.div>
 
                                             {/* Albums Grid */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                                                 {albumsInGroup.map((album) => {
                                                     const isSelected = selectedAlbums.has(album._id);
 
@@ -379,7 +379,7 @@ export default function AlbumsPage() {
                                                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            className="absolute right-0 top-full mt-2 w-48 bg-[#1A1A1A] border border-white/10 rounded-xl shadow-xl overflow-hidden py-1"
+                                                                            className="absolute right-0 top-full mt-2 w-48 bg-[#1A1A1A] border border-white/10 shadow-xl overflow-hidden py-1"
                                                                         >
                                                                             <button
                                                                                 onClick={(e) => {
@@ -390,7 +390,7 @@ export default function AlbumsPage() {
                                                                                 }}
                                                                                 className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <BsImage size={16} />
+                                                                                <LuImage size={16} />
                                                                                 <span>Change Thumbnail</span>
                                                                             </button>
                                                                             <button
@@ -401,7 +401,7 @@ export default function AlbumsPage() {
                                                                                 }}
                                                                                 className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <BsPencil size={16} />
+                                                                                <LuPencil size={16} />
                                                                                 <span>Rename</span>
                                                                             </button>
                                                                             <button
@@ -417,7 +417,7 @@ export default function AlbumsPage() {
                                                                                 }}
                                                                                 className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <BsTrash size={16} />
+                                                                                <LuTrash2 size={16} />
                                                                                 <span>Delete</span>
                                                                             </button>
                                                                         </motion.div>
@@ -444,7 +444,7 @@ export default function AlbumsPage() {
                                                     return (
                                                         <div
                                                             key={album._id}
-                                                            className="group relative block aspect-square bg-gray-900 rounded-2xl border border-white/10 hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10"
+                                                            className="group relative block aspect-square glass-panel rounded-2xl border border-white/10 hover:border-primary/50 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]"
                                                         >
                                                             {/* Visually clipped content */}
                                                             {VisualContent}

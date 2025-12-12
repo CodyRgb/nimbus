@@ -51,12 +51,12 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
     }, [isLoggedIn, isOnAuthPage]);
 
     return (
-        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none">
+        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 lg:px-46 pointer-events-none">
             <motion.nav
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 glass-card-dark rounded-full shadow-lg max-w-8xl w-full relative overflow-hidden"
+                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl max-w-8xl w-full relative overflow-hidden"
             >
 
                 {/* Logo */}
@@ -191,7 +191,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         transition={{ duration: 0.3 }}
                         className="md:hidden absolute top-24 left-4 right-4 pointer-events-auto"
                     >
-                        <div className="glass-card border border-white/10 rounded-2xl p-4 shadow-lg">
+                        <div className="bg-[#0f172a]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl">
                             <div className="flex flex-col gap-2">
                                 <Link
                                     href={`/${user?.name}/storage`}

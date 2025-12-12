@@ -10,6 +10,7 @@ import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
 import GlassCard from "../../components/ui/GlassCard";
 import RenameModal from "../../components/RenameModal";
+import { LuEye, LuDownload, LuTrash2 } from "react-icons/lu";
 
 interface FileData {
     _id: string;
@@ -270,8 +271,8 @@ export default function FavoritesPage() {
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="w-full text-white p-6">
+            <div className="max-w-[1500px] mx-auto w-full">
                 {/* Header */}
                 <motion.div
                     className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
@@ -298,13 +299,13 @@ export default function FavoritesPage() {
                             placeholder="🔍 Search favorites..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white placeholder-gray-500 bg-white/5 font-body"
+                            className="w-full px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white placeholder-gray-500 bg-transparent font-display"
                         />
                     </div>
                     <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white bg-white/5 font-body"
+                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -375,9 +376,9 @@ export default function FavoritesPage() {
                                         </motion.div>
 
                                         {/* Files Grid */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                                             {filesInGroup.map((file, index) => {
-                                                const globalIndex = paginatedFiles.findIndex(f => f._id === file._id);
+                                                const globalIndex = filteredFiles.indexOf(file);
 
                                                 return (
                                                     <motion.div
@@ -435,7 +436,7 @@ export default function FavoritesPage() {
                                             <motion.tr
                                                 key={file._id}
                                                 className="group transition-colors cursor-pointer hover:bg-white/5 relative"
-                                                onClick={() => handlePreview(index)}
+                                                onClick={() => handlePreview((currentPage - 1) * ITEMS_PER_PAGE + index)}
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ duration: 0.3, delay: index * 0.02 }}
@@ -462,14 +463,14 @@ export default function FavoritesPage() {
                                                                 <motion.button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        handlePreview(index);
+                                                                        handlePreview((currentPage - 1) * ITEMS_PER_PAGE + index);
                                                                     }}
                                                                     className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                     whileHover={{ scale: 1.1 }}
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Preview"
                                                                 >
-                                                                    👁️
+                                                                    <LuEye size={18} />
                                                                 </motion.button>
                                                                 <motion.button
                                                                     onClick={(e) => {
@@ -481,19 +482,19 @@ export default function FavoritesPage() {
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Download"
                                                                 >
-                                                                    ⬇️
+                                                                    <LuDownload size={18} />
                                                                 </motion.button>
                                                                 <motion.button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleDeleteClick(file);
                                                                     }}
-                                                                    className="p-1.5 text-white hover:bg-white/10 rounded-lg transition-colors"
+                                                                    className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                                     whileHover={{ scale: 1.1 }}
                                                                     whileTap={{ scale: 0.9 }}
                                                                     title="Remove from Favorites"
                                                                 >
-                                                                    🗑️
+                                                                    <LuTrash2 size={18} />
                                                                 </motion.button>
                                                             </div>
                                                         </div>
@@ -528,14 +529,14 @@ export default function FavoritesPage() {
                                                         <motion.button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handlePreview(index);
+                                                                handlePreview((currentPage - 1) * ITEMS_PER_PAGE + index);
                                                             }}
                                                             className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                                             whileHover={{ scale: 1.1 }}
                                                             whileTap={{ scale: 0.9 }}
                                                             title="Preview"
                                                         >
-                                                            👁️
+                                                            <LuEye size={18} />
                                                         </motion.button>
                                                         <motion.button
                                                             onClick={(e) => {
@@ -547,7 +548,7 @@ export default function FavoritesPage() {
                                                             whileTap={{ scale: 0.9 }}
                                                             title="Download"
                                                         >
-                                                            ⬇️
+                                                            <LuDownload size={18} />
                                                         </motion.button>
                                                         <motion.button
                                                             onClick={(e) => {
@@ -559,7 +560,7 @@ export default function FavoritesPage() {
                                                             whileTap={{ scale: 0.9 }}
                                                             title="Remove from Favorites"
                                                         >
-                                                            🗑️
+                                                            <LuTrash2 size={18} />
                                                         </motion.button>
                                                     </div>
                                                 </td>
@@ -567,71 +568,78 @@ export default function FavoritesPage() {
                                         );
                                     })}
                                 </tbody>
-                            </table>
-                        </div>
-                    </GlassCard>
-                )}
-            </div>
+                            </table >
+                        </div >
+                    </GlassCard >
+                )
+                }
+            </div >
 
             {/* Pagination Controls */}
-            <div className="mt-8 pb-8">
+            < div className="mt-8 pb-8" >
                 <Pagination
                     currentPage={currentPage}
                     totalPages={totalPaginationPages}
                     onPageChange={setCurrentPage}
                 />
-            </div>
+            </div >
 
             {/* Preview Modal */}
-            {selectedFile && (
-                <MediaPreviewModal
-                    isOpen={previewModalOpen}
-                    fileId={selectedFile._id}
-                    fileName={selectedFile.originalName}
-                    fileType={selectedFile.mimeType}
-                    fileSize={formatSize(selectedFile.size)}
-                    onClose={() => {
-                        setPreviewModalOpen(false);
-                        setSelectedFileIndex(null);
-                    }}
-                    onDelete={() => {
-                        setPreviewModalOpen(false);
-                        handleDeleteClick(selectedFile);
-                    }}
-                    onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
-                    onNext={handlePreviewNext}
-                    onPrevious={handlePreviewPrevious}
-                    hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
-                    hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
-                />
-            )}
+            {
+                selectedFile && (
+                    <MediaPreviewModal
+                        isOpen={previewModalOpen}
+                        fileId={selectedFile._id}
+                        fileName={selectedFile.originalName}
+                        fileType={selectedFile.mimeType}
+                        fileSize={formatSize(selectedFile.size)}
+                        onClose={() => {
+                            setPreviewModalOpen(false);
+                            setSelectedFileIndex(null);
+                        }}
+                        onDelete={() => {
+                            setPreviewModalOpen(false);
+                            handleDeleteClick(selectedFile);
+                        }}
+                        onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
+                        onNext={handlePreviewNext}
+                        onPrevious={handlePreviewPrevious}
+                        hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
+                        hasPrevious={selectedFileIndex !== null && selectedFileIndex > 0}
+                    />
+                )
+            }
 
             {/* Delete Confirmation Modal */}
-            {fileToDelete && (
-                <DeleteConfirmModal
-                    isOpen={deleteModalOpen}
-                    fileName={fileToDelete.originalName}
-                    fileSize={formatSize(fileToDelete.size)}
-                    fileType={fileToDelete.mimeType.split('/')[1]?.toUpperCase() || 'Unknown'}
-                    onConfirm={handleDeleteConfirm}
-                    onCancel={handleDeleteCancel}
-                    isDeleting={isDeleting}
-                />
-            )}
+            {
+                fileToDelete && (
+                    <DeleteConfirmModal
+                        isOpen={deleteModalOpen}
+                        fileName={fileToDelete.originalName}
+                        fileSize={formatSize(fileToDelete.size)}
+                        fileType={fileToDelete.mimeType.split('/')[1]?.toUpperCase() || 'Unknown'}
+                        onConfirm={handleDeleteConfirm}
+                        onCancel={handleDeleteCancel}
+                        isDeleting={isDeleting}
+                    />
+                )
+            }
 
             {/* Rename Modal */}
-            {fileToRename && (
-                <RenameModal
-                    isOpen={renameModalOpen}
-                    onClose={() => {
-                        setRenameModalOpen(false);
-                        setFileToRename(null);
-                    }}
-                    currentName={fileToRename.originalName}
-                    onRename={handleRename}
-                    itemType="file"
-                />
-            )}
-        </div>
+            {
+                fileToRename && (
+                    <RenameModal
+                        isOpen={renameModalOpen}
+                        onClose={() => {
+                            setRenameModalOpen(false);
+                            setFileToRename(null);
+                        }}
+                        currentName={fileToRename.originalName}
+                        onRename={handleRename}
+                        itemType="file"
+                    />
+                )
+            }
+        </div >
     );
 }

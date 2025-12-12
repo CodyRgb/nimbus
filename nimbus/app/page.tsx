@@ -52,46 +52,7 @@ export default function LandingPage() {
 
       <div className="relative z-10 flex min-h-screen w-full flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-50 w-full glass-panel border-b-0 border-b-glass-border">
-          <div className="layout-container flex justify-center w-full">
-            <div className="w-full max-w-[1280px] px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-white">
-                <div className="size-8 text-primary">
-                  <span className="material-symbols-outlined !text-3xl">cloud_queue</span>
-                </div>
-                <h2 className="text-white text-xl font-bold tracking-tight">Nimbus</h2>
-              </div>
-              <div className="hidden lg:flex items-center gap-8">
-                <Link className="text-gray-300 hover:text-primary text-sm font-medium transition-colors" href="#features">Features</Link>
-                <Link className="text-gray-300 hover:text-primary text-sm font-medium transition-colors" href="#how-it-works">How It Works</Link>
-                <Link className="text-gray-300 hover:text-primary text-sm font-medium transition-colors" href="#integration">Integration</Link>
-                <Link className="text-gray-300 hover:text-primary text-sm font-medium transition-colors" href="#faq">FAQ</Link>
-              </div>
-              <div className="flex gap-3">
-                {isLoggedIn ? (
-                  <Link href={`/${user?.name}/storage`}>
-                    <button className="flex cursor-pointer items-center justify-center rounded-full h-10 px-5 bg-primary text-white text-sm font-bold hover:bg-[#2563eb] shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all">
-                      Dashboard
-                    </button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href="/login">
-                      <button className="hidden sm:flex cursor-pointer items-center justify-center rounded-full h-10 px-5 bg-transparent border border-white/20 text-white text-sm font-bold hover:bg-white/5 transition-all">
-                        Login
-                      </button>
-                    </Link>
-                    <Link href="/register">
-                      <button className="flex cursor-pointer items-center justify-center rounded-full h-10 px-5 bg-primary text-white text-sm font-bold hover:bg-[#2563eb] shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all">
-                        Get Started
-                      </button>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+
 
         {/* Hero Section */}
         <section className="relative flex flex-col justify-center py-20 lg:py-32 px-6">
