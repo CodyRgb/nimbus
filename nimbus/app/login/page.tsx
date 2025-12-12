@@ -52,19 +52,14 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start relative overflow-hidden">
-            {/* Animated Background Orbs */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-aurora-purple/20 rounded-full blur-[100px] opacity-50 animate-float" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-aurora-blue/20 rounded-full blur-[100px] opacity-50 animate-float" style={{ animationDelay: "2s" }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-aurora-pink/10 rounded-full blur-[120px] opacity-30 animate-float" style={{ animationDelay: "4s" }} />
-
+        <div className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 bg-black relative overflow-hidden">
             <motion.div
                 className="relative w-full max-w-md z-10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
             >
-                <GlassCard className="p-8 md:p-10 glow-purple border-white/10">
+                <GlassCard className="p-8 md:p-10 border-white/10">
                     <div className="mb-8 text-center">
                         <motion.div
                             initial={{ scale: 0, rotate: -20 }}
@@ -72,8 +67,8 @@ export default function LoginPage() {
                             transition={{ type: "spring", duration: 0.8, bounce: 0.5 }}
                             className="inline-block mb-6"
                         >
-                            <div className="w-20 h-20 bg-gradient-aurora rounded-2xl flex items-center justify-center text-4xl shadow-2xl relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-2xl relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-black/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                                 <span className="relative z-10">👋</span>
                             </div>
                         </motion.div>
@@ -105,7 +100,7 @@ export default function LoginPage() {
                                 Email Address
                             </label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-aurora-blue transition-colors">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-white transition-colors">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                     </svg>
@@ -116,7 +111,7 @@ export default function LoginPage() {
                                     id="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue/50 focus:border-aurora-blue/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                    className="w-full pl-11 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none text-white placeholder-gray-500 transition-all font-body"
                                     placeholder="you@example.com"
                                     required
                                 />
@@ -131,7 +126,7 @@ export default function LoginPage() {
                                 Password
                             </label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-aurora-purple transition-colors">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-white transition-colors">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
@@ -142,7 +137,7 @@ export default function LoginPage() {
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-purple/50 focus:border-aurora-purple/50 outline-none text-white placeholder-gray-500 transition-all font-body"
+                                    className="w-full pl-11 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/50 outline-none text-white placeholder-gray-500 transition-all font-body"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -153,13 +148,13 @@ export default function LoginPage() {
                             <label className="flex items-center text-gray-400 cursor-pointer hover:text-gray-300 group select-none">
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-aurora-purple focus:ring-aurora-purple/50 mr-2 transition-all"
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-white focus:ring-white/50 mr-2 transition-all"
                                 />
                                 <span className="font-body group-hover:text-white transition-colors">Remember me</span>
                             </label>
                             <Link
                                 href="/forgot-password"
-                                className="text-aurora-blue hover:text-aurora-pink transition-colors font-body font-medium"
+                                className="text-white hover:text-gray-300 transition-colors font-body font-medium"
                             >
                                 Forgot password?
                             </Link>
@@ -167,7 +162,7 @@ export default function LoginPage() {
 
                         <MagneticButton
                             variant="primary"
-                            className="w-full !py-4 !text-lg !font-bold shadow-lg shadow-aurora-purple/20"
+                            className="w-full !py-4 !text-lg !font-bold shadow-lg"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -187,7 +182,7 @@ export default function LoginPage() {
                         Don&rsquo;t have an account?{" "}
                         <Link
                             href="/register"
-                            className="text-aurora-blue hover:text-aurora-pink font-semibold transition-colors inline-flex items-center gap-1 group"
+                            className="text-white hover:text-gray-300 font-semibold transition-colors inline-flex items-center gap-1 group"
                         >
                             Sign up
                             <span className="group-hover:translate-x-1 transition-transform">→</span>

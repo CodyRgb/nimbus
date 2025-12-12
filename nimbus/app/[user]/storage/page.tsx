@@ -465,15 +465,11 @@ export default function StoragePage() {
                                     <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.5} suffix=" MB" />
                                 </div>
                             </div>
-                            <div className="flex gap-4">
-                                <ProgressRing progress={Math.min((stats.totalSize / (1024 * 1024 * 1024)) * 100, 100)} size={100}>
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-white">
-                                            <AnimatedCounter value={totalFiles} duration={1} />
-                                        </div>
-                                        <div className="text-xs text-gray-400">Files</div>
-                                    </div>
-                                </ProgressRing>
+                            <div>
+                                <p className="text-sm text-gray-400 mb-2 font-body">Total Files</p>
+                                <div className="text-4xl font-bold text-white font-display">
+                                    <AnimatedCounter value={totalFiles} duration={1} />
+                                </div>
                             </div>
                         </div>
 
@@ -703,7 +699,7 @@ export default function StoragePage() {
                                                         />
                                                     </div>
                                                 </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-4" colSpan={5}>
+                                                <td className="px-2 md:px-6 py-3 md:py-4">
                                                     {/* Mobile card layout */}
                                                     <div className="md:hidden flex flex-col gap-2">
                                                         {/* Name and icon */}

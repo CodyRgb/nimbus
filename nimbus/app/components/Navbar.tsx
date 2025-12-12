@@ -28,7 +28,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-full shadow-lg max-w-8xl w-full relative overflow-hidden"
+                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 glass-card-dark rounded-full shadow-lg max-w-8xl w-full relative overflow-hidden"
             >
 
                 {/* Logo */}
