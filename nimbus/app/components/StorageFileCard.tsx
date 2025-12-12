@@ -1,9 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { FiHeart, FiDownload, FiEdit2, FiTrash2, FiSmartphone } from "react-icons/fi";
+import { MdPhotoAlbum } from "react-icons/md";
+import { AiFillHeart } from "react-icons/ai";
 import FileThumbnail from "./FileThumbnail";
-import FavoriteButton from "./FavoriteButton";
+import FavoriteButton from "./FavoriteButton"; // Keeping if needed elsewhere, though unused in render
 import React from "react";
+import api from "../../lib/api";
 
 interface StorageFileCardProps {
     file: {
@@ -25,6 +30,7 @@ interface StorageFileCardProps {
     onRename?: () => void;
     showActions?: boolean;
     onActivate?: () => void; // Called when card is clicked/tapped
+    deleteLabel?: string;
 }
 
 export default function StorageFileCard({
@@ -40,8 +46,28 @@ export default function StorageFileCard({
     onDelete,
     onRename,
     showActions = true,
-    onActivate
+    onActivate,
+    deleteLabel = "Delete"
 }: StorageFileCardProps) {
+
+    const [menuOpen, setMenuOpen] = React.useState(false);
+    const menuRef = React.useRef<HTMLDivElement>(null);
+
+    // Close menu when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setMenuOpen(false);
+            }
+        };
+
+        if (menuOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuOpen]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 Bytes";
@@ -54,12 +80,41 @@ export default function StorageFileCard({
     const handleCardClick = (e: React.MouseEvent) => {
         // If clicking on action buttons, don't activate the card
         const target = e.target as HTMLElement;
-        if (target.closest('button') || target.closest('input[type="checkbox"]')) {
+        if (target.closest('button') || target.closest('input[type="checkbox"]') || target.closest('.menu-trigger')) {
             return;
         }
 
         if (onActivate) {
             onActivate();
+        }
+    };
+
+    const handleDoubleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onPreview();
+    };
+
+    const handleMenuClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setMenuOpen(!menuOpen);
+    };
+
+    const handleAction = (e: React.MouseEvent, action: () => void) => {
+        e.stopPropagation();
+        action();
+        setMenuOpen(false);
+    };
+
+    const handleToggleFavoriteInternal = async () => {
+        try {
+            // Call API
+            const response = await api.patch(`/files/${file._id}/favorite`);
+            const newStatus = response.data.isFavorite;
+            // Notify parent to update state
+            onToggleFavorite(file._id, newStatus);
+        } catch (error) {
+            console.error("Failed to toggle favorite", error);
+            alert("Failed to update favorite status");
         }
     };
 
@@ -69,7 +124,8 @@ export default function StorageFileCard({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={handleCardClick}
-            className={`group relative bg-gray-900 rounded-xl overflow-hidden border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
+            onDoubleClick={handleDoubleClick}
+            className={`group relative bg-gray-900 rounded-xl overflow-visible border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
                 isActive ? 'border-white/30' :
                     'border-white/10 hover:border-white/20'
                 }`}
@@ -88,17 +144,91 @@ export default function StorageFileCard({
                 />
             </div>
 
-            {/* Favorite Button */}
-            <div
-                className={`absolute top-2 right-2 z-20 transition-opacity duration-200 ${file.isFavorite || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}
-            >
-                <div className="bg-black/40 backdrop-blur-sm rounded-full p-1">
-                    <FavoriteButton
-                        fileId={file._id}
-                        isFavorite={file.isFavorite}
-                        onToggle={onToggleFavorite}
-                    />
+            {/* 3-Dots Menu Button */}
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <div className="relative">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setMenuOpen(!menuOpen);
+                        }}
+                        className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm transition-colors"
+                    >
+                        <BsThreeDotsVertical size={18} />
+                    </button>
+
+                    <AnimatePresence>
+                        {menuOpen && (
+                            <motion.div
+                                ref={menuRef}
+                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                onMouseLeave={() => setMenuOpen(false)}
+                                className="absolute right-0 top-full mt-1 w-56 bg-[#1e1e1e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-30 flex flex-col py-1"
+                            >
+                                <button
+                                    onClick={(e) => handleAction(e, handleToggleFavoriteInternal)}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                >
+                                    {file.isFavorite ? <AiFillHeart className="text-red-500" size={18} /> : <FiHeart size={18} />}
+                                    <span>{file.isFavorite ? "Remove from favorites" : "Add to favorites"}</span>
+                                </button>
+
+                                {onAddToAlbum && (
+                                    <button
+                                        onClick={(e) => handleAction(e, onAddToAlbum)}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                    >
+                                        <MdPhotoAlbum size={18} />
+                                        <span>Add to album</span>
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={(e) => {
+                                        handleAction(e, () => alert("Open with feature coming soon!"));
+                                    }}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                >
+                                    <FiSmartphone size={18} />
+                                    <span>Open with devices</span>
+                                </button>
+
+                                <div className="h-px bg-white/10 my-1 mx-2"></div>
+
+                                <button
+                                    onClick={(e) => handleAction(e, onDownload)}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                >
+                                    <FiDownload size={18} />
+                                    <span>Download</span>
+                                </button>
+
+                                {onRename && (
+                                    <button
+                                        onClick={(e) => handleAction(e, onRename)}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                    >
+                                        <FiEdit2 size={18} />
+                                        <span>Rename</span>
+                                    </button>
+                                )}
+
+                                <div className="h-px bg-white/10 my-1 mx-2"></div>
+
+                                {onDelete && (
+                                    <button
+                                        onClick={(e) => handleAction(e, onDelete)}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
+                                    >
+                                        <FiTrash2 size={18} />
+                                        <span>{deleteLabel}</span>
+                                    </button>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
@@ -110,6 +240,12 @@ export default function StorageFileCard({
                     mimeType={file.mimeType}
                     className="w-full h-full object-cover"
                 />
+                {/* Favorite Indicator (Visual only, since button is in menu now) */}
+                {file.isFavorite && (
+                    <div className="absolute top-2 left-8 z-10 text-xl">
+                        ❤️
+                    </div>
+                )}
             </div>
 
             {/* Info Area */}
@@ -121,54 +257,6 @@ export default function StorageFileCard({
                     {formatSize(file.size)}
                 </p>
             </div>
-
-            {/* Hover/Active Actions Overlay */}
-            {showActions && (
-                <div className={`absolute inset-0 bg-black/60 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10 ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onPreview(); }}
-                        className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                        title="Preview"
-                    >
-                        👁️
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDownload(); }}
-                        className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                        title="Download"
-                    >
-                        ⬇️
-                    </button>
-                    {onAddToAlbum && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onAddToAlbum(); }}
-                            className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                            title="Add to Album"
-                        >
-                            🖼️
-                        </button>
-                    )}
-                    {onRename && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onRename(); }}
-                            className="p-2.5 bg-white/10 hover:bg-white/20 hover:scale-110 rounded-full text-white transition-all duration-200"
-                            title="Rename"
-                        >
-                            ✏️
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                            className="p-2.5 bg-red-500/20 hover:bg-red-500/40 hover:scale-110 rounded-full text-red-400 transition-all duration-200"
-                            title="Delete"
-                        >
-                            ❌
-                        </button>
-                    )}
-                </div>
-            )}
         </motion.div>
     );
 }

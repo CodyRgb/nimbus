@@ -13,14 +13,16 @@ interface FileData {
     createdAt: string;
     folder: string | null;
     isFavorite: boolean;
+    thumbnailUrl?: string; // Optional if available directly
 }
 
 interface FileSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (fileIds: string[]) => void;
+    onConfirm: (fileIds: string[], selectedFilesData?: FileData[]) => void;
     title?: string;
     confirmLabel?: string;
+    selectionMode?: 'single' | 'multiple';
 }
 
 export default function FileSelectionModal({
@@ -28,7 +30,8 @@ export default function FileSelectionModal({
     onClose,
     onConfirm,
     title = "Select Files",
-    confirmLabel = "Add Selected"
+    confirmLabel = "Add Selected",
+    selectionMode = 'multiple'
 }: FileSelectionModalProps) {
     const [files, setFiles] = useState<FileData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -52,7 +55,7 @@ export default function FileSelectionModal({
     const fetchFiles = async () => {
         setLoading(true);
         try {
-            // Fetch all files for client-side filtering/sorting for now, similar to StoragePage
+            // Fetch all files for client-side filtering/sorting for now
             const res = await api.get(`/files?page=1&limit=10000`);
             setFiles(res.data.files || []);
         } catch (error) {
@@ -63,13 +66,18 @@ export default function FileSelectionModal({
     };
 
     const toggleFileSelection = (fileId: string) => {
-        const newSelected = new Set(selectedFiles);
-        if (newSelected.has(fileId)) {
-            newSelected.delete(fileId);
+        if (selectionMode === 'single') {
+            const newSelected = new Set([fileId]);
+            setSelectedFiles(newSelected);
         } else {
-            newSelected.add(fileId);
+            const newSelected = new Set(selectedFiles);
+            if (newSelected.has(fileId)) {
+                newSelected.delete(fileId);
+            } else {
+                newSelected.add(fileId);
+            }
+            setSelectedFiles(newSelected);
         }
-        setSelectedFiles(newSelected);
     };
 
     // Filter Logic
@@ -91,7 +99,10 @@ export default function FileSelectionModal({
     const totalPaginationPages = Math.ceil(filteredFiles.length / ITEMS_PER_PAGE);
 
     const handleConfirm = () => {
-        onConfirm(Array.from(selectedFiles));
+        const selectedIds = Array.from(selectedFiles);
+        // Find the full file objects for selected Ids
+        const selectedFilesData = files.filter(f => selectedIds.includes(f._id));
+        onConfirm(selectedIds, selectedFilesData);
         onClose();
     };
 
@@ -150,10 +161,10 @@ export default function FileSelectionModal({
                                                 isSelected={selectedFiles.has(file._id)}
                                                 isSelectionMode={true}
                                                 onSelect={() => toggleFileSelection(file._id)}
-                                                onToggleFavorite={() => { }} // No-op for convenience, or handle if needed
-                                                onPreview={() => { }} // Could implement preview if desired, but keeping simple
+                                                onToggleFavorite={() => { }}
+                                                onPreview={() => { }}
                                                 onDownload={() => { }}
-                                                showActions={false} // Important: Hide actions
+                                                showActions={false}
                                             />
                                         </div>
                                     ))}
