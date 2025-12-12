@@ -14,7 +14,9 @@ import FavoriteButton from "../../components/FavoriteButton";
 import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
 import RenameModal from "../../components/RenameModal";
-import { LuEye, LuDownload, LuTrash2, LuImagePlus, LuX } from "react-icons/lu";
+import MobileContextMenu, { MobileAction } from "../../components/MobileContextMenu";
+import { LuEye, LuDownload, LuTrash2, LuImagePlus, LuX, LuHeart, LuSmartphone, LuPencil } from "react-icons/lu";
+import { AiFillHeart } from "react-icons/ai";
 
 interface FileData {
     _id: string;
@@ -40,7 +42,7 @@ export default function StoragePage() {
 
     // Client-side Pagination State (for display)
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 40;
+    const ITEMS_PER_PAGE = 100;
 
     // Selection state
     const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
@@ -65,6 +67,10 @@ export default function StoragePage() {
     // Rename modal state
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [fileToRename, setFileToRename] = useState<FileData | null>(null);
+
+    // Mobile Context Menu State
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileMenuFile, setMobileMenuFile] = useState<FileData | null>(null);
 
     const fetchContent = useCallback(async () => {
         setLoading(true);
@@ -257,10 +263,73 @@ export default function StoragePage() {
         }
     };
 
+
     const handlePreviewPrevious = () => {
         if (selectedFileIndex !== null && selectedFileIndex > 0) {
             setSelectedFileIndex(selectedFileIndex - 1);
         }
+    };
+
+    // Mobile Context Menu Handlers
+    const handleLongPress = (file: FileData) => {
+        if (window.innerWidth < 768) { // Only on mobile
+            setMobileMenuFile(file);
+            setMobileMenuOpen(true);
+        }
+    };
+
+    const getMobileMenuActions = (): MobileAction[] => {
+        if (!mobileMenuFile) return [];
+
+        const actions: MobileAction[] = [
+            {
+                label: mobileMenuFile.isFavorite ? "Remove from favorites" : "Add to favorites",
+                icon: mobileMenuFile.isFavorite ? <AiFillHeart className="text-red-500" /> : <LuHeart />,
+                onClick: async () => {
+                    try {
+                        const response = await api.patch(`/files/${mobileMenuFile._id}/favorite`);
+                        handleToggleFavorite(mobileMenuFile._id, response.data.isFavorite);
+                    } catch (e) {
+                        console.error("Favorite toggle failed", e);
+                    }
+                }
+            },
+            {
+                label: "Add to album",
+                icon: <LuImagePlus />,
+                onClick: () => {
+                    setFilesToAdd([mobileMenuFile._id]);
+                    setAddToAlbumModalOpen(true);
+                }
+            },
+            {
+                label: "Open with devices",
+                icon: <LuSmartphone />,
+                onClick: () => {
+                    alert("Open with devices feature coming soon!");
+                },
+                divider: true
+            },
+            {
+                label: "Download",
+                icon: <LuDownload />,
+                onClick: () => handleDownload(mobileMenuFile._id, mobileMenuFile.originalName)
+            },
+            {
+                label: "Rename",
+                icon: <LuPencil />,
+                onClick: () => handleRenameClick(mobileMenuFile),
+                divider: true
+            },
+            {
+                label: "Delete",
+                icon: <LuTrash2 />,
+                variant: 'danger',
+                onClick: () => handleDeleteClick(mobileMenuFile)
+            }
+        ];
+
+        return actions;
     };
 
     // Stats Calculation
@@ -595,7 +664,7 @@ export default function StoragePage() {
                                         </motion.div>
 
                                         {/* Files Grid */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-6">
                                             {filesInGroup.map((file, index) => {
                                                 const isSelected = selectedFiles.has(file._id);
                                                 const globalIndex = filteredFiles.indexOf(file);
@@ -626,6 +695,7 @@ export default function StoragePage() {
                                                             onActivate={() => {
                                                                 setActiveFileId(activeFileId === file._id ? null : file._id);
                                                             }}
+                                                            onLongPress={() => handleLongPress(file)}
                                                         />
                                                     </motion.div>
                                                 );
@@ -927,6 +997,14 @@ export default function StoragePage() {
                     />
                 )
             }
-        </div >
+
+            {/* Mobile Context Menu via Portal */}
+            <MobileContextMenu
+                isOpen={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+                actions={getMobileMenuActions()}
+                title={mobileMenuFile?.originalName}
+            />
+        </div>
     );
 }

@@ -26,10 +26,23 @@ interface UploadState {
     error?: string;
 }
 
+interface CategoryStats {
+    images: number;
+    documents: number;
+    videos: number;
+    other: number;
+}
+
+interface StorageStats {
+    totalUsed: number;
+    categoryStats: CategoryStats;
+}
+
 export default function UploadPage() {
     const router = useRouter();
     const { user } = useAuth();
     const [recentFiles, setRecentFiles] = useState<FileData[]>([]);
+    const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
     const [loadingFiles, setLoadingFiles] = useState(true);
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadState[]>([]);
@@ -50,9 +63,19 @@ export default function UploadPage() {
         }
     }, []);
 
+    const fetchStorageStats = useCallback(async () => {
+        try {
+            const res = await api.get("/files/storage");
+            setStorageStats(res.data);
+        } catch (error) {
+            console.error("Failed to fetch storage stats", error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchRecentFiles();
-    }, [fetchRecentFiles]);
+        fetchStorageStats();
+    }, [fetchRecentFiles, fetchStorageStats]);
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return "0 B";
@@ -134,6 +157,7 @@ export default function UploadPage() {
             ));
 
             fetchRecentFiles();
+            fetchStorageStats();
 
             setTimeout(() => {
                 setUploads(prev => prev.filter(u => u.id !== uploadId));
@@ -314,18 +338,41 @@ export default function UploadPage() {
                             <div className="bg-[#1a2332] rounded-2xl p-6 border border-white/5">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-bold">Storage</h3>
-                                    <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">Pro Plan</span>
+                                    <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full">Unlimited</span>
                                 </div>
 
                                 <div className="mb-3">
                                     <div className="flex items-end gap-2 mb-2">
-                                        <span className="text-3xl font-bold">45.5</span>
-                                        <span className="text-sm text-white/60 mb-1">GB used of 100 GB</span>
+                                        <span className="text-3xl font-bold">
+                                            {storageStats ? formatSize(storageStats.totalUsed).split(' ')[0] : '0'}
+                                        </span>
+                                        <span className="text-sm text-white/60 mb-1">
+                                            {storageStats ? formatSize(storageStats.totalUsed).split(' ')[1] : 'B'} used
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-6">
-                                    <div className="h-full w-[45%] bg-primary rounded-full"></div>
+                                <div className="h-3 bg-white/10 rounded-full overflow-hidden mb-6 flex">
+                                    {storageStats && storageStats.totalUsed > 0 && (
+                                        <>
+                                            <div
+                                                className="h-full bg-blue-400"
+                                                style={{ width: `${(storageStats.categoryStats.images / storageStats.totalUsed) * 100}%` }}
+                                            />
+                                            <div
+                                                className="h-full bg-yellow-400"
+                                                style={{ width: `${(storageStats.categoryStats.documents / storageStats.totalUsed) * 100}%` }}
+                                            />
+                                            <div
+                                                className="h-full bg-purple-400"
+                                                style={{ width: `${(storageStats.categoryStats.videos / storageStats.totalUsed) * 100}%` }}
+                                            />
+                                            <div
+                                                className="h-full bg-white/40"
+                                                style={{ width: `${(storageStats.categoryStats.other / storageStats.totalUsed) * 100}%` }}
+                                            />
+                                        </>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
@@ -342,7 +389,7 @@ export default function UploadPage() {
                                         <span className="text-xs text-white/60">Videos</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <div className="size-2 rounded-full bg-white/20"></div>
+                                        <div className="size-2 rounded-full bg-white/40"></div>
                                         <span className="text-xs text-white/60">Other</span>
                                     </div>
                                 </div>

@@ -1,12 +1,10 @@
-"use client";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { LuHeart, LuDownload, LuPencil, LuTrash2, LuSmartphone, LuImagePlus } from "react-icons/lu";
 import { AiFillHeart } from "react-icons/ai";
 import FileThumbnail from "./FileThumbnail";
 import FavoriteButton from "./FavoriteButton"; // Keeping if needed elsewhere, though unused in render
-import React from "react";
+import React, { useRef, useState } from "react";
 import api from "../../lib/api";
 
 interface StorageFileCardProps {
@@ -27,6 +25,7 @@ interface StorageFileCardProps {
     onAddToAlbum?: () => void;
     onDelete?: () => void;
     onRename?: () => void;
+    onLongPress?: () => void; // New prop for long press
     showActions?: boolean;
     onActivate?: () => void; // Called when card is clicked/tapped
     deleteLabel?: string;
@@ -44,6 +43,7 @@ export default function StorageFileCard({
     onAddToAlbum,
     onDelete,
     onRename,
+    onLongPress,
     showActions = true,
     onActivate,
     deleteLabel = "Delete"
@@ -51,6 +51,12 @@ export default function StorageFileCard({
 
     const [menuOpen, setMenuOpen] = React.useState(false);
     const menuRef = React.useRef<HTMLDivElement>(null);
+
+    // Touch handling refs
+    const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+    const lastTapTime = useRef<number>(0);
+    const touchstartPos = useRef<{ x: number, y: number } | null>(null);
+    const isLongPressTriggered = useRef(false);
 
     // Close menu when clicking outside
     React.useEffect(() => {
@@ -75,6 +81,72 @@ export default function StorageFileCard({
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
+
+    // --- Touch Event Handlers ---
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        // Ignore multi-touch
+        if (e.touches.length > 1) return;
+
+        const touch = e.touches[0];
+        touchstartPos.current = { x: touch.clientX, y: touch.clientY };
+        isLongPressTriggered.current = false;
+
+        // Start long press timer
+        touchTimeout.current = setTimeout(() => {
+            if (onLongPress) {
+                isLongPressTriggered.current = true;
+                if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+                onLongPress();
+            }
+        }, 500); // 500ms for long press
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!touchstartPos.current) return;
+
+        const touch = e.touches[0];
+        const moveX = Math.abs(touch.clientX - touchstartPos.current.x);
+        const moveY = Math.abs(touch.clientY - touchstartPos.current.y);
+
+        // If moved significantly, cancel gestures (it's a scroll)
+        if (moveX > 10 || moveY > 10) {
+            if (touchTimeout.current) {
+                clearTimeout(touchTimeout.current);
+                touchTimeout.current = null;
+            }
+        }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchTimeout.current) {
+            clearTimeout(touchTimeout.current);
+            touchTimeout.current = null;
+        }
+
+        // If long press happened, ignore this end event
+        if (isLongPressTriggered.current) {
+            e.preventDefault(); // Prevent click after long press
+            return;
+        }
+
+        // Determine Double Tap
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTapTime.current;
+
+        if (tapLength < 300 && tapLength > 0) {
+            // Double Tap detected
+            e.preventDefault(); // Prevent zoom or other defaults
+            onPreview();
+        } else {
+            // Single Tap logic handled by onClick usually, but we can augment here if needed
+            // For now, let onClick fire naturally for single taps
+        }
+
+        lastTapTime.current = currentTime;
+    };
+
+    // --- Mouse Event Handlers ---
 
     const handleCardClick = (e: React.MouseEvent) => {
         // If clicking on action buttons, don't activate the card
@@ -124,6 +196,9 @@ export default function StorageFileCard({
             animate={{ opacity: 1, scale: 1 }}
             onClick={handleCardClick}
             onDoubleClick={handleDoubleClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`group relative bg-gray-900 rounded-xl overflow-visible border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
                 isActive ? 'border-white/30' :
                     'border-white/10 hover:border-white/20'
@@ -237,7 +312,7 @@ export default function StorageFileCard({
                     fileId={file._id}
                     fileName={file.originalName}
                     mimeType={file.mimeType}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none" // prevent img drag interfering with touch
                 />
                 {/* Favorite Indicator (Visual only, since button is in menu now) */}
                 {file.isFavorite && (
@@ -248,7 +323,7 @@ export default function StorageFileCard({
             </div>
 
             {/* Info Area */}
-            <div className="p-3 bg-gray-900 border-t border-white/5">
+            <div className="p-2 md:p-3 bg-gray-900 border-t border-white/5">
                 <p className="text-sm font-medium text-white truncate font-body" title={file.originalName}>
                     {file.originalName}
                 </p>

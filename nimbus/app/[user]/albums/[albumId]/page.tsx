@@ -195,7 +195,7 @@ export default function AlbumDetailsPage() {
     return (
         <div className="w-full text-white selection:bg-blue-500/30">
 
-            <main className="px-4 md:px-8 max-w-[1800px] mx-auto">
+            <main className="px-4 md:px-8 max-w-[1500px] mx-auto">
                 <div className="mb-8">
                     <Link href={`/${user?.name}/albums`} className="text-gray-400 hover:text-white mb-4 inline-block transition-colors">
                         ← Back to Albums

@@ -727,3 +727,49 @@ export const renameFile = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ message: 'Failed to rename file', error: (error as Error).message });
     }
 };
+
+export const getStorageStats = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = req.user!._id;
+        const files = await File.find({ user: userId });
+
+        let totalUsed = 0;
+        const categoryStats = {
+            images: 0,
+            documents: 0,
+            videos: 0,
+            other: 0
+        };
+
+        files.forEach(file => {
+            totalUsed += file.size;
+            const mimeType = file.mimeType.toLowerCase();
+
+            if (mimeType.startsWith('image/')) {
+                categoryStats.images += file.size;
+            } else if (mimeType.startsWith('video/')) {
+                categoryStats.videos += file.size;
+            } else if (
+                mimeType.includes('pdf') ||
+                mimeType.includes('document') ||
+                mimeType.includes('text') ||
+                mimeType.includes('word') ||
+                mimeType.includes('excel') ||
+                mimeType.includes('sheet')
+            ) {
+                categoryStats.documents += file.size;
+            } else {
+                categoryStats.other += file.size;
+            }
+        });
+
+        res.json({
+            totalUsed,
+            categoryStats
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
