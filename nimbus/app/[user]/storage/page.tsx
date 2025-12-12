@@ -382,19 +382,13 @@ export default function StoragePage() {
     };
 
     const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'image': return { bg: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' };
-            case 'video': return { bg: 'from-purple-500/20 to-purple-600/20', border: 'border-purple-500/30', text: 'text-purple-400' };
-            case 'audio': return { bg: 'from-pink-500/20 to-pink-600/20', border: 'border-pink-500/30', text: 'text-pink-400' };
-            case 'application': return { bg: 'from-orange-500/20 to-orange-600/20', border: 'border-orange-500/30', text: 'text-orange-400' };
-            default: return { bg: 'from-gray-500/20 to-gray-600/20', border: 'border-gray-500/30', text: 'text-gray-400' };
-        }
+        return { bg: '', border: 'border-white/10', text: 'text-white' };
     };
 
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white p-6">
+        <div className="min-h-screen bg-black text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <motion.div
@@ -419,7 +413,7 @@ export default function StoragePage() {
                             >
                                 <motion.button
                                     onClick={handleBulkDownload}
-                                    className="px-4 py-2 glass-card border border-blue-500/30 text-blue-400 rounded-xl hover:bg-blue-500/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
@@ -430,7 +424,7 @@ export default function StoragePage() {
                                         setFilesToAdd(Array.from(selectedFiles));
                                         setAddToAlbumModalOpen(true);
                                     }}
-                                    className="px-4 py-2 glass-card border border-purple-500/30 text-purple-400 rounded-xl hover:bg-purple-500/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
@@ -438,7 +432,7 @@ export default function StoragePage() {
                                 </motion.button>
                                 <motion.button
                                     onClick={handleBulkDelete}
-                                    className="px-4 py-2 glass-card border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/10 font-medium text-sm transition-all"
+                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
@@ -463,7 +457,7 @@ export default function StoragePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <GlassCard className="p-8 mb-8 bg-linear-to-br from-aurora-purple/10 to-aurora-blue/10 border-aurora-blue/20" glow="blue">
+                    <GlassCard className="p-8 mb-8 border border-white/10">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
                             <div>
                                 <p className="text-sm text-gray-400 mb-2 font-body">Total Storage Usage</p>
@@ -517,13 +511,13 @@ export default function StoragePage() {
                             placeholder="🔍 Search files..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white placeholder-gray-500 bg-white/5 font-body"
+                            className="w-full px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white placeholder-gray-500 bg-white/5 font-body"
                         />
                     </div>
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
-                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white bg-white/5 font-body"
+                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white bg-white/5 font-body"
                     >
                         <option value="all">All Types</option>
                         <option value="image">Images</option>
@@ -534,7 +528,7 @@ export default function StoragePage() {
                     <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white bg-white/5 font-body"
+                        className="px-6 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-white outline-none text-white bg-white/5 font-body"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -546,13 +540,13 @@ export default function StoragePage() {
                     <div className="flex gap-2 glass-card p-1 rounded-xl border border-white/10">
                         <button
                             onClick={() => setViewMode("grid")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
                         >
                             ⊞ Grid
                         </button>
                         <button
                             onClick={() => setViewMode("list")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "list" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "list" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
                         >
                             ☰ List
                         </button>
@@ -600,7 +594,7 @@ export default function StoragePage() {
                                             <h2 className="text-2xl font-bold text-white font-display">
                                                 {formatDateHeader(firstFile.dateTaken || firstFile.uploadedAt)}
                                             </h2>
-                                            <div className="h-px bg-gradient-to-r from-aurora-blue/50 to-transparent mt-2"></div>
+                                            <div className="h-px bg-gradient-to-r from-white/50 to-transparent mt-2"></div>
                                         </motion.div>
 
                                         {/* Files Grid */}
@@ -787,6 +781,14 @@ export default function StoragePage() {
                                                 <td className="hidden md:table-cell px-6 py-4 text-right">
                                                     {!isSelected && (
                                                         <div className="flex items-center justify-end gap-2">
+                                                            <div onClick={(e) => e.stopPropagation()}>
+                                                                <FavoriteButton
+                                                                    fileId={file._id}
+                                                                    isFavorite={file.isFavorite}
+                                                                    onToggle={handleToggleFavorite}
+                                                                    inline={true}
+                                                                />
+                                                            </div>
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();

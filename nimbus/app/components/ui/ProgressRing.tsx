@@ -11,12 +11,12 @@ interface ProgressRingProps {
   color?: string;
 }
 
-export default function ProgressRing({ 
-  progress, 
+export default function ProgressRing({
+  progress,
   size = 120,
   strokeWidth = 8,
   children,
-  color = "url(#gradient)"
+  color = "#FFFFFF"
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -25,14 +25,6 @@ export default function ProgressRing({
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="transform -rotate-90">
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7C3AED" />
-            <stop offset="50%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#EC4899" />
-          </linearGradient>
-        </defs>
-        
         {/* Background circle */}
         <circle
           cx={size / 2}
@@ -42,7 +34,7 @@ export default function ProgressRing({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        
+
         {/* Progress circle */}
         <motion.circle
           cx={size / 2}
@@ -60,7 +52,7 @@ export default function ProgressRing({
           }}
         />
       </svg>
-      
+
       {children && (
         <div className="absolute inset-0 flex items-center justify-center">
           {children}

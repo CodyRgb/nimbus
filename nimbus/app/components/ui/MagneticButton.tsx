@@ -11,8 +11,8 @@ interface MagneticButtonProps {
   variant?: "primary" | "secondary" | "ghost";
 }
 
-export default function MagneticButton({ 
-  children, 
+export default function MagneticButton({
+  children,
   className = "",
   onClick,
   href,
@@ -34,8 +34,8 @@ export default function MagneticButton({
   };
 
   const variantClasses = {
-    primary: "bg-gradient-to-r from-aurora-purple to-aurora-blue hover:from-aurora-blue hover:to-aurora-pink text-white shadow-lg glow-purple",
-    secondary: "glass-card text-white hover:bg-white/10",
+    primary: "bg-white text-black hover:bg-gray-200 shadow-lg",
+    secondary: "glass-card text-white border border-white/20 hover:bg-white/10",
     ghost: "text-white hover:bg-white/5"
   };
 
@@ -56,7 +56,7 @@ export default function MagneticButton({
         whileTap={{ scale: 0.95 }}
       >
         <motion.span
-          className="absolute inset-0 bg-white/20 rounded-full"
+          className="absolute inset-0 bg-white/10 rounded-full"
           initial={{ scale: 0, opacity: 0 }}
           whileHover={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -79,7 +79,7 @@ export default function MagneticButton({
       whileTap={{ scale: 0.95 }}
     >
       <motion.span
-        className="absolute inset-0 bg-white/20 rounded-full"
+        className="absolute inset-0 bg-white/10 rounded-full"
         initial={{ scale: 0, opacity: 0 }}
         whileHover={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4 }}

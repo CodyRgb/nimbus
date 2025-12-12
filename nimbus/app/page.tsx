@@ -101,7 +101,7 @@ export default function LandingPage() {
   const { ref: statsRef, inView: statsInView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-deep-space-start via-deep-space-end to-deep-space-start text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-black text-white font-sans overflow-x-hidden">
       {/* Hero Section */}
       <section
         id="home"
@@ -109,15 +109,15 @@ export default function LandingPage() {
       >
         <ParticleBackground />
 
-        {/* Floating gradient orbs */}
-        <div className="absolute top-20 left-10 w-96 h-96 bg-aurora-purple/30 rounded-full blur-3xl animate-float opacity-50" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-aurora-blue/30 rounded-full blur-3xl animate-float opacity-50" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-aurora-pink/20 rounded-full blur-3xl animate-float opacity-40" style={{ animationDelay: "4s" }} />
+        {/* Floating subtle orbs */}
+        <div className="absolute top-20 left-10 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-float opacity-30" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-float opacity-30" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-float opacity-20" style={{ animationDelay: "4s" }} />
 
         <div className="relative z-10 max-w-6xl">
           {/* Badge */}
           <motion.div
-            className="inline-block mb-8 px-6 py-3 glass-card text-aurora-blue text-sm font-semibold"
+            className="inline-block mb-8 px-6 py-3 glass-card text-white text-sm font-semibold border border-white/20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -177,18 +177,18 @@ export default function LandingPage() {
             transition={{ duration: 1, delay: 0.8 }}
           >
             {[
-              { value: "∞", label: "Storage Space", color: "aurora-blue" },
-              { value: "2GB", label: "Max File Size", color: "aurora-purple" },
-              { value: "100%", label: "Free Forever", color: "aurora-pink" }
+              { value: "∞", label: "Storage Space" },
+              { value: "2GB", label: "Max File Size" },
+              { value: "100%", label: "Free Forever" }
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
-                className="glass-card p-6"
+                className="glass-card p-6 border border-white/10"
                 initial={{ opacity: 0, y: 20 }}
                 animate={statsInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.8 + i * 0.1 }}
               >
-                <div className={`text-4xl md:text-5xl font-bold text-${stat.color} mb-2`}>
+                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                   {stat.value}
                 </div>
                 <div className="text-sm text-gray-400">
@@ -223,34 +223,22 @@ export default function LandingPage() {
               {
                 icon: "☁️",
                 title: "Unlimited Storage",
-                desc: "Store as many files as you need without any storage limits or restrictions.",
-                gradient: "from-blue-500/20 to-blue-600/20",
-                border: "border-blue-500/30",
-                glow: "blue" as const
+                desc: "Store as many files as you need without any storage limits or restrictions."
               },
               {
                 icon: "🔒",
                 title: "Secure & Private",
-                desc: "Your data is encrypted and stored securely with Telegram's infrastructure.",
-                gradient: "from-green-500/20 to-green-600/20",
-                border: "border-green-500/30",
-                glow: "none" as const
+                desc: "Your data is encrypted and stored securely with Telegram's infrastructure."
               },
               {
                 icon: "⚡",
                 title: "Lightning Fast",
-                desc: "Upload and download files at blazing speeds with optimized performance.",
-                gradient: "from-purple-500/20 to-purple-600/20",
-                border: "border-purple-500/30",
-                glow: "purple" as const
+                desc: "Upload and download files at blazing speeds with optimized performance."
               },
               {
                 icon: "📁",
                 title: "All File Types",
-                desc: "Support for images, videos, documents, archives, and more file formats.",
-                gradient: "from-orange-500/20 to-orange-600/20",
-                border: "border-orange-500/30",
-                glow: "none" as const
+                desc: "Support for images, videos, documents, archives, and more file formats."
               },
             ].map((feature, i) => (
               <motion.div
@@ -260,8 +248,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: i * 0.1 }}
               >
                 <GlassCard
-                  className={`p-8 h-full bg-gradient-to-br ${feature.gradient} border ${feature.border} group cursor-pointer`}
-                  glow={feature.glow}
+                  className="p-8 h-full border border-white/10 group cursor-pointer"
                 >
                   <motion.div
                     className="text-5xl mb-6"
@@ -331,8 +318,8 @@ export default function LandingPage() {
                     transition={{ duration: 0.6, delay: i * 0.1 }}
                     viewport={{ once: true }}
                   >
-                    <div className="w-8 h-8 bg-gradient-aurora rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-white text-sm">✓</span>
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-black text-sm">✓</span>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2 text-lg font-display">{item.title}</h4>
@@ -349,7 +336,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <GlassCard className="p-12 text-center bg-gradient-to-br from-aurora-purple/20 to-aurora-blue/20 border-aurora-blue/30" glow="blue">
+              <GlassCard className="p-12 text-center border border-white/10">
                 <motion.div
                   className="text-8xl mb-6"
                   animate={{ y: [0, -20, 0] }}
@@ -420,8 +407,8 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, delay: i * 0.2 }}
                 viewport={{ once: true }}
               >
-                <GlassCard className="p-8 h-full bg-gradient-to-br from-white/5 to-white/10">
-                  <div className="absolute -top-6 -left-6 w-16 h-16 bg-gradient-aurora rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-2xl glow-purple">
+                <GlassCard className="p-8 h-full border border-white/10">
+                  <div className="absolute -top-6 -left-6 w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-black text-2xl font-bold shadow-2xl">
                     {step.step}
                   </div>
                   <motion.div
@@ -481,7 +468,7 @@ export default function LandingPage() {
                       {faq.question}
                     </span>
                     <motion.span
-                      className="text-3xl text-aurora-blue"
+                      className="text-3xl text-white"
                       animate={{ rotate: openFaqIndex === index ? 45 : 0 }}
                       transition={{ duration: 0.3 }}
                     >
@@ -619,22 +606,19 @@ export default function LandingPage() {
                   icon: "📧",
                   title: "Email Us",
                   desc: "For general inquiries and support",
-                  link: "contact.nimbuscloud@gmail.com",
-                  gradient: "from-blue-500/20 to-blue-600/20"
+                  link: "contact.nimbuscloud@gmail.com"
                 },
                 {
                   icon: "💬",
                   title: "Join Community",
                   desc: "Connect with other users on Telegram",
-                  link: "@nimbus_community",
-                  gradient: "from-purple-500/20 to-purple-600/20"
+                  link: "@nimbus_community"
                 },
                 {
                   icon: "🌐",
                   title: "Follow Us",
                   desc: "Stay updated on social media",
-                  link: "Social Links",
-                  gradient: "from-green-500/20 to-green-600/20"
+                  link: "Social Links"
                 },
               ].map((contact, i) => (
                 <motion.div
@@ -644,7 +628,7 @@ export default function LandingPage() {
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <GlassCard className={`p-8 bg-gradient-to-br ${contact.gradient}`}>
+                  <GlassCard className="p-8 border border-white/10">
                     <div className="flex items-start space-x-4">
                       <div className="text-4xl">{contact.icon}</div>
                       <div>
@@ -652,7 +636,7 @@ export default function LandingPage() {
                         <p className="text-gray-400 mb-3 font-body">{contact.desc}</p>
                         <a
                           href="#"
-                          className="text-aurora-blue hover:text-aurora-pink transition-colors font-semibold"
+                          className="text-white hover:text-gray-300 transition-colors font-semibold"
                         >
                           {contact.link}
                         </a>
@@ -737,7 +721,7 @@ export default function LandingPage() {
       < motion.button
         onClick={() => scrollToSection("home")
         }
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-aurora rounded-full shadow-2xl glow-purple flex items-center justify-center text-white text-2xl z-50"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-white rounded-full shadow-2xl flex items-center justify-center text-black text-2xl z-50"
         whileHover={{ scale: 1.1, rotate: 360 }}
         whileTap={{ scale: 0.9 }}
         initial={{ opacity: 0, y: 100 }}

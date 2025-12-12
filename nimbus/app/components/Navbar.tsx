@@ -28,10 +28,8 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)] max-w-8xl w-full relative overflow-hidden"
+                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-full shadow-lg max-w-8xl w-full relative overflow-hidden"
             >
-                {/* Subtle Aurora Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
 
                 {/* Logo */}
                 <div
@@ -156,7 +154,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         transition={{ duration: 0.3 }}
                         className="md:hidden absolute top-24 left-4 right-4 pointer-events-auto"
                     >
-                        <div className="glass-card border border-white/10 rounded-2xl p-4 shadow-[0_0_40px_-10px_rgba(120,119,198,0.3)]">
+                        <div className="glass-card border border-white/10 rounded-2xl p-4 shadow-lg">
                             <div className="flex flex-col gap-2">
                                 <Link
                                     href={`/${user?.name}/storage`}
