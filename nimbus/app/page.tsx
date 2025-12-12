@@ -115,19 +115,10 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/8 rounded-full blur-3xl animate-float opacity-40" style={{ animationDelay: "4s" }} />
 
         <div className="relative z-10 max-w-6xl">
-          {/* Badge */}
-          <motion.div
-            className="inline-block mb-8 px-6 py-3 glass-card text-white text-sm font-semibold border border-white/20"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            ✨ Powered by Telegram Infrastructure
-          </motion.div>
 
           {/* Main Headline */}
           <motion.h1
-            className="text-6xl md:text-8xl font-extrabold tracking-tight mb-8 text-gradient font-display leading-tight"
+            className="text-6xl md:text-8xl font-extrabold tracking-tight m-8 text-gradient font-display leading-tight"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
