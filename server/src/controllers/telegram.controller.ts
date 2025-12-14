@@ -24,7 +24,7 @@ export const connectTelegram = async (req: Request, res: Response): Promise<void
 export const verifyTelegram = async (req: Request, res: Response): Promise<void> => {
     try {
         const { phoneNumber, code, phoneCodeHash, session, password } = req.body;
-        const userId = req.user._id;
+        const userId = req.user!._id;
 
         if (!phoneNumber || !code || !phoneCodeHash || !session) {
             res.status(400).json({ message: 'Missing required fields' });
