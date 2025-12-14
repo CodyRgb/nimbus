@@ -2,12 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.model';
 
-// Extend Express Request interface to include user property
-declare module 'express-serve-static-core' {
-    interface Request {
-        user?: any; // Replace `any` with your User type if available
-    }
-}
+
 
 /**
  * Middleware to protect routes by verifying JWT tokens
