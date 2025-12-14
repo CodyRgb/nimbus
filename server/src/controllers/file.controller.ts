@@ -22,7 +22,7 @@ import ExifParser from 'exif-parser';
 
 export const uploadFile = async (req: Request, res: Response): Promise<void> => {
     try {
-        const files = req.files as Express.Multer.File[];
+        const files = req.files as any[];
         if (!files || files.length === 0) {
             res.status(400).json({ message: 'No files uploaded' });
             return;
