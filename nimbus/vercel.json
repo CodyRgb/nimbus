@@ -9,7 +9,7 @@
     ],
     "env": {
         "NEXT_PUBLIC_API_URL": {
-            "description": "Backend API URL (e.g., https://your-backend.com/api)",
+            "description": "https://nimbus-cloud-server-8g79.onrender.com",
             "required": true
         }
     }
