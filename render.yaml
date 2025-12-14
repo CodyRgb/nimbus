@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: cloudcontainer-server
+    env: node
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TELEGRAM_API_ID
+        sync: false
+      - key: TELEGRAM_API_HASH
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_SESSION
+        sync: false
+      - key: TELEGRAM_OWNER_ID
+        sync: false
+      - key: TELEGRAM_CHANNEL_ID
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
