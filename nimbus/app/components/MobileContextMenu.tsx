@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export interface MobileAction {
@@ -21,13 +21,13 @@ interface MobileContextMenuProps {
 
 export default function MobileContextMenu({ isOpen, onClose, actions, title }: MobileContextMenuProps) {
     // Only render on client side
-    const mounted = useRef(false);
+    const [isMounted, setIsMounted] = useState(false);
+
     useEffect(() => {
-        mounted.current = true;
-        return () => { mounted.current = false; };
+        setIsMounted(true);
     }, []);
 
-    if (!typeof window) return null;
+    if (!isMounted) return null;
 
     return createPortal(
         <AnimatePresence>
