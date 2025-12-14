@@ -28,6 +28,8 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 const app = (0, express_1.default)();
+// Enable trust proxy for Render/Heroku etc.
+app.set('trust proxy', 1);
 // Security Headers
 app.use((0, helmet_1.default)());
 // Global Rate Limiting

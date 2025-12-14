@@ -27,6 +27,9 @@ process.on('uncaughtException', (err: Error) => {
 
 const app: Application = express();
 
+// Enable trust proxy for Render/Heroku etc.
+app.set('trust proxy', 1);
+
 // Security Headers
 app.use(helmet());
 
