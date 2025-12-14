@@ -65,8 +65,17 @@ app.use(mongoSanitize);
 app.use(hpp());
 
 // Enable CORS
+// Strip path from CORS_ORIGIN if present (e.g. https://site.com/api -> https://site.com)
+let corsOrigin = env.CORS_ORIGIN;
+try {
+    const url = new URL(env.CORS_ORIGIN);
+    corsOrigin = url.origin;
+} catch (e) {
+    logger.warn(`Invalid CORS_ORIGIN URL: ${env.CORS_ORIGIN}, using as-is`);
+}
+
 app.use(cors({
-    origin: env.CORS_ORIGIN,
+    origin: corsOrigin,
     credentials: true
 }));
 
