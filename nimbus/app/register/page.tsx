@@ -166,7 +166,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="h-screen w-full flex items-center justify-center pt-24 pb-8 px-4 md:px-8 bg-[#0b1121] text-white overflow-y-auto">
+        <div className="h-[100dvh] w-full flex items-center justify-center pt-24 pb-8 px-4 md:px-8 bg-[#0b1121] text-white overflow-y-auto">
             <style jsx global>{`
                 body {
                     background-color: #0b1121;
@@ -227,7 +227,7 @@ export default function RegisterPage() {
                 }
             `}</style>
 
-            <div className="w-full max-w-6xl h-auto min-h-[600px] max-h-[calc(100vh-8rem)] bg-[#0f172a] rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex flex-col md:flex-row">
+            <div className="w-full max-w-6xl h-auto md:min-h-[600px] md:max-h-[calc(100vh-8rem)] bg-[#0f172a] rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex flex-col md:flex-row">
 
                 {/* Left Panel - Green Side */}
                 <div className="md:w-5/12 green-gradient-panel p-10 flex flex-col justify-between relative">

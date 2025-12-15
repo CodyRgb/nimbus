@@ -126,11 +126,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
 
                 {/* Desktop Buttons */}
                 <div className="hidden md:flex items-center gap-4 shrink-0 relative z-10">
-                    {isOnAuthPage ? (
-                        <Link href="/contact" className="px-6 py-3 text-base font-medium text-gray-300 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:scale-105">
-                            Contact
-                        </Link>
-                    ) : isLoggedIn ? (
+                    {isOnAuthPage ? null : isLoggedIn ? (
                         <>
                             <span className="text-white font-medium">
                                 {user?.name}
