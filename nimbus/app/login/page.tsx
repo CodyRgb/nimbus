@@ -52,12 +52,12 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-white overflow-x-hidden min-h-screen flex flex-col">
+        <div className="bg-background-light dark:bg-background-dark font-display text-white overflow-hidden h-screen flex flex-col">
             {/* Header */}
 
 
             {/* Main Content */}
-            <main className="relative flex-1 flex items-center justify-center p-4">
+            <main className="relative flex-1 flex items-center justify-center p-4 overflow-y-auto">
                 <div className="glow-orb orb-1"></div>
                 <div className="glow-orb orb-2"></div>
 

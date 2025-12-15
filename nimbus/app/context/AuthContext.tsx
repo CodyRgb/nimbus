@@ -22,24 +22,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        const token = sessionStorage.getItem('token');
+        const storedUser = sessionStorage.getItem('user');
         if (token && storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
                 setIsLoggedIn(true);
             } catch (error) {
                 console.error("Failed to parse user data", error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
             }
         }
     }, []);
 
     const login = (userData: User, token: string) => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(userData));
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('user', JSON.stringify(userData));
         }
         setUser(userData);
         setIsLoggedIn(true);
@@ -47,8 +47,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = () => {
         if (typeof window !== 'undefined') {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
             window.location.href = '/';
         }
         setUser(null);

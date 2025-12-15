@@ -416,7 +416,7 @@ export default function FavoritesPage() {
                 ) : (
                     /* List View */
                     <GlassCard className="overflow-hidden">
-                        <div className="overflow-x-auto md:overflow-x-visible">
+                        <div className="overflow-hidden">
                             <table className="w-full text-left text-xs md:text-sm">
                                 <thead className="glass-card border-b border-white/10">
                                     <tr>
@@ -443,11 +443,11 @@ export default function FavoritesPage() {
                                             >
                                                 <td className="px-2 md:px-6 py-3 md:py-4" colSpan={5}>
                                                     {/* Mobile card layout */}
-                                                    <div className="md:hidden flex flex-col gap-2">
+                                                    <div className="md:hidden flex flex-col gap-2 w-full overflow-hidden">
                                                         {/* Name and icon */}
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xl">{getFileIcon(file.mimeType)}</span>
-                                                            <span className="font-medium text-white font-body truncate flex-1">{file.originalName}</span>
+                                                        <div className="flex items-center gap-2 min-w-0 w-full">
+                                                            <span className="text-xl shrink-0">{getFileIcon(file.mimeType)}</span>
+                                                            <span className="font-medium text-white font-body truncate flex-1 min-w-0 max-w-[calc(100vw-200px)]" title={file.originalName}>{file.originalName}</span>
                                                         </div>
                                                         {/* Actions and favorite */}
                                                         <div className="flex items-center gap-2">
@@ -459,7 +459,7 @@ export default function FavoritesPage() {
                                                                     inline={true}
                                                                 />
                                                             </div>
-                                                            <div className="flex items-center gap-1 ml-auto">
+                                                            <div className="flex items-center gap-1 ml-auto shrink-0">
                                                                 <motion.button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
@@ -500,8 +500,8 @@ export default function FavoritesPage() {
                                                         </div>
                                                     </div>
                                                     {/* Desktop layout */}
-                                                    <div className="hidden md:flex items-center gap-3">
-                                                        <div onClick={(e) => e.stopPropagation()}>
+                                                    <div className="hidden md:flex items-center gap-3 min-w-0">
+                                                        <div onClick={(e) => e.stopPropagation()} className="shrink-0">
                                                             <FavoriteButton
                                                                 fileId={file._id}
                                                                 isFavorite={file.isFavorite}
@@ -509,8 +509,8 @@ export default function FavoritesPage() {
                                                                 inline={true}
                                                             />
                                                         </div>
-                                                        <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
-                                                        <span className="font-medium text-white font-body truncate">{file.originalName}</span>
+                                                        <span className="text-2xl shrink-0">{getFileIcon(file.mimeType)}</span>
+                                                        <span className="font-medium text-white font-body truncate min-w-0 flex-1" title={file.originalName}>{file.originalName}</span>
                                                     </div>
                                                 </td>
                                                 <td className="hidden lg:table-cell px-6 py-4 text-gray-400 font-body">

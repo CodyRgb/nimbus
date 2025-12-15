@@ -51,12 +51,12 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
     }, [isLoggedIn, isOnAuthPage]);
 
     return (
-        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-8 lg:px-46 pointer-events-none">
+        <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 md:px-6 lg:px-8 pointer-events-none">
             <motion.nav
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="pointer-events-auto flex items-center justify-between gap-6 p-4 pl-8 pr-4 bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl max-w-8xl w-full relative overflow-hidden"
+                className="pointer-events-auto flex items-center justify-between gap-3 md:gap-6 p-3 md:p-4 pl-6 md:pl-8 pr-3 md:pr-4 bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl max-w-[95vw] lg:max-w-7xl w-full relative overflow-hidden"
             >
 
                 {/* Logo */}
@@ -159,7 +159,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                 </div>
 
                 {/* Mobile Hamburger Menu */}
-                {isLoggedIn && !isOnAuthPage && (
+                {!isOnAuthPage && (
                     <motion.button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="md:hidden relative z-10 p-2 text-white"
@@ -183,7 +183,7 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
 
             {/* Mobile Menu Dropdown */}
             <AnimatePresence>
-                {mobileMenuOpen && isLoggedIn && (
+                {mobileMenuOpen && (
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -192,53 +192,86 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         className="md:hidden absolute top-24 left-4 right-4 pointer-events-auto"
                     >
                         <div className="bg-[#0f172a]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl">
-                            <div className="flex flex-col gap-2">
-                                <Link
-                                    href={`/${user?.name}/storage`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/storage') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    📂 Storage
-                                </Link>
-                                <Link
-                                    href={`/${user?.name}/favorites`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/favorites') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    ❤️ Favorites
-                                </Link>
-                                <Link
-                                    href={`/${user?.name}/upload`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/upload') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    📤 Uploads
-                                </Link>
-                                <Link
-                                    href={`/${user?.name}/albums`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/albums') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
-                                        }`}
-                                >
-                                    🖼️ Albums
-                                </Link>
-                                <div className="border-t border-white/10 my-2"></div>
-                                <div className="px-6 py-2 text-sm text-gray-400">
-                                    {user?.name}
+                            {isLoggedIn ? (
+                                <div className="flex flex-col gap-2">
+                                    <Link
+                                        href={`/${user?.name}/storage`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/storage') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        📂 Storage
+                                    </Link>
+                                    <Link
+                                        href={`/${user?.name}/favorites`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/favorites') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        ❤️ Favorites
+                                    </Link>
+                                    <Link
+                                        href={`/${user?.name}/upload`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/upload') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        📤 Uploads
+                                    </Link>
+                                    <Link
+                                        href={`/${user?.name}/albums`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${pathname?.includes('/albums') ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                            }`}
+                                    >
+                                        🖼️ Albums
+                                    </Link>
+                                    <div className="border-t border-white/10 my-2"></div>
+                                    <div className="px-6 py-2 text-sm text-gray-400">
+                                        {user?.name}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        className="px-6 py-3 text-base font-medium text-red-400 hover:text-red-300 transition-all duration-300 rounded-xl hover:bg-red-500/10 text-left"
+                                    >
+                                        🚪 Logout
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        logout();
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className="px-6 py-3 text-base font-medium text-red-400 hover:text-red-300 transition-all duration-300 rounded-xl hover:bg-red-500/10 text-left"
-                                >
-                                    🚪 Logout
-                                </button>
-                            </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {["About", "Help", "FAQ", "Contact"].map((item) => (
+                                        <Link
+                                            key={item}
+                                            href={`/#${item.toLowerCase()}`}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className={`px-6 py-3 text-base font-medium transition-all duration-300 rounded-xl ${activeSection === item.toLowerCase() ? 'bg-white text-black' : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                                }`}
+                                        >
+                                            {item}
+                                        </Link>
+                                    ))}
+                                    <div className="border-t border-white/10 my-2"></div>
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <button className="w-full px-6 py-3 text-base font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                                            Login
+                                        </button>
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <button className="w-full px-6 py-3 text-base font-medium text-black bg-white rounded-xl hover:bg-gray-100 transition-all duration-300">
+                                            Register
+                                        </button>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
