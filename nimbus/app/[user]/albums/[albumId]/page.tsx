@@ -10,8 +10,11 @@ import { motion } from 'framer-motion';
 import MediaPreviewModal from '../../../components/MediaPreviewModal';
 import FileSelectionModal from '../../../components/FileSelectionModal';
 import AddToAlbumModal from '../../../components/AddToAlbumModal';
+import MobileContextMenu, { MobileAction } from '../../../components/MobileContextMenu';
 import StorageFileCard from '../../../components/StorageFileCard';
 import RenameModal from '../../../components/RenameModal';
+import { LuDownload, LuTrash2, LuImagePlus, LuHeart, LuSmartphone, LuPencil } from "react-icons/lu";
+import { AiFillHeart } from "react-icons/ai";
 
 interface FileData {
     _id: string;
@@ -47,6 +50,10 @@ export default function AlbumDetailsPage() {
     // Add to Album modal state
     const [addToAlbumModalOpen, setAddToAlbumModalOpen] = useState(false);
     const [fileToAddToAlbum, setFileToAddToAlbum] = useState<string[]>([]);
+
+    // Mobile Context Menu State
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileMenuFile, setMobileMenuFile] = useState<FileData | null>(null);
 
     const albumId = params.albumId as string;
 
@@ -173,6 +180,52 @@ export default function AlbumDetailsPage() {
         setAddToAlbumModalOpen(true);
     };
 
+    // Mobile Context Menu Handlers
+    const handleLongPress = (file: FileData) => {
+        if (window.innerWidth < 768) { // Only on mobile
+            setMobileMenuFile(file);
+            setMobileMenuOpen(true);
+        }
+    };
+
+    const getMobileMenuActions = (): MobileAction[] => {
+        if (!mobileMenuFile) return [];
+
+        const actions: MobileAction[] = [
+            {
+                label: mobileMenuFile.isFavorite ? "Remove from favorites" : "Add to favorites",
+                icon: mobileMenuFile.isFavorite ? <AiFillHeart className="text-red-500" /> : <LuHeart />,
+                onClick: async () => {
+                    try {
+                        const response = await api.patch(`/files/${mobileMenuFile._id}/favorite`);
+                        handleToggleFavorite(mobileMenuFile._id, response.data.isFavorite);
+                    } catch (e) {
+                        console.error("Favorite toggle failed", e);
+                    }
+                }
+            },
+            {
+                label: "Download",
+                icon: <LuDownload />,
+                onClick: () => handleDownload(mobileMenuFile._id, mobileMenuFile.originalName)
+            },
+            {
+                label: "Rename",
+                icon: <LuPencil />,
+                onClick: () => handleRenameClick(mobileMenuFile),
+                divider: true
+            },
+            {
+                label: "Remove from Album",
+                icon: <LuTrash2 />,
+                variant: 'danger',
+                onClick: () => handleRemoveFromAlbum(mobileMenuFile._id)
+            }
+        ];
+
+        return actions;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
@@ -234,7 +287,7 @@ export default function AlbumDetailsPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-6">
                         {files.map((file) => (
                             <motion.div
                                 key={file._id}
@@ -257,6 +310,7 @@ export default function AlbumDetailsPage() {
                                     onDelete={() => handleRemoveFromAlbum(file._id)}
                                     deleteLabel="Remove from Album"
                                     onRename={() => handleRenameClick(file)}
+                                    onLongPress={() => handleLongPress(file)}
                                 />
                             </motion.div>
                         ))}
@@ -318,6 +372,14 @@ export default function AlbumDetailsPage() {
                     setFileToAddToAlbum([]);
                     alert("Added to album successfully!");
                 }}
+            />
+
+            {/* Mobile Context Menu */}
+            <MobileContextMenu
+                isOpen={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+                title={mobileMenuFile?.originalName || "Options"}
+                actions={getMobileMenuActions()}
             />
         </div>
     );
