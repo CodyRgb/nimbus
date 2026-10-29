@@ -64,19 +64,44 @@ app.use(mongoSanitize);
 // Prevent Parameter Pollution
 app.use(hpp());
 
-// Enable CORS
-// Strip path from CORS_ORIGIN if present (e.g. https://site.com/api -> https://site.com)
-let corsOrigin = env.CORS_ORIGIN;
-try {
-    const url = new URL(env.CORS_ORIGIN);
-    corsOrigin = url.origin;
-} catch (e) {
-    logger.warn(`Invalid CORS_ORIGIN URL: ${env.CORS_ORIGIN}, using as-is`);
-}
+// Enable Dynamic CORS (Supports Vercel production, preview URLs, and localhost)
+const allowedOrigins = (env.CORS_ORIGIN || '')
+    .split(',')
+    .map((o: string) => o.trim())
+    .filter(Boolean);
 
 app.use(cors({
-    origin: corsOrigin,
-    credentials: true
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+
+        // Allow localhost development
+        if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+            return callback(null, true);
+        }
+
+        // Allow any Vercel deployment (*.vercel.app)
+        try {
+            const hostname = new URL(origin).hostname;
+            if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) {
+                return callback(null, true);
+            }
+        } catch (e) {
+            // Ignore URL parsing errors
+        }
+
+        // Allow configured origins from CORS_ORIGIN env
+        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+            return callback(null, true);
+        }
+
+        logger.warn(`Blocked by CORS: ${origin}`);
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Range'],
+    exposedHeaders: ['Content-Range', 'Accept-Ranges', 'ETag']
 }));
 
 // Logging Middleware

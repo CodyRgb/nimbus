@@ -13,9 +13,7 @@ import {
     LuCopy, 
     LuCheck, 
     LuLock, 
-    LuAlertTriangle,
     LuRadio,
-    LuTerminal,
     LuClock
 } from 'react-icons/lu';
 import { useAuth } from '../../context/AuthContext';
