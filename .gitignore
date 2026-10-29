@@ -1,0 +1,86 @@
+# ============================================
+# Environment Variables & Secrets
+# ============================================
+.env
+.env.*
+*.env
+!.env.example
+!.env*.example
+bot_session.txt
+*_session.txt
+*.session
+telegram_session.txt
+
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+*/node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ============================================
+# Build Outputs & Caches
+# ============================================
+dist/
+server/dist/
+build/
+.next/
+nimbus/.next/
+out/
+nimbus/out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# ============================================
+# Logs & Diagnostics
+# ============================================
+logs/
+server/logs/
+*.log
+server.log
+test.log
+combined.log
+error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ============================================
+# Temporary Files, Storage & Upload Buffers
+# ============================================
+temp/
+server/temp/
+uploads/
+uploads_temp/
+server/uploads_temp/
+*.tmp
+*.temp
+
+# ============================================
+# Operating System & IDE Files
+# ============================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.kombai/
+.qodo/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============================================
+# Certificates, Keys & Security Credentials
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
