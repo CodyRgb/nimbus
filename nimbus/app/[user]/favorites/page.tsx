@@ -271,83 +271,88 @@ export default function FavoritesPage() {
     const selectedFile = selectedFileIndex !== null ? filteredFiles[selectedFileIndex] : null;
 
     return (
-        <div className="w-full text-white p-6">
+        <div className="w-full text-white">
             <div className="max-w-[1500px] mx-auto w-full">
                 {/* Header */}
                 <motion.div
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+                    className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-6 border-b border-white/10 gap-4"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-bold text-gradient mb-2 font-display">❤️ Favorites</h1>
-                        <p className="text-gray-400 font-body">Your favorite files in one place</p>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="eyebrow-tag text-pill-lime">PINNED ASSETS</span>
+                            <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● REAL-TIME SYNC</span>
+                        </div>
+                        <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                            STARRED VAULT ASSETS
+                        </h1>
+                        <p className="text-white/60 text-sm font-sans max-w-xl">
+                            Fast access to your frequently referenced cryptographic files and high-priority assets.
+                        </p>
                     </div>
                 </motion.div>
 
                 {/* Controls */}
                 <motion.div
-                    className="flex flex-col md:flex-row gap-4 mb-6"
+                    className="flex flex-col md:flex-row gap-3 mb-6 items-stretch"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <div className="flex-1">
+                    <div className="flex-1 relative">
                         <input
                             type="text"
-                            placeholder="🔍 Search favorites..."
+                            placeholder="SEARCH STARRED ASSETS BY NAME OR EXTENSION..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white placeholder-gray-500 bg-transparent font-display"
+                            className="w-full px-4 py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
                         />
                     </div>
                     <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display"
+                        className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
                     >
-                        <option value="date-desc">Newest First</option>
-                        <option value="date-asc">Oldest First</option>
-                        <option value="name-asc">Name (A-Z)</option>
-                        <option value="size-desc">Size (Largest)</option>
+                        <option value="date-desc">NEWEST FIRST</option>
+                        <option value="date-asc">OLDEST FIRST</option>
+                        <option value="name-asc">NAME (A - Z)</option>
+                        <option value="size-desc">SIZE (LARGEST)</option>
                     </select>
 
                     {/* View Mode Toggle */}
-                    <div className="flex gap-2 glass-card p-1 rounded-xl border border-white/10">
+                    <div className="flex bg-[#202327] border border-white/15 p-1 shrink-0">
                         <button
                             onClick={() => setViewMode("grid")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
                         >
-                            ⊞ Grid
+                            ⊞ GRID
                         </button>
                         <button
                             onClick={() => setViewMode("list")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "list" ? "bg-aurora-blue text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
                         >
-                            ☰ List
+                            ☰ LIST
                         </button>
                     </div>
                 </motion.div>
 
                 {/* Content */}
                 {loading ? (
-                    <GlassCard className="p-12 text-center">
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="inline-block text-6xl mb-4"
-                        >
-                            ⚡
-                        </motion.div>
-                        <p className="text-gray-400 font-body">Loading your favorites...</p>
-                    </GlassCard>
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
+                        <div className="inline-block animate-spin text-[#B8FE00] text-4xl mb-4">⚡</div>
+                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">SYNCING STARRED ASSETS...</h3>
+                        <p className="text-white/40 font-mono text-xs uppercase">QUERYING DECENTRALIZED REPOSITORY</p>
+                    </div>
                 ) : filteredFiles.length === 0 ? (
-                    <GlassCard className="p-12 text-center">
-                        <div className="text-6xl mb-4">💔</div>
-                        <p className="text-gray-400 text-lg font-body mb-2">No favorites yet.</p>
-                        <p className="text-gray-500 text-sm font-body">Click the heart icon on any file to add it to your favorites!</p>
-                    </GlassCard>
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl max-w-2xl mx-auto">
+                        <div className="text-5xl mb-4 opacity-50">⭐</div>
+                        <h3 className="font-['Anton'] text-3xl uppercase tracking-tight text-white mb-2">ZERO STARRED ASSETS</h3>
+                        <p className="text-white/50 text-sm max-w-md mx-auto mb-6">
+                            You haven't pinned any files yet. Open your storage vault and click the Star or Heart icon on any file to bookmark it here.
+                        </p>
+                    </div>
                 ) : viewMode === "grid" ? (
                     /* Grid View with Date Grouping */
                     <div className="space-y-8">
@@ -367,16 +372,17 @@ export default function FavoritesPage() {
                                         <motion.div
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="mb-4"
+                                            className="mb-4 flex items-center gap-3"
                                         >
-                                            <h2 className="text-2xl font-bold text-white font-display">
+                                            <span className="w-2 h-2 bg-[#B8FE00]"></span>
+                                            <h2 className="font-['Anton'] text-2xl uppercase tracking-tight text-white">
                                                 {formatDateHeader(firstFile.dateTaken || firstFile.uploadedAt)}
                                             </h2>
-                                            <div className="h-px bg-gradient-to-r from-aurora-blue/50 to-transparent mt-2"></div>
+                                            <div className="h-px bg-white/10 flex-1 ml-2"></div>
                                         </motion.div>
 
                                         {/* Files Grid */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                                             {filesInGroup.map((file, index) => {
                                                 const globalIndex = filteredFiles.indexOf(file);
 
@@ -415,19 +421,19 @@ export default function FavoritesPage() {
                     </div>
                 ) : (
                     /* List View */
-                    <GlassCard className="overflow-hidden">
-                        <div className="overflow-hidden">
+                    <div className="bg-[#202327] border border-white/10 overflow-hidden shadow-2xl">
+                        <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs md:text-sm">
-                                <thead className="glass-card border-b border-white/10">
+                                <thead className="bg-[#16181B] border-b border-white/10 text-white/50 font-mono uppercase text-[11px] tracking-wider">
                                     <tr>
                                         <th className="px-2 md:px-6 py-3 md:py-4">
                                             {/* Favorite button column */}
                                         </th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display">Name</th>
-                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Date Uploaded</th>
-                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Type</th>
-                                        <th className="hidden md:table-cell px-6 py-4 font-semibold text-white font-display">Size</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display text-right">Actions</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 font-bold text-white">Asset Name</th>
+                                        <th className="hidden lg:table-cell px-6 py-4">Ingestion Date</th>
+                                        <th className="hidden lg:table-cell px-6 py-4">Mime Shard</th>
+                                        <th className="hidden md:table-cell px-6 py-4">Volume</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/10">
@@ -570,7 +576,7 @@ export default function FavoritesPage() {
                                 </tbody>
                             </table >
                         </div >
-                    </GlassCard >
+                    </div>
                 )
                 }
             </div >

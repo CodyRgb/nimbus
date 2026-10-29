@@ -14,6 +14,7 @@ interface MediaPreviewModalProps {
     onClose: () => void;
     onDelete?: () => void;
     onDownload?: () => void;
+    onShare?: () => void;
     onNext?: () => void;
     onPrevious?: () => void;
     hasNext?: boolean;
@@ -29,6 +30,7 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
     onClose,
     onDelete,
     onDownload,
+    onShare,
     onNext,
     onPrevious,
     hasNext = false,
@@ -134,27 +136,47 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
             {/* Modal */}
             <div className="relative w-full h-full flex flex-col">
                 {/* Header */}
-                <div className="relative z-10 flex items-center justify-between px-6 py-4 glass-card border-b border-white/10">
+                <div className="relative z-10 flex items-center justify-between px-6 py-3.5 bg-[#202327] border-b border-white/10">
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-white truncate" title={fileName}>
-                            {fileName}
-                        </h3>
-                        <p className="text-sm text-gray-300">
-                            {fileSize} • {fileType.split('/')[1]?.toUpperCase()}
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-base font-bold text-white truncate font-sans tracking-tight" title={fileName}>
+                                {fileName}
+                            </h3>
+                            <span className="px-2 py-0.5 bg-[#16181B] border border-white/15 text-[10px] font-mono text-[#B8FE00] font-bold uppercase tracking-wider">
+                                {fileType.split('/')[1]?.toUpperCase() || 'ASSET'}
+                            </span>
+                        </div>
+                        <p className="text-xs font-mono text-white/50 mt-0.5">
+                            SIZE: {fileSize} • HARDWARE-ENCRYPTED BUFFER
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2.5 ml-4">
+                        {/* Share Button */}
+                        {onShare && (
+                            <button
+                                onClick={onShare}
+                                className="px-3.5 py-1.5 bg-[#0720C6] hover:bg-blue-600 text-white font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md border border-[#0720C6]"
+                                title="Share encrypted link & permissions"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                                <span>SHARE</span>
+                            </button>
+                        )}
+
                         {/* Download Button */}
                         {onDownload && (
                             <button
                                 onClick={onDownload}
-                                className="p-2 hover:bg-aurora-blue/20 rounded-xl transition-colors text-aurora-blue border border-aurora-blue/30"
-                                title="Download"
+                                className="px-3.5 py-1.5 bg-[#B8FE00] text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white transition-all flex items-center gap-1.5 shadow-md"
+                                title="Download decrypted asset"
                             >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
+                                <span>DOWNLOAD</span>
                             </button>
                         )}
 
@@ -162,22 +184,23 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                         {onDelete && (
                             <button
                                 onClick={onDelete}
-                                className="p-2 hover:bg-red-500/20 rounded-xl transition-colors text-red-400 hover:text-red-300 border border-red-500/30"
-                                title="Delete"
+                                className="px-3 py-1.5 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1"
+                                title="Delete file"
                             >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
+                                <span>DELETE</span>
                             </button>
                         )}
 
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white border border-white/20"
+                            className="p-1.5 bg-[#16181B] hover:bg-white hover:text-black text-white border border-white/20 transition-all"
                             title="Close (ESC)"
                         >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
@@ -277,9 +300,9 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                                     <p className="text-white text-lg">Preview not available for this file type</p>
                                     <button
                                         onClick={onDownload}
-                                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                                        className="px-6 py-2.5 bg-[#B8FE00] hover:bg-white text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg"
                                     >
-                                        Download to View
+                                        DOWNLOAD ASSET
                                     </button>
                                 </div>
                             )}
@@ -290,11 +313,11 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                     {hasPrevious && onPrevious && (
                         <button
                             onClick={onPrevious}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors text-white"
+                            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black border border-white/20 transition-all text-white shadow-xl"
                             title="Previous (←)"
                         >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                     )}
@@ -302,22 +325,22 @@ const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                     {hasNext && onNext && (
                         <button
                             onClick={onNext}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors text-white"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black border border-white/20 transition-all text-white shadow-xl"
                             title="Next (→)"
                         >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
                     )}
                 </div>
 
                 {/* Footer with keyboard hints */}
-                <div className="relative z-10 px-6 py-3 glass-card border-t border-white/10">
-                    <p className="text-xs text-gray-400 text-center font-body">
-                        <kbd className="px-2 py-1 glass-card border border-white/20 rounded">ESC</kbd> Close
-                        {hasPrevious && <> • <kbd className="px-2 py-1 glass-card border border-white/20 rounded">←</kbd> Previous</>}
-                        {hasNext && <> • <kbd className="px-2 py-1 glass-card border border-white/20 rounded">→</kbd> Next</>}
+                <div className="relative z-10 px-6 py-2.5 bg-[#16181B] border-t border-white/10">
+                    <p className="text-[11px] font-mono text-white/50 text-center uppercase tracking-wider">
+                        <kbd className="px-1.5 py-0.5 bg-[#202327] border border-white/20 text-white font-mono mr-1">ESC</kbd> CLOSE
+                        {hasPrevious && <> • <kbd className="px-1.5 py-0.5 bg-[#202327] border border-white/20 text-white font-mono mx-1">←</kbd> PREVIOUS</>}
+                        {hasNext && <> • <kbd className="px-1.5 py-0.5 bg-[#202327] border border-white/20 text-white font-mono mx-1">→</kbd> NEXT</>}
                     </p>
                 </div>
             </div>

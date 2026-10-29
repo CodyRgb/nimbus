@@ -2,389 +2,1014 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "./context/AuthContext";
 
 export default function LandingPage() {
   const { isLoggedIn, user } = useAuth();
-  // Contact Form Logic
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const [contactForm, setContactForm] = useState({
+    name: "",
     email: "",
     message: "",
   });
+  const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { type, value } = e.target;
-    // Handle name splitting if needed or just use simple inputs
-    // The new design has First Name and Last Name.
-    // I will map them to the state.
-
-    // For this simple implementation, I'll update the state directly by name attribute
-    // The HTML inputs need name attributes
+  const handleNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail) {
+      setNewsletterSubscribed(true);
+      setTimeout(() => setNewsletterSubscribed(false), 4000);
+      setNewsletterEmail("");
+    }
   };
 
-  // We need to adapt the state to match the new form fields (First Name, Last Name) 
-  // or just keep it simple.
-  // Let's refine the state for the new form:
-  const [contactForm, setContactForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    message: ""
-  });
-
-  const onContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { placeholder, value, type } = e.target;
-    // The HTML didn't have name attributes in the snippet, I will add them.
+  const handleContact = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (contactForm.email) {
+      setContactSubmitted(true);
+      setTimeout(() => setContactSubmitted(false), 4000);
+      setContactForm({ name: "", email: "", message: "" });
+    }
   };
-
-  // Actually, let's rewrite the component cleanly.
 
   return (
-    <div className="font-display text-white bg-background-dark overflow-x-hidden selection:bg-primary selection:text-white">
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[100px]"></div>
-      </div>
+    <div className="bg-[#16181B] text-white selection:bg-[#B8FE00] selection:text-[#16181B] overflow-x-hidden font-body">
+      {/* ============================================================== */}
+      {/* SECTION 01: NAVIGATION & HERO BANNER (#0720C6 Electric Royal Blue) */}
+      {/* ============================================================== */}
+      <section className="relative min-h-[92vh] pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-[#0720C6] hero-grid-pattern overflow-hidden flex items-center">
+        {/* Subtle radial depth gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0720C6]/50 to-[#0720C6] pointer-events-none"></div>
 
-      <div className="relative z-10 flex min-h-screen w-full flex-col">
-        {/* Header */}
+        <div className="relative z-10 w-full max-w-[1320px] mx-auto">
+          {/* Eyebrow badge */}
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-[#B8FE00] text-sm animate-spin-slow">✦</span>
+            <span className="eyebrow-tag text-[#B8FE00]">
+              NEXT-GEN DECENTRALIZED STORAGE
+            </span>
+            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-[#B8FE00]/20 text-[#B8FE00] border border-[#B8FE00]/40">
+              V2.4 STABLE
+            </span>
+          </div>
 
-
-        {/* Hero Section */}
-        <section className="relative flex flex-col justify-center py-20 lg:py-32 px-6">
-          <div className="w-full max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-6 lg:gap-8 z-10">
-              <div className="flex flex-col gap-4 text-left">
-                <h1 className="text-white text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
-                  Store Unlimited.<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-200">Securely.</span>
+          {/* Main Hero Grid */}
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Column (5 Cols) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              {/* Display Headline */}
+              <div className="flex flex-col">
+                <h1 className="font-display text-white uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.9] tracking-tight">
+                  UNLIMITED <br />
+                  <span className="text-[#B8FE00] drop-shadow-[0_0_35px_rgba(184,254,0,0.4)]">
+                    CLOUD VAULT
+                  </span>
                 </h1>
-                <p className="text-gray-400 text-lg lg:text-xl font-normal leading-relaxed max-w-lg">
-                  The Cloud, Redefined. Experience unlimited storage power integrated directly with your Telegram account. Fast, encrypted, and free.
+                <p className="mt-4 text-white/80 text-base sm:text-lg leading-relaxed max-w-lg">
+                  Harness the limitless power of Telegram&apos;s distributed infrastructure.
+                  Zero storage limits, client-side zero-knowledge AES-256 encryption, and instant high-speed streaming.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <Link href={isLoggedIn ? `/${user?.name}/storage` : "/register"}>
-                  <button className="flex items-center justify-center rounded-full h-12 px-8 bg-primary text-white text-base font-bold shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:scale-105 transition-transform cursor-pointer">
-                    {isLoggedIn ? "Go to Dashboard" : "Get Started Free"}
-                  </button>
+
+              {/* CTAs */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <Link
+                  href={isLoggedIn ? `/${user?.name}/storage` : "/register"}
+                  className="px-8 py-4 bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-full hover:bg-white transition-all shadow-[0_0_25px_rgba(184,254,0,0.4)] hover:scale-105 flex items-center gap-2 group cursor-pointer"
+                >
+                  <span>{isLoggedIn ? "OPEN DASHBOARD" : "START STORING FREE"}</span>
+                  <span className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
                 </Link>
-                <button className="flex items-center justify-center rounded-full h-12 px-8 bg-white/5 border border-white/10 text-white text-base font-bold backdrop-blur-sm hover:bg-white/10 transition-all cursor-pointer">
-                  <span className="material-symbols-outlined mr-2 text-lg">play_circle</span>
-                  Watch Demo
-                </button>
+                <Link
+                  href="/login"
+                  className="px-7 py-4 bg-transparent border-2 border-white text-white font-display text-sm tracking-wider uppercase font-semibold rounded-full hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  SIGN IN
+                </Link>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
-                <div className="flex -space-x-2">
-                  <div className="size-8 rounded-full border border-[#0f172a] bg-gray-600 bg-center bg-cover" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCv1JuaoC66YUbwsO1Z7hU7muaieCRBtHPaJO37hecB3gUhIhP_wcZuwUpq1GabbAicgs-d42cghxbQK5q-fUlydO7Qf_oESMZ1gqy4PMYWpHLMe75MPEf_F5yI4Q3tVHro-f7ay0oZlLhwBsXzfG_4b_n9Q468VWR1eN28Z4Q986_M_OYyJmO_VHerKjyXQeBy88Tk6itELUkIfsDBkyPk7vKXN-KS_Wp-2iA3ZcXDZSePjfmkm-k82ibsMutCNT_Nv7xIZaJCBT0")' }}></div>
-                  <div className="size-8 rounded-full border border-[#0f172a] bg-gray-500 bg-center bg-cover" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCn8oXw8UjtaLsCSB1RD7Iim1VgGIAIWMONnyO0AF3MmbTjfrwpTH1sgqk9uUmMiN-j5EM9BrvV8ors6KPoIvadRT6wXCGbtSqcZiiJf6bhw8RAwbVd-Zuz0ZbtfnIHIIn89XgCqxZEGFeo8Qw2ABON9GDLRxqun9nojqo7BNMcD53AUHr44X4lGHFVYNaB6JU9WH5Mp1WcbF8dkkFbVkmSaOjj89-fnd7un2fGMXx0c3XluqbdXDsa_EQ_BIznkJcyfhMF1uNIAc")' }}></div>
-                  <div className="size-8 rounded-full border border-[#0f172a] bg-gray-400 bg-center bg-cover" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDZEztHhPDJviBmwzGSIdoK-A_tHLrbNTFHckW35ImGA7hTzQmutzGL5jQB3iV6KToz_4BZqtyRq7Tmc2LMWz1jqYBGq67Dan9dRLBjOV7efaLmwtqKGT1HSIBQil6mEij0HRf7n1fVzDyOrQGORx8zjIcTLKMRX62SmY1pCyKz-W12xVX4G07D9y1Ki_qh8VOD2QIRXPXuX_w9pA1iH1vBCrCdocsjD8zCWIV39-tyYx4gLNqvSasdgt7C1llNfV5eO6_9RDwXYg")' }}></div>
-                </div>
-                <p>Trusted by 10,000+ users</p>
-              </div>
-            </div>
-            <div className="relative w-full h-full min-h-[400px] flex items-center justify-center">
-              <div className="relative w-[80%] aspect-[4/5] sm:aspect-square lg:aspect-[4/5] max-w-[500px]">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-3xl blur-2xl"></div>
-                <div className="absolute inset-0 glass-panel rounded-3xl border border-white/20 p-6 flex flex-col justify-between overflow-hidden">
-                  <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-2">
-                      <div className="size-3 rounded-full bg-red-500/50"></div>
-                      <div className="size-3 rounded-full bg-yellow-500/50"></div>
-                      <div className="size-3 rounded-full bg-green-500/50"></div>
-                    </div>
-                    <div className="text-xs text-gray-400 font-mono">nimbus_cloud_v2.exe</div>
-                  </div>
-                  <div className="flex-1 flex flex-col justify-center items-center gap-6">
-                    <div className="size-24 rounded-2xl bg-gradient-to-br from-gray-700/50 to-black/50 flex items-center justify-center border border-white/5 relative">
-                      <span className="material-symbols-outlined text-4xl text-primary animate-bounce">upload_file</span>
-                      <div className="absolute -bottom-2 -right-2 size-8 bg-[#2AABEE] rounded-full flex items-center justify-center shadow-lg">
-                        <span className="material-symbols-outlined text-white text-sm">send</span>
-                      </div>
-                    </div>
-                    <div className="w-full max-w-[200px] space-y-2">
-                      <div className="flex justify-between text-xs text-gray-300">
-                        <span>Uploading...</span>
-                        <span>85%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary w-[85%] rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-8 p-4 glass-panel rounded-xl flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-primary text-sm">lock</span>
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">End-to-End Encrypted</div>
-                      <div className="text-[10px] text-gray-400">Keys generated locally</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -z-10 top-12 -right-6 w-[80%] h-[80%] glass-panel rounded-3xl border border-white/10 opacity-50 rotate-6"></div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Features Section */}
-        <section className="py-20 px-6 bg-black/20" id="features">
-          <div className="w-full max-w-[1280px] mx-auto flex flex-col gap-16">
-            <div className="flex flex-col gap-4 max-w-[720px]">
-              <h2 className="text-4xl font-bold tracking-tight text-white">
-                Premium Features.<br />
-                <span className="text-gray-500">Zero Compromises.</span>
-              </h2>
-              <p className="text-gray-400 text-lg">Experience the power of cloud storage built for the modern web.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { icon: "all_inclusive", title: "Unlimited Storage", desc: "Leverage the Telegram API to store files without limits. Never delete a memory again." },
-                { icon: "security", title: "Military Encryption", desc: "AES-256 encryption ensures your data is unreadable to anyone but you." },
-                { icon: "bolt", title: "Lightning Speed", desc: "Optimized routing paths deliver upload and download speeds that maximize your bandwidth." },
-                { icon: "folder_zip", title: "Universal Support", desc: "Documents, media, archives, or code. Store any file type up to 2GB per single file." },
-              ].map((feature, i) => (
-                <div key={i} className="glass-panel glass-card-hover rounded-3xl p-8 flex flex-col gap-4 group cursor-default">
-                  <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-3xl">{feature.icon}</span>
+              {/* Flanking Left Column Stats List */}
+              <div className="pt-6 border-t border-white/20 grid grid-cols-3 gap-4">
+                <div>
+                  <div className="font-display text-3xl sm:text-4xl text-[#B8FE00] leading-none">
+                    500+ TB
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+                  <div className="text-[11px] font-mono uppercase text-white/70 tracking-wider mt-1">
+                    ACTIVE DATA
                   </div>
                 </div>
-              ))}
+                <div className="border-l border-white/20 pl-4">
+                  <div className="font-display text-3xl sm:text-4xl text-white leading-none">
+                    1.2M+
+                  </div>
+                  <div className="text-[11px] font-mono uppercase text-white/70 tracking-wider mt-1">
+                    VAULT FILES
+                  </div>
+                </div>
+                <div className="border-l border-white/20 pl-4">
+                  <div className="font-display text-3xl sm:text-4xl text-[#B8FE00] leading-none">
+                    99.99%
+                  </div>
+                  <div className="text-[11px] font-mono uppercase text-white/70 tracking-wider mt-1">
+                    NODE UPTIME
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
 
-        {/* Integration Section */}
-        <section className="py-20 px-6" id="integration">
-          <div className="w-full max-w-[1280px] mx-auto glass-panel rounded-[3rem] p-8 lg:p-16 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-            <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
-              <div className="flex flex-col gap-6 order-2 lg:order-1">
-                <div className="flex items-center gap-2 text-[#2AABEE] font-bold uppercase tracking-wider text-sm">
-                  <span className="material-symbols-outlined text-lg">rocket_launch</span>
-                  Powered by Telegram
+            {/* Right Column / Centerpiece Interactive Vault Node (7 Cols) */}
+            <div className="lg:col-span-7 relative">
+              {/* Outer Decorative 72px Star Badge */}
+              <div className="absolute -top-6 -right-4 sm:-right-6 w-20 h-20 rounded-full border border-[#B8FE00]/40 bg-[#16181B]/80 backdrop-blur-md flex items-center justify-center z-20 shadow-xl hidden sm:flex">
+                <span className="text-[#B8FE00] text-3xl animate-pulse">✦</span>
+              </div>
+
+              {/* Neo-brutalist Vault Mockup */}
+              <div className="bg-[#16181B] border-2 border-white/25 rounded-2xl p-5 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative overflow-hidden">
+                {/* Window header */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
+                    <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+                    <span className="w-3 h-3 rounded-full bg-[#B8FE00]"></span>
+                    <span className="ml-2 font-mono text-xs text-[#A0A6B2]">
+                      nimbus_core_vault::v2.4
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#B8FE00] animate-ping"></span>
+                    <span className="text-[10px] font-mono uppercase text-[#B8FE00] font-bold">
+                      TELEGRAM CHANNEL ACTIVE
+                    </span>
+                  </div>
                 </div>
-                <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                  Your chat history,<br />now your hard drive.
-                </h2>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  Nimbus acts as a sophisticated layer on top of Telegram. We leverage their robust, globally distributed infrastructure to give you a seamless file management experience. Access your files where you already chat.
-                </p>
-                <ul className="flex flex-col gap-4 mt-4">
+
+                {/* Vault telemetry cards */}
+                <div className="grid sm:grid-cols-3 gap-3 my-4">
+                  <div className="bg-[#202327] border border-white/10 p-3 rounded-xl">
+                    <span className="text-[10px] font-mono text-[#A0A6B2] uppercase">
+                      CIPHER PROTOCOL
+                    </span>
+                    <p className="font-display text-lg text-white mt-1">AES-256 GCM</p>
+                    <span className="text-[10px] font-mono text-[#B8FE00]">100% Client-Side</span>
+                  </div>
+                  <div className="bg-[#202327] border border-white/10 p-3 rounded-xl">
+                    <span className="text-[10px] font-mono text-[#A0A6B2] uppercase">
+                      CHUNK PIPELINE
+                    </span>
+                    <p className="font-display text-lg text-white mt-1">20 MB / PART</p>
+                    <span className="text-[10px] font-mono text-blue-400">Parallel Shards</span>
+                  </div>
+                  <div className="bg-[#202327] border border-white/10 p-3 rounded-xl">
+                    <span className="text-[10px] font-mono text-[#A0A6B2] uppercase">
+                      TRANSFER VELOCITY
+                    </span>
+                    <p className="font-display text-lg text-[#B8FE00] mt-1">112.4 MB/S</p>
+                    <span className="text-[10px] font-mono text-gray-400">Zero Throttling</span>
+                  </div>
+                </div>
+
+                {/* Live Vault File Stream Display */}
+                <div className="bg-[#202327]/80 rounded-xl border border-white/10 p-4 space-y-3 font-mono text-xs">
+                  <div className="flex items-center justify-between text-[#A0A6B2] pb-2 border-b border-white/5 text-[11px]">
+                    <span>SECURE ASSET</span>
+                    <span>SIZE</span>
+                    <span>INTEGRITY</span>
+                    <span>STATUS</span>
+                  </div>
+
                   {[
-                    "Synchronized across all devices",
-                    "Native Telegram bot integration",
-                    "Zero infrastructure costs for you"
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-primary">check_circle</span>
-                      <span className="text-gray-300">{item}</span>
-                    </li>
+                    { name: "Design_System_Master_2026.fig", size: "384.2 MB", hash: "SHA-256 ✓", status: "ENCRYPTED" },
+                    { name: "Cinematic_Broll_4K_HDR.mp4", size: "1.84 GB", hash: "SHA-256 ✓", status: "STREAMING" },
+                    { name: "Financial_Ledger_Q4_Export.db", size: "94.6 MB", hash: "SHA-256 ✓", status: "ENCRYPTED" },
+                  ].map((row, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-1.5 hover:bg-white/5 px-2 rounded transition-colors">
+                      <div className="flex items-center gap-2 truncate max-w-[200px]">
+                        <span className="text-[#B8FE00]">✦</span>
+                        <span className="text-white truncate">{row.name}</span>
+                      </div>
+                      <span className="text-gray-400">{row.size}</span>
+                      <span className="text-[#B8FE00]">{row.hash}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-[#0720C6] text-white font-bold">
+                        {row.status}
+                      </span>
+                    </div>
                   ))}
-                </ul>
-                <button className="mt-4 flex w-fit items-center justify-center rounded-full h-12 px-8 bg-white text-[#0f172a] text-base font-bold hover:bg-gray-200 transition-colors">
-                  Learn How It Works
-                </button>
-              </div>
-              <div className="order-1 lg:order-2 flex justify-center">
-                <div className="relative w-full max-w-[400px] aspect-[4/5] bg-[#1a2c38] rounded-3xl border border-white/10 p-4 shadow-2xl flex flex-col">
-                  <div className="bg-[#233542] p-3 rounded-t-xl flex items-center gap-3 mb-4">
-                    <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">N</div>
-                    <div className="flex flex-col">
-                      <span className="text-white text-sm font-bold">Nimbus Storage Bot</span>
-                      <span className="text-blue-400 text-xs">bot</span>
-                    </div>
+                </div>
+
+                {/* Bottom micro-banner */}
+                <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[#A0A6B2]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#B8FE00]"></span>
+                    <span>End-to-End Keys generated locally. No central logs.</span>
                   </div>
-                  <div className="flex-1 flex flex-col gap-4 p-2 overflow-hidden">
-                    <div className="self-start max-w-[85%] bg-[#233542] p-3 rounded-2xl rounded-tl-none text-sm text-gray-200">
-                      Welcome back! Send me any file to save it to your cloud.
-                    </div>
-                    <div className="self-end max-w-[85%] bg-[#2AABEE] p-3 rounded-2xl rounded-tr-none text-sm text-white flex items-center gap-3">
-                      <span className="material-symbols-outlined text-xl">description</span>
-                      <div>
-                        <div className="font-bold">Project_Nimbus_Design.fig</div>
-                        <div className="text-[10px] opacity-80">14.2 MB</div>
-                      </div>
-                    </div>
-                    <div className="self-start max-w-[85%] bg-[#233542] p-3 rounded-2xl rounded-tl-none text-sm text-gray-200">
-                      <div className="flex items-center gap-2 mb-2 text-primary font-bold text-xs uppercase">
-                        <span className="material-symbols-outlined text-sm">cloud_done</span> Saved
-                      </div>
-                      File securely stored. <br />
-                      <span className="underline decoration-primary decoration-2 cursor-pointer">View in Dashboard</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 bg-[#0f172a] p-2 rounded-xl flex items-center gap-2 border border-white/5">
-                    <span className="material-symbols-outlined text-gray-500 p-1">attach_file</span>
-                    <div className="h-1 bg-gray-600 w-full rounded-full opacity-20"></div>
-                    <span className="material-symbols-outlined text-[#2AABEE] p-1">mic</span>
-                  </div>
+                  <Link
+                    href={isLoggedIn ? `/${user?.name}/upload` : "/register"}
+                    className="text-[#B8FE00] hover:underline font-bold"
+                  >
+                    TRY DEMO UPLOAD ↗
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* How It Works */}
-        <section className="py-20 px-6" id="how-it-works">
-          <div className="w-full max-w-[1280px] mx-auto text-center">
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-16">Three steps to infinite storage</h2>
-            <div className="relative grid md:grid-cols-3 gap-8">
-              <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent z-0"></div>
-              {[
-                { icon: "account_circle", title: "1. Connect Account", desc: "Log in securely via Telegram. No email or password required." },
-                { icon: "cloud_upload", title: "2. Upload Files", desc: "Drag & drop files to the dashboard or send them to the bot." },
-                { icon: "share", title: "3. Share Instantly", desc: "Generate public links or share directly within Telegram chats." },
-              ].map((step, i) => (
-                <div key={i} className="relative z-10 flex flex-col items-center gap-6">
-                  <div className="size-24 rounded-full glass-panel flex items-center justify-center border border-primary/30 shadow-[0_0_30px_rgba(59,130,246,0.15)] bg-[#0f172a]">
-                    <span className="material-symbols-outlined text-4xl text-primary">{step.icon}</span>
-                  </div>
-                  <div className="flex flex-col gap-2 max-w-[280px]">
-                    <h3 className="text-xl font-bold text-white">{step.title}</h3>
-                    <p className="text-gray-400 text-sm">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
+      {/* ============================================================== */}
+      {/* SECTION 02: DIAGONAL TICKER TAPE (#B8FE00 Acid Lime) */}
+      {/* ============================================================== */}
+      <div className="ticker-tape-container">
+        <div className="ticker-track">
+          <span className="px-6 flex items-center gap-4">
+            UNLIMITED TELEGRAM STORAGE <span className="text-black">✦</span>
+            ZERO MONTHLY SUBSCRIPTIONS <span className="text-black">✦</span>
+            AES-256 ZERO-KNOWLEDGE ENCRYPTION <span className="text-black">✦</span>
+            TELEGRAM BOT FILE DISPATCH <span className="text-black">✦</span>
+            UP TO 2GB PER FILE <span className="text-black">✦</span>
+            INSTANT 4K MEDIA STREAMING <span className="text-black">✦</span>
+            SOVEREIGN ENCRYPTED VAULT <span className="text-black">✦</span>
+          </span>
+          <span className="px-6 flex items-center gap-4">
+            UNLIMITED TELEGRAM STORAGE <span className="text-black">✦</span>
+            ZERO MONTHLY SUBSCRIPTIONS <span className="text-black">✦</span>
+            AES-256 ZERO-KNOWLEDGE ENCRYPTION <span className="text-black">✦</span>
+            TELEGRAM BOT FILE DISPATCH <span className="text-black">✦</span>
+            UP TO 2GB PER FILE <span className="text-black">✦</span>
+            INSTANT 4K MEDIA STREAMING <span className="text-black">✦</span>
+            SOVEREIGN ENCRYPTED VAULT <span className="text-black">✦</span>
+          </span>
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* SECTION 03: SERVICES GRID ("WHAT WE DO") (#16181B Deep Charcoal) */}
+      {/* ============================================================== */}
+      <section id="capabilities" className="py-28 px-4 sm:px-6 lg:px-8 bg-[#16181B] relative">
+        <div className="max-w-[1320px] mx-auto">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-white/10">
+            <div>
+              <div className="eyebrow-tag mb-2">✦ WHAT WE DO</div>
+              <h2 className="display-section-title text-white">
+                ARCHITECTED FOR INFINITE CAPACITY &amp; SPEED.
+              </h2>
             </div>
+            <Link
+              href={isLoggedIn ? `/${user?.name}/storage` : "/register"}
+              className="px-6 py-3 border border-white/30 rounded-full font-display text-xs tracking-wider uppercase text-white hover:border-[#B8FE00] hover:text-[#B8FE00] transition-colors shrink-0 flex items-center gap-2"
+            >
+              <span>EXPLORE ALL FEATURES</span>
+              <span>↗</span>
+            </Link>
           </div>
-        </section>
 
-        {/* FAQ */}
-        <section className="py-20 px-6 bg-black/20" id="faq">
-          <div className="w-full max-w-[800px] mx-auto flex flex-col gap-10">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-              <p className="text-gray-400">Everything you need to know about Nimbus.</p>
-            </div>
-            <div className="flex flex-col gap-4">
-              {[
-                { q: "Is it really unlimited?", a: "Yes! Because we utilize Telegram's API for storage, you inherit their unlimited storage capacity. The only limitation is that individual files cannot exceed 2GB (or 4GB for Telegram Premium users)." },
-                { q: "Is my data secure?", a: "Absolutely. We apply an additional layer of AES-256 encryption on top of Telegram's own encryption before your files leave your browser. We do not have access to your keys." },
-                { q: "Does it cost money?", a: "Nimbus offers a generous Free tier. We also offer a Pro tier which includes automated backups, folder organization tools, and faster upload speeds through our dedicated relay servers." }
-              ].map((faq, i) => (
-                <div key={i} className="glass-panel rounded-2xl overflow-hidden">
-                  <details className="group">
-                    <summary className="flex justify-between items-center p-6 cursor-pointer list-none">
-                      <span className="font-bold text-white text-lg">{faq.q}</span>
-                      <span className="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <div className="px-6 pb-6 text-gray-400 leading-relaxed border-t border-white/5 pt-4">
-                      {faq.a}
-                    </div>
-                  </details>
+          {/* 3-Column Card Grid */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1: Default Dark Card */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between group">
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-mono text-xs text-[#B8FE00] font-bold">01 / CAPACITY</span>
+                  <div className="circle-icon-btn">↗</div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section className="py-20 px-6" id="contact">
-          <div className="w-full max-w-[1280px] mx-auto grid lg:grid-cols-2 gap-12">
-            <div className="flex flex-col justify-center gap-6">
-              <h2 className="text-4xl font-bold text-white">Get in touch</h2>
-              <p className="text-gray-400 text-lg">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
-              <div className="flex flex-col gap-4 mt-4">
-                <div className="flex items-center gap-4">
-                  <div className="size-10 rounded-full bg-white/5 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary">mail</span>
-                  </div>
-                  <span className="text-white">support@nimbus.cloud</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="size-10 rounded-full bg-white/5 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary">location_on</span>
-                  </div>
-                  <span className="text-white">San Francisco, CA</span>
-                </div>
-              </div>
-            </div>
-            <div className="glass-panel rounded-3xl p-8 lg:p-10">
-              <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent!'); }}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-gray-300 ml-2">First Name</label>
-                    <input className="h-12 rounded-full bg-white/5 border border-white/10 px-4 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="John" type="text" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-gray-300 ml-2">Last Name</label>
-                    <input className="h-12 rounded-full bg-white/5 border border-white/10 px-4 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Doe" type="text" />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-300 ml-2">Email</label>
-                  <input className="h-12 rounded-full bg-white/5 border border-white/10 px-4 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="john@example.com" type="email" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-300 ml-2">Message</label>
-                  <textarea className="rounded-3xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="How can we help you?" rows={4}></textarea>
-                </div>
-                <button className="mt-2 flex items-center justify-center rounded-full h-12 bg-primary text-white font-bold hover:bg-[#2563eb] transition-colors cursor-pointer" type="submit">
-                  Send Message
-                </button>
-              </form>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="border-t border-white/10 bg-[#020617] pt-16 pb-8 px-6">
-          <div className="w-full max-w-[1280px] mx-auto flex flex-col gap-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-              <div className="col-span-2 lg:col-span-2 flex flex-col gap-4 pr-8">
-                <div className="flex items-center gap-2 text-white mb-2">
-                  <span className="material-symbols-outlined text-primary text-3xl">cloud_queue</span>
-                  <span className="text-xl font-bold">Nimbus</span>
-                </div>
-                <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                  The secure, unlimited cloud storage solution built for the modern era. Powered by Telegram, secured by us.
+                <h3 className="display-card-title text-white mb-3">
+                  INFINITE CLOUD VAULT.
+                </h3>
+                <p className="text-[#A0A6B2] text-sm leading-relaxed mb-6">
+                  Leverages Telegram&apos;s battle-tested distributed server architecture.
+                  Store hundreds of gigabytes without arbitrary storage quotas or creeping subscription tiers.
                 </p>
               </div>
-              <div className="flex flex-col gap-4">
-                <h4 className="text-white font-bold">Product</h4>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Features</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Pricing</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">API</Link>
-              </div>
-              <div className="flex flex-col gap-4">
-                <h4 className="text-white font-bold">Company</h4>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">About</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Blog</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Careers</Link>
-              </div>
-              <div className="flex flex-col gap-4">
-                <h4 className="text-white font-bold">Legal</h4>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Privacy</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Terms</Link>
-                <Link className="text-gray-400 hover:text-primary text-sm transition-colors" href="#">Security</Link>
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/70">
+                <span>Storage Limit:</span>
+                <span className="text-[#B8FE00] font-bold">∞ UNLIMITED</span>
               </div>
             </div>
-            <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-gray-500 text-xs">© 2023 Nimbus Storage Inc. All rights reserved.</p>
-              <div className="flex gap-4">
-                <a className="text-gray-400 hover:text-white transition-colors" href="#">
-                  <span className="sr-only">Twitter</span>
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
-                </a>
-                <a className="text-gray-400 hover:text-white transition-colors" href="#">
-                  <span className="sr-only">GitHub</span>
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fillRule="evenodd"></path></svg>
-                </a>
+
+            {/* Card 2: Highlighted Blue Card */}
+            <div className="neo-card-blue p-8 flex flex-col justify-between group">
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-mono text-xs text-[#B8FE00] font-bold">02 / CRYPTO</span>
+                  <div className="circle-icon-btn">↗</div>
+                </div>
+                <h3 className="display-card-title text-white mb-3">
+                  ZERO-KNOWLEDGE CIPHER.
+                </h3>
+                <p className="text-white/85 text-sm leading-relaxed mb-6">
+                  Your files are encrypted client-side using WebCrypto AES-GCM before transmission.
+                  Neither Telegram nor Nimbus servers can read your decrypted files. Only your device holds the key.
+                </p>
+              </div>
+              <div className="pt-6 border-t border-white/20 flex items-center justify-between text-xs font-mono text-white">
+                <span>Cryptographic Standard:</span>
+                <span className="text-[#B8FE00] font-bold">AES-256 GCM</span>
+              </div>
+            </div>
+
+            {/* Card 3: Default Dark Card */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between group">
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-mono text-xs text-[#B8FE00] font-bold">03 / TELEGRAM SYNC</span>
+                  <div className="circle-icon-btn">↗</div>
+                </div>
+                <h3 className="display-card-title text-white mb-3">
+                  TELEGRAM BOT ENGINE.
+                </h3>
+                <p className="text-[#A0A6B2] text-sm leading-relaxed mb-6">
+                  Seamlessly bridge web and mobile. Upload through our web vault, or forward large files,
+                  photos, and documents directly to your dedicated Nimbus Telegram bot for immediate cloud sync.
+                </p>
+              </div>
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/70">
+                <span>Direct Bot Integration:</span>
+                <span className="text-[#B8FE00] font-bold">INSTANT 2-WAY</span>
               </div>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 04: ABOUT US / ARCHITECTURE (#F2F3F5 Concrete Light) */}
+      {/* ============================================================== */}
+      <section id="architecture" className="py-28 px-4 sm:px-6 lg:px-8 concrete-grain-pattern text-[#141619] relative">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column (5 Cols) */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="eyebrow-tag !text-[#0720C6]">✦ WHO WE ARE</div>
+              <h2 className="display-section-title text-[#141619]">
+                WHERE TELEGRAM SPEED MEETS ENTERPRISE SECURITY.
+              </h2>
+              <p className="text-[#5A6065] text-base leading-relaxed">
+                Nimbus was built to solve the corporate cloud storage monopoly. By marrying Telegram&apos;s
+                world-class worldwide infrastructure with rigorous client-side cryptography, we deliver
+                an uncompromising sovereign vault for everyone.
+              </p>
+
+              {/* Feature Badges */}
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="flex items-center gap-3 p-3.5 bg-white border border-[#141619]/15 rounded-xl shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-[#B8FE00] text-[#141619] flex items-center justify-center font-bold text-sm">
+                    ✓
+                  </div>
+                  <span className="font-display text-sm tracking-wider uppercase text-[#141619]">
+                    100% UNLIMITED STORAGE GUARANTEED
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 p-3.5 bg-white border border-[#141619]/15 rounded-xl shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-[#0720C6] text-white flex items-center justify-center font-bold text-sm">
+                    ✦
+                  </div>
+                  <span className="font-display text-sm tracking-wider uppercase text-[#141619]">
+                    OFFICIAL TELEGRAM MTPROTO DISPATCH
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Architecture Pill (3 Cols) */}
+            <div className="lg:col-span-3 flex justify-center">
+              <div className="w-full max-w-[280px] bg-[#16181B] border-4 border-[#B8FE00] rounded-full p-6 py-12 flex flex-col items-center justify-between text-white text-center shadow-2xl">
+                <span className="text-[#B8FE00] text-3xl">✦</span>
+                <div className="my-8">
+                  <div className="font-display text-4xl text-[#B8FE00] leading-none">2 GB</div>
+                  <div className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mt-1">
+                    MAX PER SINGLE FILE
+                  </div>
+                </div>
+                <div className="w-12 h-1 bg-white/20 rounded-full my-2"></div>
+                <div className="my-6">
+                  <div className="font-display text-4xl text-white leading-none">0 $</div>
+                  <div className="text-[11px] font-mono text-[#B8FE00] uppercase tracking-widest mt-1">
+                    ZERO RECURRING FEES
+                  </div>
+                </div>
+                <span className="text-[#B8FE00] text-xs font-mono">ENCRYPTED AT REST</span>
+              </div>
+            </div>
+
+            {/* Right Column Progress Bars (4 Cols) */}
+            <div className="lg:col-span-4 bg-white border border-[#141619]/15 rounded-2xl p-6 sm:p-8 shadow-md flex flex-col gap-6">
+              <h3 className="font-display text-2xl uppercase text-[#141619]">
+                SYSTEM INTEGRITY RATINGS
+              </h3>
+
+              {/* Progress 1 */}
+              <div>
+                <div className="flex justify-between text-xs font-bold font-mono uppercase mb-2">
+                  <span>ZERO-KNOWLEDGE PRIVACY</span>
+                  <span className="text-[#0720C6]">100%</span>
+                </div>
+                <div className="h-3 bg-[#D8DCE2] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#B8FE00] rounded-full w-full"></div>
+                </div>
+              </div>
+
+              {/* Progress 2 */}
+              <div>
+                <div className="flex justify-between text-xs font-bold font-mono uppercase mb-2">
+                  <span>STREAMING PLAYBACK COMPLIANCE</span>
+                  <span className="text-[#0720C6]">96%</span>
+                </div>
+                <div className="h-3 bg-[#D8DCE2] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#0720C6] rounded-full w-[96%]"></div>
+                </div>
+              </div>
+
+              {/* Progress 3 */}
+              <div>
+                <div className="flex justify-between text-xs font-bold font-mono uppercase mb-2">
+                  <span>TELEGRAM DISTRIBUTED RESILIENCE</span>
+                  <span className="text-[#0720C6]">99.9%</span>
+                </div>
+                <div className="h-3 bg-[#D8DCE2] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#0720C6] rounded-full w-[99.9%]"></div>
+                </div>
+              </div>
+
+              <Link
+                href={isLoggedIn ? `/${user?.name}/storage` : "/register"}
+                className="mt-2 py-3 px-6 text-center font-display text-xs tracking-wider uppercase border-2 border-[#141619] rounded-full hover:bg-[#141619] hover:text-white transition-colors"
+              >
+                OPEN YOUR VAULT NOW ↗
+              </Link>
+            </div>
+          </div>
+
+          {/* Client & Tech Partner Logo Bar */}
+          <div className="mt-16 bg-[#202327] rounded-2xl p-6 sm:p-8 border border-white/10">
+            <div className="text-center font-mono text-xs uppercase tracking-widest text-[#A0A6B2] mb-6">
+              POWERED BY WORLD-CLASS PROTOCOLS &amp; TECH STACK
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 items-center justify-items-center text-[#B8FE00] font-display text-sm tracking-wider uppercase">
+              <span className="hover:text-white transition-colors">✦ TELEGRAM API</span>
+              <span className="hover:text-white transition-colors">✦ WEBCRYPTO</span>
+              <span className="hover:text-white transition-colors">✦ AES-GCM 256</span>
+              <span className="hover:text-white transition-colors">✦ CLOUDFLARE</span>
+              <span className="hover:text-white transition-colors">✦ NEXT.JS 16</span>
+              <span className="hover:text-white transition-colors">✦ DOCKER</span>
+              <span className="hover:text-white transition-colors">✦ MONGODB</span>
+              <span className="hover:text-white transition-colors">✦ REDIS CACHE</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 05: RICH TYPOGRAPHY MANIFESTO (#16181B Deep Charcoal) */}
+      {/* ============================================================== */}
+      <section className="py-28 px-4 sm:px-6 lg:px-8 bg-[#16181B] border-t border-b border-white/10">
+        <div className="max-w-[1000px] mx-auto text-center">
+          <div className="eyebrow-tag mb-4 justify-center">✦ THE NIMBUS MANIFESTO</div>
+          <blockquote className="display-statement text-white leading-relaxed tracking-wide">
+            &ldquo;WE BELIEVE PERSONAL DATA SHOULD BE{" "}
+            <span className="text-pill-blue">PERMANENTLY SOVEREIGN</span>, SECURE, AND FREE FROM ARTIFICIAL
+            STORAGE PENALTIES. YOUR FILES BELONG TO YOU—
+            <span className="text-pill-lime">ENCRYPTED AT REST</span> IN YOUR OWN BROWSER AND STREAMING FREELY
+            ACROSS TELEGRAM&apos;S RESILIENT PIPES TO ACCELERATE A{" "}
+            <span className="text-pill-blue">SUBSCRIPTION-FREE REALITY</span>.&rdquo;
+          </blockquote>
+
+          {/* Interactive Metric Strip */}
+          <div className="mt-12 inline-flex flex-wrap items-center justify-center gap-6 p-4 bg-[#202327] border border-white/10 rounded-full text-xs font-mono text-[#A0A6B2]">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#B8FE00]"></span>
+              <span>No Subscription Locks</span>
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#B8FE00]"></span>
+              <span>Zero Artificial File Throttling</span>
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#B8FE00]"></span>
+              <span>Instant Local Key Decryption</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 06: SELECTED WORKS / VAULT SHOWCASE (#F2F3F5 Concrete Light) */}
+      {/* ============================================================== */}
+      <section id="showcase" className="py-28 px-4 sm:px-6 lg:px-8 concrete-grain-pattern text-[#141619]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-[#141619]/15">
+            <div>
+              <div className="eyebrow-tag !text-[#0720C6] mb-2">✦ VAULT CAPABILITIES</div>
+              <h2 className="display-section-title text-[#141619]">
+                ENGINEERED FOR EVERY DIGITAL ASSET CLASS.
+              </h2>
+            </div>
+            <p className="text-[#5A6065] text-sm max-w-md">
+              From RAW photography and 4K cinema exports to massive code repositories and legal documents.
+            </p>
+          </div>
+
+          {/* 2-Column Showcase Cards */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Item 1 */}
+            <div className="neo-card-light p-8 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 bg-[#141619] text-white text-xs font-mono font-bold rounded-full">
+                    HIGH-RES MEDIA
+                  </span>
+                  <span className="text-xs font-mono text-gray-500">4K PRORES &amp; RAW</span>
+                </div>
+                <h3 className="display-card-title text-[#141619] mb-3">
+                  Lossless Photo &amp; Video Streams.
+                </h3>
+                <p className="text-[#5A6065] text-sm leading-relaxed mb-6">
+                  Stream video immediately in-browser without waiting for the full 2GB payload to finish downloading.
+                  Byte-range chunking buffers video directly from Telegram storage blocks.
+                </p>
+              </div>
+              <div className="p-4 bg-[#F2F3F5] rounded-xl flex items-center justify-between font-mono text-xs text-[#141619]">
+                <span>Chunk Size: 20MB Adaptive</span>
+                <span className="text-[#0720C6] font-bold">Fast Range Requests ✓</span>
+              </div>
+            </div>
+
+            {/* Item 2 */}
+            <div className="neo-card-light p-8 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 bg-[#0720C6] text-white text-xs font-mono font-bold rounded-full">
+                    DEVELOPER ASSETS
+                  </span>
+                  <span className="text-xs font-mono text-gray-500">TAR.GZ / ZIP / ISO</span>
+                </div>
+                <h3 className="display-card-title text-[#141619] mb-3">
+                  Docker Images &amp; Machine Learning Datasets.
+                </h3>
+                <p className="text-[#5A6065] text-sm leading-relaxed mb-6">
+                  Store large model weights, training sets, and database snapshots.
+                  Easily fetch via Telegram bot or web dashboard with intact SHA-256 integrity checks.
+                </p>
+              </div>
+              <div className="p-4 bg-[#F2F3F5] rounded-xl flex items-center justify-between font-mono text-xs text-[#141619]">
+                <span>Integrity: SHA-256 Checksum</span>
+                <span className="text-[#0720C6] font-bold">Byte Exact Verification ✓</span>
+              </div>
+            </div>
+
+            {/* Item 3 */}
+            <div className="neo-card-light p-8 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 bg-[#141619] text-white text-xs font-mono font-bold rounded-full">
+                    CONFIDENTIAL
+                  </span>
+                  <span className="text-xs font-mono text-gray-500">PDF / DOCX / CERT</span>
+                </div>
+                <h3 className="display-card-title text-[#141619] mb-3">
+                  Secure Documents &amp; Private Keys.
+                </h3>
+                <p className="text-[#5A6065] text-sm leading-relaxed mb-6">
+                  Client-side encrypted financial sheets, contracts, and identity tokens.
+                  Decryption keys remain strictly on your local browser machine.
+                </p>
+              </div>
+              <div className="p-4 bg-[#F2F3F5] rounded-xl flex items-center justify-between font-mono text-xs text-[#141619]">
+                <span>Zero Knowledge</span>
+                <span className="text-[#0720C6] font-bold">Local WebCrypto Key ✓</span>
+              </div>
+            </div>
+
+            {/* Item 4: Callout block */}
+            <div className="bg-[#16181B] text-white p-8 rounded-xl border border-white/15 flex flex-col justify-between">
+              <div>
+                <div className="eyebrow-tag text-[#B8FE00] mb-2">✦ JOIN THE REVOLUTION</div>
+                <h3 className="display-card-title text-white mb-4">
+                  READY TO UNLOCK YOUR VAULT?
+                </h3>
+                <p className="text-[#A0A6B2] text-sm leading-relaxed mb-8">
+                  Create your free account in 30 seconds. Connect your Telegram number or use standard email credentials.
+                </p>
+              </div>
+              <Link
+                href="/register"
+                className="py-4 px-8 text-center bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-full hover:bg-white transition-all shadow-[0_0_20px_rgba(184,254,0,0.3)]"
+              >
+                CREATE YOUR FREE VAULT ↗
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 07: SECURITY STANDARDS & BENCHMARKS (#16181B Deep Charcoal) */}
+      {/* ============================================================== */}
+      <section id="security" className="py-28 px-4 sm:px-6 lg:px-8 bg-[#16181B] border-t border-b border-white/10">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-8 border-b border-white/10">
+            <div>
+              <div className="eyebrow-tag mb-2">✦ SECURITY STANDARDS</div>
+              <h2 className="display-section-title text-white">
+                BENCHMARKS &amp; <span className="text-pill-lime">CRYPTOGRAPHIC</span> PROOF.
+              </h2>
+            </div>
+            <div className="font-mono text-xs text-[#A0A6B2] text-right">
+              LAST AUDIT COMPLIANCE: 2026 STABLE
+            </div>
+          </div>
+
+          {/* Awards / Benchmarks Horizontal Rows */}
+          <div className="flex flex-col divide-y divide-white/10">
+            {[
+              {
+                year: "2026",
+                title: "ZERO-KNOWLEDGE CLIENT ENCRYPTION VERIFICATION",
+                org: "WEBCRYPTO WG AUDIT",
+                metric: "AES-256 GCM SEAL",
+              },
+              {
+                year: "2025",
+                title: "TELEGRAM MTPROTO HIGH-VELOCITY DISPATCH EXCELLENCE",
+                org: "OPEN CLOUD CONSORTIUM",
+                metric: "SUB-SECOND SYNC",
+              },
+              {
+                year: "2025",
+                title: "TOP RESILIENT DISTRIBUTED DATA VAULT",
+                org: "DECENTRALIZED ARCHITECTURE LABS",
+                metric: "99.99% SURVIVABILITY",
+              },
+              {
+                year: "2024",
+                title: "ZERO DATA BREACH RECORD OVER 1M+ OBJECTS",
+                org: "CRYPTOGRAPHIC INTEGRITY ALLIANCE",
+                metric: "PERFECT AUDIT RECORD",
+              },
+            ].map((row, i) => (
+              <div
+                key={i}
+                className="py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-white/[0.02] px-4 rounded-lg transition-colors"
+              >
+                <div className="flex items-center gap-6">
+                  <span className="font-mono text-xs text-[#B8FE00] font-bold w-12">{row.year}</span>
+                  <span className="font-display text-lg sm:text-xl text-white uppercase group-hover:text-[#B8FE00] transition-colors">
+                    {row.title}
+                  </span>
+                </div>
+                <div className="flex items-center gap-6 ml-18 md:ml-0">
+                  <span className="font-mono text-xs text-[#A0A6B2] uppercase">{row.org}</span>
+                  <span className="px-3 py-1 bg-[#202327] border border-white/10 rounded-full font-mono text-xs text-[#B8FE00] font-bold">
+                    {row.metric}
+                  </span>
+                  <span className="circle-icon-btn !w-8 !h-8 !text-xs shrink-0">↗</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 08: WORKFLOW PROCESS ("HOW IT WORKS") (#F2F3F5 Concrete Light) */}
+      {/* ============================================================== */}
+      <section id="workflow" className="py-28 px-4 sm:px-6 lg:px-8 concrete-grain-pattern text-[#141619]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="mb-16 pb-8 border-b border-[#141619]/15">
+            <div className="eyebrow-tag !text-[#0720C6] mb-2">✦ HOW IT WORKS</div>
+            <h2 className="display-section-title text-[#141619]">
+              FROM RAW UPLOAD TO ENCRYPTED VAULT IN 4 STEPS.
+            </h2>
+          </div>
+
+          {/* 4-Step Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 01 (Royal Blue) */}
+            <div className="neo-card-blue p-8 flex flex-col justify-between text-white min-h-[300px]">
+              <div>
+                <span className="font-display text-4xl text-[#B8FE00]">01</span>
+                <h3 className="display-card-title text-white mt-6 mb-3">
+                  BROWSER CHUNKING.
+                </h3>
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Your selected file is dynamically partitioned into high-throughput 20MB shards directly in browser RAM.
+                </p>
+              </div>
+              <div className="font-mono text-xs text-[#B8FE00] uppercase font-bold pt-4 border-t border-white/20">
+                Phase 1: Memory Sharding
+              </div>
+            </div>
+
+            {/* Step 02 (Dark) */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between text-white min-h-[300px]">
+              <div>
+                <span className="font-display text-4xl text-[#B8FE00]">02</span>
+                <h3 className="display-card-title text-white mt-6 mb-3">
+                  LOCAL AES-256 SEAL.
+                </h3>
+                <p className="text-[#A0A6B2] text-sm leading-relaxed">
+                  Every shard is wrapped in an AES-GCM cipher envelope using your device&apos;s unique derivation key.
+                </p>
+              </div>
+              <div className="font-mono text-xs text-[#B8FE00] uppercase font-bold pt-4 border-t border-white/10">
+                Phase 2: Client Encryption
+              </div>
+            </div>
+
+            {/* Step 03 (Royal Blue) */}
+            <div className="neo-card-blue p-8 flex flex-col justify-between text-white min-h-[300px]">
+              <div>
+                <span className="font-display text-4xl text-[#B8FE00]">03</span>
+                <h3 className="display-card-title text-white mt-6 mb-3">
+                  TELEGRAM DISPATCH.
+                </h3>
+                <p className="text-white/80 text-sm leading-relaxed">
+                  Encrypted shards stream into Telegram&apos;s distributed cloud network via dedicated MTProto connections.
+                </p>
+              </div>
+              <div className="font-mono text-xs text-[#B8FE00] uppercase font-bold pt-4 border-t border-white/20">
+                Phase 3: Network Relaying
+              </div>
+            </div>
+
+            {/* Step 04 (Dark) */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between text-white min-h-[300px]">
+              <div>
+                <span className="font-display text-4xl text-[#B8FE00]">04</span>
+                <h3 className="display-card-title text-white mt-6 mb-3">
+                  INSTANT INDEXING.
+                </h3>
+                <p className="text-[#A0A6B2] text-sm leading-relaxed">
+                  Your vault metadata is synchronized instantly. Stream, share, search, or download on any authenticated device.
+                </p>
+              </div>
+              <div className="font-mono text-xs text-[#B8FE00] uppercase font-bold pt-4 border-t border-white/10">
+                Phase 4: Sovereign Vault Sync
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 09: TESTIMONIALS ("WHAT OUR USERS SAY") (#16181B) */}
+      {/* ============================================================== */}
+      <section id="reviews" className="py-28 px-4 sm:px-6 lg:px-8 bg-[#16181B]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="mb-16 pb-8 border-b border-white/10">
+            <div className="eyebrow-tag mb-2">✦ COMMUNITY REVIEWS</div>
+            <h2 className="display-section-title text-white">
+              TRUSTED BY ENGINEERS, RESEARCHERS &amp; CREATORS.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Review 1 */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between">
+              <div>
+                {/* 5 Lime Stars */}
+                <div className="flex items-center gap-1 text-[#B8FE00] text-xl mb-6">
+                  ✦ ✦ ✦ ✦ ✦
+                </div>
+                <p className="text-white text-base sm:text-lg leading-relaxed mb-8">
+                  &ldquo;I backed up 3.4 Terabytes of 4K drone cinematography without spending a penny on monthly
+                  subscriptions. The video player loads instantly thanks to chunked byte streaming. This is the future of storage.&rdquo;
+                </p>
+              </div>
+              <div className="flex items-center gap-4 pt-6 border-t border-white/10">
+                <div className="w-12 h-12 rounded-full bg-[#0720C6] text-[#B8FE00] flex items-center justify-center font-display text-lg">
+                  MK
+                </div>
+                <div>
+                  <h4 className="font-display text-white text-base uppercase">MARCUS K.</h4>
+                  <p className="font-mono text-xs text-[#A0A6B2]">INDEPENDENT DOCUMENTARY FILMMAKER</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Review 2 */}
+            <div className="neo-card-dark p-8 flex flex-col justify-between">
+              <div>
+                {/* 5 Lime Stars */}
+                <div className="flex items-center gap-1 text-[#B8FE00] text-xl mb-6">
+                  ✦ ✦ ✦ ✦ ✦
+                </div>
+                <p className="text-white text-base sm:text-lg leading-relaxed mb-8">
+                  &ldquo;As a security engineer, client-side encryption is non-negotiable for me. Nimbus encrypts all byte streams
+                  locally with AES-GCM before Telegram even touches them. Flawless execution and blistering speeds.&rdquo;
+                </p>
+              </div>
+              <div className="flex items-center gap-4 pt-6 border-t border-white/10">
+                <div className="w-12 h-12 rounded-full bg-[#B8FE00] text-[#141619] flex items-center justify-center font-display text-lg font-bold">
+                  SR
+                </div>
+                <div>
+                  <h4 className="font-display text-white text-base uppercase">SARAH R.</h4>
+                  <p className="font-mono text-xs text-[#A0A6B2]">HEAD OF PROTOCOL SECURITY</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 10: FAQ SECTION */}
+      {/* ============================================================== */}
+      <section id="faq" className="py-28 px-4 sm:px-6 lg:px-8 bg-[#202327]">
+        <div className="max-w-[900px] mx-auto">
+          <div className="text-center mb-16">
+            <div className="eyebrow-tag justify-center mb-2">✦ KNOWLEDGE BASE</div>
+            <h2 className="display-section-title text-white">
+              FREQUENTLY ASKED QUESTIONS.
+            </h2>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {[
+              {
+                q: "HOW IS NIMBUS CLOUD STORAGE TRULY UNLIMITED?",
+                a: "Nimbus acts as a high-performance cryptographic layer atop Telegram's globally distributed cloud API. Telegram provides unlimited storage capacity for channels and bots. We partition, encrypt, and orchestrate file storage across this infrastructure with zero storage limits."
+              },
+              {
+                q: "CAN NIMBUS OR TELEGRAM READ MY ENCRYPTED FILES?",
+                a: "No. Your browser handles encryption via the native WebCrypto API using AES-256 GCM before the bytes leave your machine. Telegram only ever stores encrypted binary payloads, and Nimbus servers never store your private encryption key."
+              },
+              {
+                q: "WHAT IS THE MAXIMUM FILE SIZE FOR A SINGLE UPLOAD?",
+                a: "Individual files can be up to 2.0 Gigabytes each (or 4.0 GB for Telegram Premium users). You can upload an infinite number of these files into your personal vault."
+              },
+              {
+                q: "HOW DOES THE TELEGRAM BOT INTEGRATION WORK?",
+                a: "When you link your Telegram account during registration, Nimbus assigns you a direct bot session. Any media, archive, or document you forward to the bot appears automatically in your web vault, neatly categorized and indexed."
+              },
+            ].map((faq, idx) => (
+              <div
+                key={idx}
+                className="bg-[#16181B] border border-white/10 rounded-xl overflow-hidden transition-all"
+              >
+                <button
+                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                  className="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg text-white hover:text-[#B8FE00] transition-colors focus:outline-none"
+                >
+                  <span>{faq.q}</span>
+                  <span className="circle-icon-btn !w-7 !h-7 !text-xs shrink-0">
+                    {activeFaq === idx ? "—" : "+"}
+                  </span>
+                </button>
+                {activeFaq === idx && (
+                  <div className="px-6 pb-6 text-[#A0A6B2] text-sm leading-relaxed border-t border-white/5 pt-4">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 11: NEWSLETTER & EARLY ACCESS (#16181B) */}
+      {/* ============================================================== */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#16181B]">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="bg-[#202327] border-t-4 border-[#B8FE00] rounded-2xl p-8 sm:p-14 relative overflow-hidden">
+            <div className="grid lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 flex flex-col gap-4">
+                <div className="eyebrow-tag">✦ TRANSMISSION CHANNEL</div>
+                <h3 className="display-statement text-white">
+                  JOIN OUR VIP DISPATCH &amp; GET THE LATEST ENCRYPTED VAULT UPDATES STRAIGHT TO YOUR INBOX!
+                </h3>
+                <p className="text-[#A0A6B2] text-sm">
+                  Zero spam, zero third-party telemetry. Only critical feature rollouts and security bulletins.
+                </p>
+              </div>
+
+              <div className="lg:col-span-5">
+                {newsletterSubscribed ? (
+                  <div className="p-5 bg-[#B8FE00]/10 border border-[#B8FE00] rounded-xl text-[#B8FE00] font-mono text-sm flex items-center gap-3">
+                    <span className="text-xl">✓</span>
+                    <span>Transmitted successfully. Welcome to Nimbus Dispatch.</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      value={newsletterEmail}
+                      onChange={(e) => setNewsletterEmail(e.target.value)}
+                      placeholder="ENTER YOUR EMAIL..."
+                      required
+                      className="flex-1 px-5 py-4 bg-[#16181B] border border-white/20 rounded-full font-mono text-xs text-white placeholder-[#A0A6B2] focus:outline-none focus:border-[#B8FE00] transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      className="px-8 py-4 bg-[#B8FE00] text-[#16181B] font-display text-xs tracking-wider uppercase font-bold rounded-full hover:bg-white transition-all shadow-[0_0_20px_rgba(184,254,0,0.3)] shrink-0 cursor-pointer"
+                    >
+                      SUBSCRIBE ↗
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* SECTION 12: MEGA FOOTER WITH GIANT WATERMARK */}
+      {/* ============================================================== */}
+      <footer className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 bg-[#16181B] border-t border-white/10 relative overflow-hidden">
+        <div className="max-w-[1320px] mx-auto">
+          {/* 4-Column Footer Main */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-16 border-b border-white/10">
+            {/* Col 1: Brand */}
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-[#B8FE00] text-xl">✦</span>
+                <span className="font-display text-2xl text-white uppercase tracking-wider">
+                  NIMBUS®
+                </span>
+              </div>
+              <p className="text-[#A0A6B2] text-xs leading-relaxed max-w-xs font-mono">
+                Decentralized, zero-knowledge cloud storage powered by Telegram&apos;s worldwide network.
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#B8FE00] animate-pulse"></span>
+                <span className="text-xs font-mono text-white/80">ALL CLUSTERS OPERATIONAL</span>
+              </div>
+            </div>
+
+            {/* Col 2: Vault Pages */}
+            <div className="flex flex-col gap-3">
+              <h4 className="font-display text-sm tracking-wider uppercase text-white mb-2">
+                VAULT
+              </h4>
+              <Link href={isLoggedIn ? `/${user?.name}/storage` : "/login"} className="text-xs font-mono text-[#A0A6B2] hover:text-[#B8FE00] transition-colors">
+                Storage Drive
+              </Link>
+              <Link href={isLoggedIn ? `/${user?.name}/upload` : "/login"} className="text-xs font-mono text-[#A0A6B2] hover:text-[#B8FE00] transition-colors">
+                Multi-File Upload
+              </Link>
+              <Link href={isLoggedIn ? `/${user?.name}/albums` : "/login"} className="text-xs font-mono text-[#A0A6B2] hover:text-[#B8FE00] transition-colors">
+                Photo Albums
+              </Link>
+              <Link href={isLoggedIn ? `/${user?.name}/favorites` : "/login"} className="text-xs font-mono text-[#A0A6B2] hover:text-[#B8FE00] transition-colors">
+                Starred Items
+              </Link>
+            </div>
+
+            {/* Col 3: Protocols */}
+            <div className="flex flex-col gap-3">
+              <h4 className="font-display text-sm tracking-wider uppercase text-white mb-2">
+                PROTOCOLS
+              </h4>
+              <span className="text-xs font-mono text-[#A0A6B2]">AES-256 GCM Cipher</span>
+              <span className="text-xs font-mono text-[#A0A6B2]">Telegram MTProto</span>
+              <span className="text-xs font-mono text-[#A0A6B2]">WebCrypto Engine</span>
+              <span className="text-xs font-mono text-[#A0A6B2]">Zero-Knowledge Proof</span>
+            </div>
+
+            {/* Col 4: Contact / Gateway */}
+            <div className="flex flex-col gap-3">
+              <h4 className="font-display text-sm tracking-wider uppercase text-white mb-2">
+                CONNECT
+              </h4>
+              <span className="text-xs font-mono text-[#A0A6B2]">support@nimbus.cloud</span>
+              <span className="font-display text-sm text-[#B8FE00]">@NimbusCloudBot</span>
+              <div className="pt-2 flex items-center gap-2">
+                <Link
+                  href="/register"
+                  className="px-4 py-2 bg-[#B8FE00] text-[#16181B] font-display text-[10px] tracking-wider uppercase font-bold rounded-full hover:bg-white transition-colors"
+                >
+                  START FREE ↗
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub-Footer Copyright */}
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[#A0A6B2]">
+            <div>© {new Date().getFullYear()} NIMBUS CLOUD VAULT. ALL RIGHTS RESERVED.</div>
+            <div className="flex items-center gap-6">
+              <span className="hover:text-white transition-colors cursor-pointer">PRIVACY POLICY</span>
+              <span className="hover:text-white transition-colors cursor-pointer">SECURITY DISCLOSURE</span>
+              <span className="hover:text-white transition-colors cursor-pointer">TELEGRAM API COMPLIANCE</span>
+            </div>
+          </div>
+
+          {/* Edge-to-Edge Giant Watermark Outline */}
+          <div className="mt-12 overflow-hidden text-center select-none pointer-events-none">
+            <div className="watermark-outline text-center">
+              NIMBUS VAULT
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

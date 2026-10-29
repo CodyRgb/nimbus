@@ -1,0 +1,870 @@
+{
+    "designSystem": {
+        "meta": {
+            "projectName": "Aurelia - Creative Agency Landing Page",
+            "themeStyle": "Bold Neo-Brutalist / High-Contrast Modern Agency",
+            "brandPersonality": [
+                "Energetic",
+                "Bold",
+                "Innovative",
+                "High-Impact",
+                "Structured"
+            ],
+            "gridSystem": {
+                "columns": 12,
+                "maxWidth": "1320px",
+                "gutter": "24px",
+                "margin": "auto",
+                "sectionPaddingVertical": "100px"
+            }
+        },
+        "colorPalette": {
+            "primary": {
+                "electricRoyalBlue": {
+                    "hex": "#0720C6",
+                    "rgb": "rgb(7, 32, 198)",
+                    "usage": "Hero background, active/featured cards, progress bars, inline text highlight pills, icon badges"
+                },
+                "acidLimeGreen": {
+                    "hex": "#B8FE00",
+                    "rgb": "rgb(184, 254, 0)",
+                    "usage": "Display hero text, ticker tape background, circular action arrows, star icons, logomarks, inline text highlight pills"
+                }
+            },
+            "backgrounds": {
+                "deepCharcoal": {
+                    "hex": "#16181B",
+                    "rgb": "rgb(22, 24, 27)",
+                    "usage": "Primary dark section backgrounds (Services, Statement, Awards, Testimonials, Newsletter, Footer)"
+                },
+                "elevatedDarkCard": {
+                    "hex": "#202327",
+                    "rgb": "rgb(32, 35, 39)",
+                    "usage": "Default service cards, testimonial cards, logo bar container, dark process cards"
+                },
+                "offWhiteConcrete": {
+                    "hex": "#F2F3F5",
+                    "rgb": "rgb(242, 243, 245)",
+                    "usage": "Light alternating sections (Who We Are, Portfolio, Team, Process, Blog) with subtle noise/halftone texture"
+                },
+                "pureWhite": {
+                    "hex": "#FFFFFF",
+                    "rgb": "rgb(255, 255, 255)",
+                    "usage": "Card backgrounds in light sections, primary text on dark backgrounds"
+                }
+            },
+            "typography": {
+                "textLight": "#FFFFFF",
+                "textMutedLight": "#A0A6B2",
+                "textDark": "#141619",
+                "textMutedDark": "#5A6065",
+                "textAccentLime": "#B8FE00"
+            },
+            "bordersAndDividers": {
+                "subtleLight": "rgba(255, 255, 255, 0.15)",
+                "subtleDark": "rgba(20, 22, 25, 0.12)",
+                "accentYellow": "#B8FE00"
+            },
+            "texturesAndOverlays": {
+                "heroGridOverlay": "Subtle radial dot matrix + faint geometric wireframe grid at 8% opacity over #0720C6",
+                "lightSectionTexture": "Subtle diagonal micro-line / concrete grain texture over #F2F3F5"
+            }
+        },
+        "typography": {
+            "fontFamilies": {
+                "display": {
+                    "primary": "Anton",
+                    "fallbacks": [
+                        "Impact",
+                        "Bebas Neue",
+                        "Oswald",
+                        "sans-serif"
+                    ],
+                    "characteristics": "Ultra-condensed, heavy weight, all-caps, tight tracking, strong vertical presence"
+                },
+                "body": {
+                    "primary": "Plus Jakarta Sans",
+                    "fallbacks": [
+                        "Inter",
+                        "DM Sans",
+                        "sans-serif"
+                    ],
+                    "characteristics": "Clean geometric grotesk, high legibility at small sizes"
+                }
+            },
+            "scale": {
+                "heroDisplay": {
+                    "fontFamily": "display",
+                    "fontSize": "clamp(5.5rem, 13vw, 11.5rem)",
+                    "fontWeight": 800,
+                    "lineHeight": 0.88,
+                    "letterSpacing": "-0.02em",
+                    "textTransform": "uppercase"
+                },
+                "footerWatermark": {
+                    "fontFamily": "display",
+                    "fontSize": "clamp(4rem, 11vw, 9.5rem)",
+                    "fontWeight": 800,
+                    "lineHeight": 0.85,
+                    "textTransform": "uppercase",
+                    "style": "1px stroke outline only, rgba(255,255,255,0.08) fill transparent"
+                },
+                "h1_sectionStatement": {
+                    "fontFamily": "display",
+                    "fontSize": "clamp(1.75rem, 3.2vw, 2.75rem)",
+                    "fontWeight": 700,
+                    "lineHeight": 1.25,
+                    "letterSpacing": "0.01em",
+                    "textTransform": "uppercase"
+                },
+                "h2_sectionTitle": {
+                    "fontFamily": "display",
+                    "fontSize": "clamp(2rem, 3.8vw, 3.25rem)",
+                    "fontWeight": 700,
+                    "lineHeight": 1.08,
+                    "letterSpacing": "0.01em",
+                    "textTransform": "uppercase"
+                },
+                "h3_cardTitle": {
+                    "fontFamily": "display",
+                    "fontSize": "1.5rem",
+                    "fontWeight": 700,
+                    "lineHeight": 1.15,
+                    "textTransform": "uppercase"
+                },
+                "tickerText": {
+                    "fontFamily": "display",
+                    "fontSize": "1.85rem",
+                    "fontWeight": 700,
+                    "lineHeight": 1.0,
+                    "letterSpacing": "0.02em",
+                    "textTransform": "uppercase"
+                },
+                "statNumber": {
+                    "fontFamily": "body",
+                    "fontSize": "2.25rem",
+                    "fontWeight": 800,
+                    "lineHeight": 1.0
+                },
+                "eyebrowTag": {
+                    "fontFamily": "display",
+                    "fontSize": "0.85rem",
+                    "fontWeight": 600,
+                    "letterSpacing": "0.08em",
+                    "textTransform": "uppercase"
+                },
+                "navLink": {
+                    "fontFamily": "display",
+                    "fontSize": "0.75rem",
+                    "fontWeight": 500,
+                    "letterSpacing": "0.06em",
+                    "textTransform": "uppercase"
+                },
+                "bodyRegular": {
+                    "fontFamily": "body",
+                    "fontSize": "0.875rem",
+                    "fontWeight": 400,
+                    "lineHeight": 1.6
+                },
+                "buttonLabel": {
+                    "fontFamily": "display",
+                    "fontSize": "0.8rem",
+                    "fontWeight": 600,
+                    "letterSpacing": "0.06em",
+                    "textTransform": "uppercase"
+                }
+            }
+        },
+        "uiComponents": {
+            "sectionEyebrow": {
+                "structure": "4-point star icon (#B8FE00) + uppercase label text",
+                "gap": "8px",
+                "alignment": "center-left"
+            },
+            "outlineButton": {
+                "padding": "10px 20px",
+                "border": "1px solid currentColor",
+                "borderRadius": "0px",
+                "background": "transparent",
+                "typography": "buttonLabel",
+                "icon": "Small right arrow inside circle or chevron"
+            },
+            "circleIconButton": {
+                "size": "38px",
+                "borderRadius": "50%",
+                "background": "#B8FE00",
+                "iconColor": "#141619",
+                "iconType": "North-East diagonal arrow (↗)"
+            },
+            "textHighlightPill": {
+                "padding": "2px 10px",
+                "borderRadius": "20px",
+                "variants": {
+                    "blue": {
+                        "background": "#0720C6",
+                        "textColor": "#FFFFFF"
+                    },
+                    "lime": {
+                        "background": "#B8FE00",
+                        "textColor": "#141619"
+                    }
+                }
+            },
+            "inlineTextThumb": {
+                "width": "64px",
+                "height": "28px",
+                "borderRadius": "14px",
+                "objectFit": "cover",
+                "verticalAlign": "middle"
+            }
+        }
+    },
+    "pageSections": [
+        {
+            "id": "section-01-header-and-hero",
+            "name": "Navigation & Hero Banner",
+            "background": {
+                "color": "#0720C6",
+                "pattern": "Subtle radial dot matrix on left/right edges and faint grid lines"
+            },
+            "navbar": {
+                "layout": "3-column flex (Logo Left, Nav Links Center, Contact Action Right)",
+                "padding": "24px 0",
+                "logo": {
+                    "icon": "8-point geometric star with sharp points in #B8FE00",
+                    "brandText": "AURELIA®",
+                    "subText": "CREATIVE",
+                    "textColor": "#FFFFFF"
+                },
+                "menuItems": [
+                    {
+                        "label": "HOME",
+                        "active": true
+                    },
+                    {
+                        "label": "ABOUT US",
+                        "hasDropdown": false
+                    },
+                    {
+                        "label": "OUR SERVICES",
+                        "hasDropdown": true
+                    },
+                    {
+                        "label": "PORTFOLIO",
+                        "hasDropdown": true
+                    },
+                    {
+                        "label": "PAGES",
+                        "hasDropdown": true
+                    },
+                    {
+                        "label": "CONTACT US",
+                        "hasDropdown": false
+                    }
+                ],
+                "ctaPhone": {
+                    "iconCircle": {
+                        "bg": "#B8FE00",
+                        "icon": "Phone handset dark"
+                    },
+                    "label": "PHONE NUMBER",
+                    "number": "+43 875 5673 9876"
+                }
+            },
+            "heroContent": {
+                "composition": "Layered z-index composition: Giant background typography, overlapping central cutout portrait, flanking left/right asymmetric info columns",
+                "centerpiece": {
+                    "backgroundText": {
+                        "line1": "CREATIVE",
+                        "line2": "AGENCY",
+                        "color": "#B8FE00",
+                        "specialEffect": "Behind the subject's grey hoodie, the letters 'EN' of AGENCY transition into a 2px #B8FE00 wireframe outline stacked on top of the subject layer for a 3D depth effect"
+                    },
+                    "subjectImage": {
+                        "description": "Young woman in an oversized grey heather hoodie wearing mint-green over-ear headphones, looking to the right and smiling brightly",
+                        "masking": "Full upper-body cutout overlapping the bottom of 'CREATIVE' and sitting in front of/intertwined with 'AGENCY'"
+                    }
+                },
+                "leftColumn": {
+                    "topWidget": {
+                        "type": "Avatar Group + Micro Copy",
+                        "avatars": "3 overlapping circular user portraits (36px) + 1 blue circle icon",
+                        "text": "THE EXPERT TEAM BRINGS A CREATIVITY TO EVERY PROJECT."
+                    },
+                    "statsList": [
+                        {
+                            "number": "500+",
+                            "label": "HAPPY CLIENT",
+                            "divider": "1px solid rgba(255,255,255,0.2)"
+                        },
+                        {
+                            "number": "125+",
+                            "label": "PROJECT DONE",
+                            "divider": "1px solid rgba(255,255,255,0.2)"
+                        },
+                        {
+                            "number": "450+",
+                            "label": "MEDIA FEATURED",
+                            "divider": "none"
+                        }
+                    ]
+                },
+                "rightColumn": {
+                    "topDecorativeBadge": {
+                        "type": "Circular thin white outline badge (72px)",
+                        "innerIcon": "Tilted 4-point star in #B8FE00"
+                    },
+                    "descriptionText": "Lorem ipsum do adipiscing elit Ut elit tellus luctus nec ullamcorper mattis pulvinar dapibus leo.",
+                    "ctaButton": {
+                        "label": "GET STARTED",
+                        "icon": "Right arrow in circle",
+                        "style": "White 1px rectangular outline button"
+                    },
+                    "videoPlayButton": {
+                        "style": "Solid #B8FE00 circle (48px) with dark play triangle and outer partial orbital ring"
+                    }
+                }
+            }
+        },
+        {
+            "id": "section-02-marquee-ticker",
+            "name": "Diagonal Skill Ticker Tape",
+            "style": {
+                "background": "#B8FE00",
+                "textColor": "#16181B",
+                "rotationAngle": "-1.5deg",
+                "padding": "16px 0",
+                "zIndex": 10,
+                "boxShadow": "0 10px 30px rgba(0,0,0,0.25)"
+            },
+            "items": [
+                "BRANDING",
+                "GRAPHIC DESIGN",
+                "WEB DESIGN",
+                "DIGITAL MARKETING"
+            ],
+            "separatorIcon": "4-point black star (✦)"
+        },
+        {
+            "id": "section-03-what-we-do",
+            "name": "Services Grid ('What We Do')",
+            "background": "#16181B",
+            "header": {
+                "layout": "3-column top bar (Eyebrow Left, Main Title Center-Left, CTA Button Right)",
+                "eyebrow": "WHAT WE DO",
+                "title": "DESIGNING FOR SEAMLESS AND ENJOYABLE INTERACTIONS.",
+                "ctaButton": {
+                    "label": "ALL SERVICES",
+                    "style": "1px solid rgba(255,255,255,0.4) outline button"
+                }
+            },
+            "cardsGrid": {
+                "columns": 3,
+                "gap": "24px",
+                "cards": [
+                    {
+                        "index": 1,
+                        "theme": "dark",
+                        "background": "#202327",
+                        "layoutOrder": [
+                            "Header + Arrow",
+                            "Description",
+                            "Bottom Image"
+                        ],
+                        "title": "BRAND BUILDING & STRATEGY.",
+                        "actionButton": "circleIconButton (#B8FE00)",
+                        "description": "Lorem ipsum do adipiscing elit Ut elit tellus luctus nec ullamcorper mattis pulvinar dapibus leo.",
+                        "image": "Team working around desktop monitors in a moody creative office"
+                    },
+                    {
+                        "index": 2,
+                        "theme": "highlighted-blue",
+                        "background": "#0720C6",
+                        "layoutOrder": [
+                            "Top Image",
+                            "Header + Arrow",
+                            "Description"
+                        ],
+                        "title": "CREATIVE DIGITAL SOLUTION.",
+                        "actionButton": "circleIconButton (#B8FE00)",
+                        "description": "Lorem ipsum do adipiscing elit Ut elit tellus luctus nec ullamcorper mattis pulvinar dapibus leo.",
+                        "image": "Black and white photo of creative directors reviewing prints at a desk"
+                    },
+                    {
+                        "index": 3,
+                        "theme": "dark",
+                        "background": "#202327",
+                        "layoutOrder": [
+                            "Header + Arrow",
+                            "Description",
+                            "Bottom Image"
+                        ],
+                        "title": "MARKETING & CAMPAIGN.",
+                        "actionButton": "circleIconButton (#B8FE00)",
+                        "description": "Lorem ipsum do adipiscing elit Ut elit tellus luctus nec ullamcorper mattis pulvinar dapibus leo.",
+                        "image": "Group of young marketers collaborating late at night over laptops"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-04-who-we-are",
+            "name": "About Us & Skills ('Who We Are')",
+            "background": "#F2F3F5",
+            "mainGrid": {
+                "columns": 3,
+                "layout": "Left Copy & Badges (4 cols) | Center Cutout Arch Image (4 cols) | Right Progress & Info (4 cols)",
+                "leftColumn": {
+                    "eyebrow": "WHO WE ARE",
+                    "title": "CREATIVITY MEETS STRATEGY.",
+                    "description": "With a team of passionate designers, marketers, and innovators, we specialize in delivering unique solutions that elevate your brand and captivate your audience.",
+                    "featureList": [
+                        {
+                            "iconBg": "#B8FE00",
+                            "iconColor": "#141619",
+                            "iconType": "Check/Target badge",
+                            "label": "OVER 10 YEARS OF EXPERIENCE"
+                        },
+                        {
+                            "iconBg": "#0720C6",
+                            "iconColor": "#FFFFFF",
+                            "iconType": "Globe/Network badge",
+                            "label": "TRUSTED BY GLOBAL BRANDS"
+                        }
+                    ]
+                },
+                "centerColumn": {
+                    "backdropShape": "Vertical pill/arch with black fill and #B8FE00 4px border",
+                    "subjectImage": "Woman with voluminous curly afro hair, white retro sunglasses, yellow top, sipping an iced drink through a straw (overlapping outside the arch)"
+                },
+                "rightColumn": {
+                    "topThumbnail": "Woman working on laptop in a bright studio with a green circular badge overlay on left",
+                    "progressBars": [
+                        {
+                            "label": "SUCCESSFUL CAMPAIGN LAUNCHES",
+                            "percentage": "95%",
+                            "barColor": "#B8FE00",
+                            "trackColor": "#D8DCE2"
+                        },
+                        {
+                            "label": "INNOVATIVE DESIGN",
+                            "percentage": "89%",
+                            "barColor": "#0720C6",
+                            "trackColor": "#D8DCE2"
+                        },
+                        {
+                            "label": "HIGH IMPACT PROJECT",
+                            "percentage": "100%",
+                            "barColor": "#0720C6",
+                            "trackColor": "#D8DCE2"
+                        }
+                    ],
+                    "secondaryDescription": "Consectetuer adipiscing congue aptent placera senec efficitur aptent malesuada sit conubia tincidunt iaculis.",
+                    "ctaButton": {
+                        "label": "ABOUT US",
+                        "style": "Dark 1px outline rectangular button"
+                    }
+                }
+            },
+            "clientLogoBar": {
+                "containerStyle": {
+                    "background": "#202327",
+                    "borderRadius": "14px",
+                    "padding": "28px 40px",
+                    "marginTop": "40px"
+                },
+                "logosCount": 8,
+                "logoColor": "#B8FE00",
+                "logoDescriptions": [
+                    "Double triangle mountain line logo",
+                    "Abstract leaf/flame solid mark",
+                    "Monogram letter 'R' line mark",
+                    "Geometric cone/megaphone mark",
+                    "Diamond heart line icon",
+                    "Interlocking circles Venn diagram",
+                    "Lotus flower line icon",
+                    "Diagonal parallel bars with dots"
+                ]
+            }
+        },
+        {
+            "id": "section-05-manifesto-statement",
+            "name": "Rich Typography Manifesto & Video Banner",
+            "background": "#16181B",
+            "content": {
+                "alignment": "center",
+                "maxWidth": "960px",
+                "statementRichText": [
+                    {
+                        "text": "“WE ARE CREATORS,",
+                        "type": "pill-blue"
+                    },
+                    {
+                        "text": " INNOVATORS, AND STORYTELLERS COMMITTED TO UNDERSTANDING ",
+                        "type": "plain-white"
+                    },
+                    {
+                        "text": "[inline-pill-image: two team members smiling]",
+                        "type": "inline-image"
+                    },
+                    {
+                        "text": " EACH BRAND'S UNIQUE ",
+                        "type": "plain-white"
+                    },
+                    {
+                        "text": "[inline-pill-image: designer working]",
+                        "type": "inline-image"
+                    },
+                    {
+                        "text": " IDENTITY. OUR PASSION LIES IN BLENDING STRATEGY WITH ",
+                        "type": "plain-white"
+                    },
+                    {
+                        "text": "CREATIVITY TO",
+                        "type": "pill-lime"
+                    },
+                    {
+                        "text": " BUILD EXPERIENCES THAT DON'T JUST EXIST BUT THRIVE IN THE HEARTS OF THEIR ",
+                        "type": "plain-white"
+                    },
+                    {
+                        "text": "AUDIENCE.”",
+                        "type": "pill-blue"
+                    }
+                ],
+                "bottomMediaStrip": {
+                    "description": "Horizontal pill-shaped video/image banner below the text showing a team meeting with a play button and stat callout"
+                }
+            }
+        },
+        {
+            "id": "section-06-portfolio-showcase",
+            "name": "Selected Works ('Transforming Ideas')",
+            "background": "#F2F3F5",
+            "header": {
+                "eyebrow": "PORTFOLIO",
+                "title": "TRANSFORMING IDEAS INTO MEMORABLE BRAND EXPERIENCES.",
+                "rightNote": "Short paragraph + 'ALL PORTFOLIO' outline button"
+            },
+            "masonryGrid": {
+                "columns": 2,
+                "gap": "28px",
+                "items": [
+                    {
+                        "title": "Cosmetic Packaging Mockup",
+                        "image": "Purple/dark minimalist dropper bottle and tube on light grey surface",
+                        "tags": [
+                            "BRANDING",
+                            "PACKAGING"
+                        ]
+                    },
+                    {
+                        "title": "Web App UI Showcase",
+                        "image": "Laptop floating on dark pedestal displaying a futuristic blue/dark interface",
+                        "tags": [
+                            "UI/UX",
+                            "WEB DESIGN"
+                        ]
+                    },
+                    {
+                        "title": "Neon Typography Visual",
+                        "image": "Glowing neon script typography on a dark backdrop ('Creativity is Intelligence Having Fun')",
+                        "tags": [
+                            "DIGITAL ART",
+                            "CAMPAIGN"
+                        ]
+                    },
+                    {
+                        "title": "Minimalist Editorial Stationery",
+                        "image": "Flatlay of white stationery cards, envelopes, and botanical elements",
+                        "tags": [
+                            "PRINT",
+                            "IDENTITY"
+                        ]
+                    },
+                    {
+                        "type": "Text Callout Block (Bottom Left)",
+                        "title": "OUR WORK SPEAKS FOR ITSELF.",
+                        "subtitle": "Explore our curated selection of high-impact projects.",
+                        "cta": "VIEW MORE"
+                    },
+                    {
+                        "title": "Dark Merchandise & Tote Bag",
+                        "image": "Black branded box and pouch mockup on dark textured surface",
+                        "tags": [
+                            "MERCH",
+                            "BRANDING"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-07-awards-and-recognition",
+            "name": "Awards List ('Celebrating Excellence')",
+            "background": "#16181B",
+            "header": {
+                "eyebrow": "OUR ACHIEVEMENTS",
+                "title": "CELEBRATING EXCELLENCE IN CREATIVITY.",
+                "highlightedWords": {
+                    "word": "EXCELLENCE",
+                    "style": "pill-lime"
+                }
+            },
+            "awardsTable": {
+                "style": "Full-width horizontal rows separated by 1px rgba(255,255,255,0.12) borders",
+                "rows": [
+                    {
+                        "year": "2023",
+                        "title": "2023 CREATIVE AGENCY OF THE YEAR",
+                        "organization": "GLOBAL DESIGN AWARDS",
+                        "icon": "North-East arrow in #B8FE00"
+                    },
+                    {
+                        "year": "2023",
+                        "title": "BEST DIGITAL CAMPAIGN 2023",
+                        "organization": "MARKETING EXCELLENCE",
+                        "icon": "North-East arrow in #B8FE00"
+                    },
+                    {
+                        "year": "2022",
+                        "title": "TOP BRANDING AGENCY 2022",
+                        "organization": "CREATIVE POOL",
+                        "icon": "North-East arrow in #B8FE00"
+                    },
+                    {
+                        "year": "2021",
+                        "title": "AWARD FOR OUTSTANDING INNOVATION",
+                        "organization": "DESIGN WEEK",
+                        "icon": "North-East arrow in #B8FE00"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-08-team-of-experts",
+            "name": "Team Showcase & Split CTA Banner",
+            "background": "#F2F3F5",
+            "topRow": {
+                "leftInfo": {
+                    "eyebrow": "OUR TEAM",
+                    "title": "TEAM OF EXPERT",
+                    "description": "Meet the minds behind our most successful campaigns.",
+                    "counters": [
+                        {
+                            "value": "300+",
+                            "label": "PROJECTS COMPLETED"
+                        },
+                        {
+                            "value": "200+",
+                            "label": "SATISFIED CLIENTS"
+                        }
+                    ]
+                },
+                "rightTeamGrid": {
+                    "columns": 4,
+                    "style": "Tall vertical portrait slices that expand on hover",
+                    "members": [
+                        {
+                            "name": "Member 1",
+                            "photo": "Smiling woman with glasses in studio"
+                        },
+                        {
+                            "name": "Member 2 (Featured Expanded)",
+                            "photo": "Bearded creative director in black shirt"
+                        },
+                        {
+                            "name": "Member 3",
+                            "photo": "Young female strategist"
+                        },
+                        {
+                            "name": "Member 4",
+                            "photo": "Male developer in casual wear"
+                        }
+                    ]
+                }
+            },
+            "bottomCtaBanner": {
+                "backgroundImage": "Architectural colonnade / urban street scene with a bright blue vintage van passing by",
+                "floatingCard": {
+                    "position": "Bottom Right",
+                    "background": "#16181B",
+                    "title": "LET'S CREATE SOMETHING EXTRAORDINARY TOGETHER.",
+                    "decorativeElement": "Half-circle #B8FE00 graphic with star icon",
+                    "ctaButton": "GET IN TOUCH"
+                }
+            }
+        },
+        {
+            "id": "section-09-process-steps",
+            "name": "Workflow Process ('From Vision To Reality')",
+            "background": "#F2F3F5",
+            "header": {
+                "eyebrow": "HOW IT WORKS",
+                "title": "FROM VISION TO REALITY"
+            },
+            "stepsGrid": {
+                "columns": 4,
+                "gap": "20px",
+                "steps": [
+                    {
+                        "stepNumber": "01",
+                        "theme": "blue",
+                        "background": "#0720C6",
+                        "textColor": "#FFFFFF",
+                        "title": "UNDERSTANDING YOUR BRAND"
+                    },
+                    {
+                        "stepNumber": "02",
+                        "theme": "dark",
+                        "background": "#16181B",
+                        "textColor": "#FFFFFF",
+                        "title": "CRAFTING UNIQUE CONCEPTS"
+                    },
+                    {
+                        "stepNumber": "03",
+                        "theme": "blue",
+                        "background": "#0720C6",
+                        "textColor": "#FFFFFF",
+                        "title": "BRINGING IDEAS TO LIFE"
+                    },
+                    {
+                        "stepNumber": "04",
+                        "theme": "dark",
+                        "background": "#16181B",
+                        "textColor": "#FFFFFF",
+                        "title": "LAUNCHING WITH EXCELLENCE"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-10-testimonials",
+            "name": "Client Reviews ('What Our Client Says')",
+            "background": "#16181B",
+            "header": {
+                "eyebrow": "TESTIMONIALS",
+                "title": "WHAT OUR CLIENT SAYS"
+            },
+            "reviewsGrid": {
+                "columns": 2,
+                "gap": "24px",
+                "cards": [
+                    {
+                        "background": "#202327",
+                        "stars": 5,
+                        "starColor": "#B8FE00",
+                        "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.",
+                        "authorName": "JOHN DOE",
+                        "authorRole": "CEO, TECH CORP",
+                        "avatar": "Circular user portrait"
+                    },
+                    {
+                        "background": "#202327",
+                        "stars": 5,
+                        "starColor": "#B8FE00",
+                        "quote": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.",
+                        "authorName": "SARAH JENKINS",
+                        "authorRole": "FOUNDER, STUDIO X",
+                        "avatar": "Circular user portrait"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-11-blog-insights",
+            "name": "Latest News ('Stay Inspired With Our Latest Insights')",
+            "background": "#F2F3F5",
+            "header": {
+                "eyebrow": "BLOG & NEWS",
+                "title": "STAY INSPIRED WITH OUR LATEST INSIGHTS",
+                "ctaButton": "VIEW ALL POSTS"
+            },
+            "postsGrid": {
+                "columns": 3,
+                "gap": "24px",
+                "posts": [
+                    {
+                        "image": "Designer working at dual-monitor desk setup",
+                        "date": "OCTOBER 24, 2024",
+                        "category": "DESIGN",
+                        "title": "THE FUTURE OF DIGITAL BRANDING IN 2025",
+                        "accentBar": "#B8FE00"
+                    },
+                    {
+                        "image": "Laptop screen showing wireframes and UI cards",
+                        "date": "OCTOBER 18, 2024",
+                        "category": "UI/UX",
+                        "title": "HOW TO BUILD SEAMLESS USER INTERACTIONS",
+                        "accentBar": "#B8FE00"
+                    },
+                    {
+                        "image": "Creative professional smiling in modern office",
+                        "date": "OCTOBER 12, 2024",
+                        "category": "STRATEGY",
+                        "title": "WHY STORYTELLING MATTERS FOR GLOBAL BRANDS",
+                        "accentBar": "#B8FE00"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "section-12-newsletter-and-footer",
+            "name": "Newsletter Box & Mega Footer",
+            "background": "#16181B",
+            "newsletterBanner": {
+                "containerBackground": "#202327",
+                "borderTop": "2px solid #B8FE00",
+                "leftGraphic": "Large #B8FE00 circle with dark star cutout",
+                "title": "JOIN OUR NEWSLETTER & GET EXCLUSIVE INSIGHTS, TIPS, & UPDATES STRAIGHT TO YOUR INBOX!",
+                "form": {
+                    "inputPlaceholder": "Enter your email address...",
+                    "submitButton": {
+                        "label": "SUBSCRIBE",
+                        "background": "#B8FE00",
+                        "textColor": "#141619"
+                    }
+                }
+            },
+            "footerMain": {
+                "columns": 4,
+                "brandColumn": {
+                    "logo": "AURELIA® CREATIVE",
+                    "description": "Creative agency dedicated to building impactful digital experiences."
+                },
+                "linksColumns": [
+                    {
+                        "heading": "PAGES",
+                        "links": [
+                            "Home",
+                            "About Us",
+                            "Services",
+                            "Portfolio"
+                        ]
+                    },
+                    {
+                        "heading": "CONTACT US",
+                        "details": [
+                            "info@aurelia.com",
+                            "123 Creative St, Design City"
+                        ]
+                    },
+                    {
+                        "heading": "PHONE",
+                        "highlightPhone": "+43 875 5673 9876",
+                        "socialIcons": [
+                            "Facebook",
+                            "Twitter/X",
+                            "Instagram",
+                            "LinkedIn"
+                        ]
+                    }
+                ]
+            },
+            "footerBottomWatermark": {
+                "text": "AURELIA CREAT",
+                "style": "Edge-to-edge giant outlined display text in subtle dark-grey stroke"
+            }
+        }
+    ]
+}

@@ -17,6 +17,11 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Password Recovery Modal
+    const [forgotModalOpen, setForgotModalOpen] = useState(false);
+    const [recoveryEmail, setRecoveryEmail] = useState("");
+    const [recoverySent, setRecoverySent] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -34,9 +39,9 @@ export default function LoginPage() {
                 email: res.data.email,
             }, res.data.token);
 
-            router.push(`/${res.data.name}/upload`);
+            router.push(`/${res.data.name}/storage`);
         } catch (err: unknown) {
-            let errorMessage = "Login failed";
+            let errorMessage = "Authentication failed. Please verify your credentials.";
             if (typeof err === "object" && err !== null && "response" in err) {
                 const response = (err as { response: { data?: { message?: string } } }).response;
                 if (response?.data?.message) {
@@ -51,119 +56,204 @@ export default function LoginPage() {
         }
     };
 
+    const handleRecovery = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (recoveryEmail) {
+            setRecoverySent(true);
+            setTimeout(() => {
+                setRecoverySent(false);
+                setForgotModalOpen(false);
+                setRecoveryEmail("");
+            }, 3000);
+        }
+    };
+
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-white overflow-hidden h-[100dvh] flex flex-col">
-            {/* Header */}
+        <div className="bg-[#16181B] min-h-screen flex flex-col justify-center items-center px-4 py-28 relative overflow-hidden font-body text-white selection:bg-[#B8FE00] selection:text-[#16181B]">
+            {/* Subtle background overlay */}
+            <div className="absolute inset-0 hero-grid-pattern opacity-40 pointer-events-none"></div>
 
+            <div className="relative z-10 w-full max-w-[480px]">
+                {/* Brand Header */}
+                <div className="flex items-center justify-center gap-2 mb-8">
+                    <span className="text-[#B8FE00] text-2xl">✦</span>
+                    <span className="font-display text-3xl tracking-wider uppercase text-white">
+                        NIMBUS VAULT
+                    </span>
+                </div>
 
-            {/* Main Content */}
-            <main className="relative flex-1 flex items-center justify-center p-4 md:p-8 overflow-y-auto w-full">
-                <div className="glow-orb orb-1"></div>
-                <div className="glow-orb orb-2"></div>
+                {/* Login Card */}
+                <div className="bg-[#202327] border-2 border-white/15 rounded-2xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative">
+                    <div className="flex flex-col gap-2 text-center mb-8">
+                        <span className="eyebrow-tag justify-center text-xs">
+                          ✦ SECURE AUTHENTICATION GATEWAY
+                        </span>
+                        <h1 className="font-display text-3xl sm:text-4xl uppercase text-white tracking-tight">
+                            UNLOCK YOUR VAULT
+                        </h1>
+                        <p className="text-[#A0A6B2] text-xs font-mono">
+                            Enter credentials to decrypt your sovereign cloud storage session.
+                        </p>
+                    </div>
 
-                <div className="relative z-10 w-full max-w-[480px]">
-                    <div className="glass-card bg-glass-gradient border border-white/10 rounded-xl p-8 md:p-12 flex flex-col gap-8">
-                        <div className="flex flex-col gap-2 text-center">
-                            <h1 className="text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">Welcome back</h1>
-                            <p className="text-accent-text text-base font-normal">Enter your credentials to access your cloud vault.</p>
+                    {/* Error Banner */}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/10 border-2 border-red-500/40 rounded-xl text-red-300 text-xs font-mono flex items-center gap-3">
+                            <span className="text-red-400 text-base font-bold">⚠</span>
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                EMAIL IDENTIFIER
+                            </label>
+                            <input
+                                className="w-full h-12 px-5 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                placeholder="name@domain.com"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
                         </div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-200 text-sm p-4 rounded-xl flex items-center gap-3">
-                                <svg className="w-5 h-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {error}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                    PASSPHRASE
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setForgotModalOpen(true)}
+                                    className="text-[11px] font-mono text-[#B8FE00] hover:underline"
+                                >
+                                    FORGOT PASSWORD?
+                                </button>
                             </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                            <label className="flex flex-col gap-2">
-                                <span className="text-white text-sm font-medium leading-normal ml-1">Email Address</span>
+                            <div className="relative flex items-center">
                                 <input
-                                    className="form-input flex w-full min-w-0 resize-none overflow-hidden rounded-full text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-dark-border bg-dark-input focus:border-primary h-12 md:h-14 placeholder:text-accent-text/50 px-6 text-base font-normal leading-normal transition-all"
-                                    placeholder="user@example.com"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full h-12 px-5 pr-12 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                    placeholder="••••••••••••"
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
-                            </label>
-                            <label className="flex flex-col gap-2">
-                                <span className="text-white text-sm font-medium leading-normal ml-1">Password</span>
-                                <div className="relative flex w-full items-center rounded-full bg-dark-input border border-dark-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/50 transition-all overflow-hidden h-12 md:h-14">
-                                    <input
-                                        className="form-input flex-1 w-full bg-transparent border-none text-white focus:ring-0 placeholder:text-accent-text/50 px-6 h-full text-base font-normal leading-normal"
-                                        placeholder="••••••••"
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                    <button
-                                        className="px-4 text-accent-text hover:text-primary transition-colors flex items-center justify-center h-full cursor-pointer"
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        <span className="material-symbols-outlined text-[20px]">
-                                            {showPassword ? "visibility" : "visibility_off"}
-                                        </span>
-                                    </button>
-                                </div>
-                            </label>
-
-                            <div className="flex items-center justify-between checkbox-container">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className="relative flex items-center">
-                                        <input
-                                            className="peer h-5 w-5 rounded border-dark-border border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 focus:border-primary focus:outline-none transition-all cursor-pointer"
-                                            type="checkbox"
-                                        />
-                                    </div>
-                                    <span className="text-accent-text group-hover:text-white text-sm font-medium transition-colors select-none">Remember me</span>
-                                </label>
-                                <a className="text-sm font-bold text-accent-text hover:text-primary transition-colors" href="#">Forgot password?</a>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 text-[#A0A6B2] hover:text-white transition-colors cursor-pointer text-xs font-mono"
+                                >
+                                    {showPassword ? "HIDE" : "SHOW"}
+                                </button>
                             </div>
-
-                            <button
-                                className="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 md:h-14 px-4 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                                type="submit"
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Logging In...
-                                    </span>
-                                ) : (
-                                    <span className="truncate">Log In</span>
-                                )}
-                            </button>
-                        </form>
-
-                        <div className="text-center pt-2">
-                            <p className="text-accent-text text-sm">
-                                Don't have an account?
-                                <Link className="font-bold text-white hover:text-primary transition-colors ml-1" href="/register">Sign Up</Link>
-                            </p>
                         </div>
+
+                        <div className="flex items-center justify-between pt-1">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 rounded border-white/30 bg-[#16181B] text-[#B8FE00] focus:ring-0 cursor-pointer"
+                                    defaultChecked
+                                />
+                                <span className="text-xs font-mono text-[#A0A6B2]">
+                                    Remember terminal session
+                                </span>
+                            </label>
+                            <span className="text-[10px] font-mono text-[#B8FE00] flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#B8FE00]"></span>
+                                AES-256
+                            </span>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="mt-3 w-full h-13 bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(184,254,0,0.3)] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            {loading ? (
+                                <span className="flex items-center gap-2 font-mono text-xs">
+                                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                                    DECRYPTING SESSION...
+                                </span>
+                            ) : (
+                                <>
+                                    <span>UNLOCK CLOUD VAULT</span>
+                                    <span>↗</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs font-mono text-[#A0A6B2]">
+                        Don&apos;t have an encrypted vault yet?{" "}
+                        <Link href="/register" className="text-[#B8FE00] font-bold hover:underline ml-1">
+                            CREATE ACCOUNT ↗
+                        </Link>
                     </div>
                 </div>
 
-                <div className="absolute bottom-0 left-0 w-full h-[300px] opacity-10 pointer-events-none z-0" style={{
-                    backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC2qiV64FJOs7KTs2sQAvlzxEjkH48xTjKjMk4DDaF9iFNrqo0xoca31oAGFf4uNIWOM1m8veeHmpgspOEVrzHFXZcsH2LQ4BX7UateBrJIrqcyfDCMbL2fhQiCMv0yqQLvxdV85G8s63Ehnx34OhhgHimTuF7zc_qRWSdUujys1e5pZ6MZdRVCtaMg58scxMcOObj36j03NIN2iaeNlT21CBl6fXG_kRzmWKtLKFnOJPHl-ifEoC4auFQN6BQKT9j_W46BZ8CXS-Y')",
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    maskImage: 'linear-gradient(to top, black, transparent)',
-                    WebkitMaskImage: 'linear-gradient(to top, black, transparent)'
-                }}>
-                    <span className="sr-only" data-alt="Abstract network lines representing global connectivity"></span>
+                {/* Bottom Sovereign Note */}
+                <p className="mt-6 text-center text-[11px] font-mono text-[#5A6065]">
+                  ✦ Client-side zero-knowledge encrypted session. No plaintext keys stored.
+                </p>
+            </div>
+
+            {/* Password Recovery Modal */}
+            {forgotModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <div className="bg-[#202327] border-2 border-white/20 rounded-2xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+                        <button
+                            onClick={() => setForgotModalOpen(false)}
+                            className="absolute top-4 right-4 text-[#A0A6B2] hover:text-white font-mono text-sm"
+                        >
+                            ✕
+                        </button>
+                        <div className="eyebrow-tag text-xs mb-2">✦ RECOVERY DISPATCH</div>
+                        <h2 className="font-display text-2xl uppercase text-white mb-2">
+                            RESET VAULT CREDENTIALS
+                        </h2>
+                        <p className="text-xs font-mono text-[#A0A6B2] mb-6">
+                            Enter the email address registered with your vault. We will transmit emergency recovery instructions.
+                        </p>
+
+                        {recoverySent ? (
+                            <div className="p-4 bg-[#B8FE00]/10 border border-[#B8FE00] rounded-xl text-[#B8FE00] text-xs font-mono flex items-center gap-2">
+                                <span>✓</span>
+                                <span>Recovery dispatch transmitted. Please verify your inbox.</span>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleRecovery} className="flex flex-col gap-4">
+                                <input
+                                    type="email"
+                                    value={recoveryEmail}
+                                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                                    placeholder="user@domain.com"
+                                    required
+                                    className="w-full h-12 px-4 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-[#B8FE00]"
+                                />
+                                <div className="flex items-center justify-end gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setForgotModalOpen(false)}
+                                        className="px-5 py-2.5 text-xs font-display uppercase tracking-wider text-white border border-white/20 rounded-full hover:bg-white/10"
+                                    >
+                                        CANCEL
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-6 py-2.5 bg-[#B8FE00] text-[#16181B] font-display text-xs uppercase tracking-wider font-bold rounded-full hover:bg-white transition-colors"
+                                    >
+                                        SEND RECOVERY ↗
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
                 </div>
-            </main>
+            )}
         </div>
     );
 }

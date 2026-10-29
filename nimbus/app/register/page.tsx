@@ -19,7 +19,7 @@ export default function RegisterPage() {
         name: "",
         email: "",
         password: "",
-        confirmPassword: "", // Keeping for state compatibility, though might not use in UI if 1 field
+        confirmPassword: "",
     });
     const [showPassword, setShowPassword] = useState(false);
 
@@ -65,8 +65,11 @@ export default function RegisterPage() {
             }, res.data.token);
 
             setStep(2); // Move to Telegram step
-        } catch (err: any) {
-            const message = isAxiosError(err) ? (err.response?.data?.message || 'Registration failed') : 'Registration failed';
+        } catch (err: unknown) {
+            let message = "Registration failed";
+            if (isAxiosError(err)) {
+                message = err.response?.data?.message || 'Registration failed';
+            }
             setError(message);
         } finally {
             setLoading(false);
@@ -75,14 +78,7 @@ export default function RegisterPage() {
 
     // Telegram handlers
     const handleSendCode = async () => {
-        // Simple parsing of country code to get digits only if needed, 
-        // but existing backend expectation depends on implementation.
-        // Assuming we strip non-digits.
-        const countryDigits = phoneCountryCode.replace(/\D/g, '');
-        // Or if the value is like "+1 (US)", we might just want "+1".
-        // Let's take the part before space
         const cc = phoneCountryCode.split(' ')[0];
-
         const fullPhone = `${cc}${phoneNumber}`.replace(/\s+/g, '');
 
         if (phoneNumber.length < 5) {
@@ -97,8 +93,11 @@ export default function RegisterPage() {
             setPhoneCodeHash(res.data.phoneCodeHash);
             setSession(res.data.session);
             setTelegramStep('CODE');
-        } catch (err: any) {
-            const message = isAxiosError(err) ? (err.response?.data?.message || 'Failed to send code') : 'Failed to send code';
+        } catch (err: unknown) {
+            let message = "Failed to send verification code";
+            if (isAxiosError(err)) {
+                message = err.response?.data?.message || 'Failed to send code';
+            }
             setError(message);
         } finally {
             setLoading(false);
@@ -147,12 +146,15 @@ export default function RegisterPage() {
                 password: telegramPassword
             });
             // Success
-            router.push("/login"); // Redirect to login or dashboard
-        } catch (err: any) {
-            const msg = isAxiosError(err) ? (err.response?.data?.message || 'Verification failed') : 'Verification failed';
+            router.push(`/${formData.name || 'user'}/storage`);
+        } catch (err: unknown) {
+            let msg = "Verification failed";
+            if (isAxiosError(err)) {
+                msg = err.response?.data?.message || 'Verification failed';
+            }
             if (msg.includes('password') || msg.includes('SESSION_PASSWORD_NEEDED')) {
                 setTelegramStep('PASSWORD');
-                setError('Two-step verification required');
+                setError('Two-step verification password required');
             } else {
                 setError(msg);
             }
@@ -162,363 +164,316 @@ export default function RegisterPage() {
     };
 
     const skipTelegram = () => {
-        router.push("/login");
+        router.push(`/${formData.name || 'user'}/storage`);
     };
 
     return (
-        <div className="h-[100dvh] w-full flex items-center justify-center pt-24 pb-8 px-4 md:px-8 bg-[#0b1121] text-white overflow-y-auto">
-            <style jsx global>{`
-                body {
-                    background-color: #0b1121;
-                }
-                .green-gradient-panel {
-                    background: linear-gradient(135deg, #0f2e18 0%, #051a0d 100%);
-                    position: relative;
-                    overflow: hidden;
-                }
-                .green-gradient-panel::before {
-                    content: '';
-                    position: absolute;
-                    top: -50%;
-                    left: -50%;
-                    width: 200%;
-                    height: 200%;
-                    background: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 60%);
-                    pointer-events: none;
-                }
-                .input-dark {
-                    background: #0b1121;
-                    border: 1px solid #1e293b;
-                    transition: all 0.2s ease;
-                }
-                .input-dark:focus-within {
-                    border-color: #3b82f6;
-                    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-                }
-                /* Stepper Line */
-                .step-line {
-                    height: 2px;
-                    background: #1e293b;
-                    flex: 1;
-                    margin: 0 1rem;
-                    position: relative;
-                }
-                .step-line.active {
-                   background: #22c55e;
-                }
-                .step-circle {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: bold;
-                    font-size: 14px;
-                    transition: all 0.3s ease;
-                }
-                .step-circle.active {
-                    background: #22c55e;
-                    color: black;
-                }
-                .step-circle.inactive {
-                    background: #1e293b;
-                    color: #64748b;
-                }
-            `}</style>
+        <div className="bg-[#16181B] min-h-screen flex items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 text-white font-body selection:bg-[#B8FE00] selection:text-[#16181B] relative overflow-hidden">
+            {/* Background grid */}
+            <div className="absolute inset-0 hero-grid-pattern opacity-30 pointer-events-none"></div>
 
-            <div className="w-full max-w-6xl h-auto md:min-h-[600px] md:max-h-[calc(100vh-8rem)] bg-[#0f172a] rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex flex-col md:flex-row">
-
-                {/* Left Panel - Green Side */}
-                <div className="md:w-5/12 green-gradient-panel p-10 flex flex-col justify-between relative">
+            <div className="w-full max-w-5xl bg-[#202327] border-2 border-white/15 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7)] overflow-hidden flex flex-col md:flex-row relative z-10">
+                {/* Left Panel: High Impact Royal Blue Branding */}
+                <div className="md:w-5/12 bg-[#0720C6] p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden text-white">
                     <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-semibold mb-8">
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            Secure Registration
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#B8FE00] text-[#16181B] text-xs font-display tracking-wider uppercase font-bold mb-6">
+                            <span>✦</span>
+                            <span>ZERO SUBSCRIPTIONS</span>
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-white tracking-tight">
-                            Create your<br />digital sanctuary.
+                        <h1 className="font-display text-4xl sm:text-5xl uppercase leading-[0.92] tracking-tight mb-4">
+                            INITIALIZE <br />
+                            <span className="text-[#B8FE00]">SOVEREIGN VAULT</span>
                         </h1>
-                        <p className="text-gray-400 text-lg leading-relaxed max-w-sm">
-                            Join thousands of users who trust Nimbus for secure, encrypted, and ultra-fast cloud storage. Your data, your rules.
+                        <p className="text-white/80 text-sm leading-relaxed max-w-sm">
+                            Join over 10,000+ engineers, researchers, and creators holding their encrypted assets without storage limits.
                         </p>
                     </div>
 
-                    <div className="relative z-10 space-y-6 mt-12 md:mt-0">
-                        <div className="flex items-center gap-4 group">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-green-500/20 group-hover:border-green-500/30 transition-all duration-300">
-                                <span className="material-symbols-outlined text-green-500">lock</span>
-                            </div>
+                    <div className="relative z-10 space-y-4 my-8">
+                        <div className="flex items-center gap-3.5 p-3.5 bg-black/20 border border-white/15 rounded-xl">
+                            <span className="text-[#B8FE00] text-xl">✦</span>
                             <div>
-                                <h3 className="font-bold text-white mb-0.5">End-to-End Encryption</h3>
-                                <p className="text-gray-400 text-sm">Your files are encrypted before they leave your device.</p>
+                                <h3 className="font-display text-sm tracking-wider uppercase text-white">
+                                    CLIENT-SIDE AES-256 GCM
+                                </h3>
+                                <p className="text-white/70 text-xs">Keys generated and kept exclusively in your browser.</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 group">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-purple-500/20 group-hover:border-purple-500/30 transition-all duration-300">
-                                <span className="material-symbols-outlined text-purple-400">speed</span>
-                            </div>
+                        <div className="flex items-center gap-3.5 p-3.5 bg-black/20 border border-white/15 rounded-xl">
+                            <span className="text-[#B8FE00] text-xl">✦</span>
                             <div>
-                                <h3 className="font-bold text-white mb-0.5">Lightning Fast Sync</h3>
-                                <p className="text-gray-400 text-sm">Access your files instantly from any device, anywhere.</p>
+                                <h3 className="font-display text-sm tracking-wider uppercase text-white">
+                                    TELEGRAM MTPROTO MESH
+                                </h3>
+                                <p className="text-white/70 text-xs">Infinite distributed persistence with zero recurring fees.</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/20 font-mono text-xs text-white/70 flex items-center justify-between">
+                        <span>Vault Spec:</span>
+                        <span className="text-[#B8FE00] font-bold">2GB/File • Unlimited Space</span>
                     </div>
                 </div>
 
-                {/* Right Panel - Form Side */}
-                <div className="md:w-7/12 bg-[#0b1121] p-8 md:p-16 flex flex-col relative">
-                    {/* Stepper */}
-                    <div className="flex items-center justify-center mb-12 max-w-sm mx-auto w-full">
-                        <div className="flex flex-col items-center gap-2">
-                            <div className={`step-circle ${step === 1 ? 'active' : 'bg-green-500 text-black'}`}>
-                                {step > 1 ? <span className="material-symbols-outlined text-sm">check</span> : '1'}
+                {/* Right Panel: Stepper & Forms */}
+                <div className="md:w-7/12 p-8 sm:p-12 flex flex-col justify-between">
+                    <div>
+                        {/* Stepper Indicator */}
+                        <div className="flex items-center justify-between max-w-xs mx-auto mb-10 pb-6 border-b border-white/10">
+                            <div className="flex items-center gap-2">
+                                <span className={`w-7 h-7 rounded-full flex items-center justify-center font-display text-xs ${step === 1 ? 'bg-[#B8FE00] text-[#16181B] font-bold' : 'bg-[#0720C6] text-white'}`}>
+                                    01
+                                </span>
+                                <span className="text-xs font-display tracking-wider uppercase text-white">
+                                    CREDENTIALS
+                                </span>
                             </div>
-                            <span className={`text-xs font-semibold ${step >= 1 ? 'text-white' : 'text-gray-500'}`}>Account</span>
-                        </div>
-
-                        <div className="h-[2px] w-24 bg-[#1e293b] mx-4 relative overflow-hidden">
-                            <div className={`absolute top-0 left-0 h-full bg-green-500 transition-all duration-500 ${step === 2 ? 'w-full' : 'w-0'}`}></div>
-                        </div>
-
-                        <div className="flex flex-col items-center gap-2">
-                            <div className={`step-circle ${step === 2 ? 'active' : 'inactive'}`}>
-                                2
+                            <span className="text-white/30 font-mono">———</span>
+                            <div className="flex items-center gap-2">
+                                <span className={`w-7 h-7 rounded-full flex items-center justify-center font-display text-xs ${step === 2 ? 'bg-[#B8FE00] text-[#16181B] font-bold' : 'bg-[#16181B] text-[#A0A6B2] border border-white/20'}`}>
+                                    02
+                                </span>
+                                <span className={`text-xs font-display tracking-wider uppercase ${step === 2 ? 'text-white' : 'text-[#A0A6B2]'}`}>
+                                    TELEGRAM
+                                </span>
                             </div>
-                            <span className={`text-xs font-semibold ${step === 2 ? 'text-white' : 'text-gray-500'}`}>Security</span>
                         </div>
-                    </div>
 
-                    {/* Content */}
-                    <div className="flex-1 max-w-md mx-auto w-full">
-
-                        {/* Error Alert */}
+                        {/* Error Banner */}
                         {error && (
-                            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg flex items-center gap-3">
-                                <span className="material-symbols-outlined text-lg">error</span>
-                                {error}
+                            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-xs font-mono flex items-center gap-3">
+                                <span className="text-red-400 font-bold">⚠</span>
+                                <span>{error}</span>
                             </div>
                         )}
 
                         {step === 1 ? (
-                            <form onSubmit={handleRegister} className="flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-gray-400 ml-1">Full Name</label>
+                            <form onSubmit={handleRegister} className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                        FULL NAME OR ALIAS
+                                    </label>
                                     <input
                                         id="name"
                                         type="text"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                                        placeholder="Enter your name"
+                                        className="w-full h-12 px-4 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                        placeholder="Alex Vance"
                                         required
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-gray-400 ml-1">Email Address</label>
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                        EMAIL IDENTIFIER
+                                    </label>
                                     <input
                                         id="email"
                                         type="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                                        placeholder="name@example.com"
+                                        className="w-full h-12 px-4 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                        placeholder="alex@domain.com"
                                         required
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-gray-400 ml-1">Password</label>
-                                    <div className="relative">
+
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                            VAULT MASTER PASSWORD
+                                        </label>
+                                        <span className="text-[10px] font-mono text-[#A0A6B2]">Min 8 Characters</span>
+                                    </div>
+                                    <div className="relative flex items-center">
                                         <input
                                             id="password"
                                             type={showPassword ? "text" : "password"}
                                             value={formData.password}
                                             onChange={handleChange}
-                                            className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all pr-12"
-                                            placeholder="Create a password"
+                                            className="w-full h-12 px-4 pr-12 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                            placeholder="••••••••••••"
                                             required
                                             minLength={8}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                                            className="absolute right-4 text-xs font-mono text-[#A0A6B2] hover:text-white"
                                         >
-                                            <span className="material-symbols-outlined text-lg">
-                                                {showPassword ? "visibility" : "visibility_off"}
-                                            </span>
+                                            {showPassword ? "HIDE" : "SHOW"}
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500 ml-1">Must be at least 8 characters</p>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="mt-4 w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="mt-4 w-full h-13 bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-xl hover:bg-white transition-all shadow-[0_0_20px_rgba(184,254,0,0.3)] disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     {loading ? (
-                                        <span className="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+                                        <span className="font-mono text-xs flex items-center gap-2">
+                                            <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                                            INITIALIZING...
+                                        </span>
                                     ) : (
                                         <>
-                                            Create Account
-                                            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                            <span>CONTINUE TO TELEGRAM SETUP</span>
+                                            <span>↗</span>
                                         </>
                                     )}
                                 </button>
-
-                                <p className="text-center text-sm text-gray-500 mt-2">
-                                    Already have an account? <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">Log in</Link>
-                                </p>
                             </form>
                         ) : (
-                            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="flex flex-col gap-5">
                                 <div className="text-center mb-2">
-                                    <div className="w-16 h-16 bg-[#0f172a] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1e293b]">
-                                        <span className="material-symbols-outlined text-blue-400 text-3xl">send</span>
+                                    <div className="w-12 h-12 rounded-full bg-[#0720C6] text-[#B8FE00] flex items-center justify-center mx-auto mb-3 font-display text-xl">
+                                        ✦
                                     </div>
-                                    <h2 className="text-2xl font-bold text-white mb-2">Connect Telegram</h2>
-                                    <p className="text-gray-400 text-sm">Enable 2FA via Telegram for enhanced security</p>
+                                    <h2 className="font-display text-2xl uppercase text-white">
+                                        CONNECT TELEGRAM BOT
+                                    </h2>
+                                    <p className="text-xs font-mono text-[#A0A6B2]">
+                                        Links your storage space directly to Telegram for infinite backups.
+                                    </p>
                                 </div>
 
                                 {telegramStep === 'PHONE' && (
                                     <>
-                                        <div className="space-y-1.5">
-                                            <label className="text-sm font-medium text-gray-400 ml-1">Phone Number</label>
-                                            <div className="flex gap-3">
-                                                <div className="w-[120px] shrink-0">
-                                                    <select
-                                                        value={phoneCountryCode}
-                                                        onChange={(e) => setPhoneCountryCode(e.target.value)}
-                                                        className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-3 py-3 text-white focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
-                                                        style={{
-                                                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                                                            backgroundPosition: `right 0.5rem center`,
-                                                            backgroundRepeat: `no-repeat`,
-                                                            backgroundSize: `1.5em 1.5em`
-                                                        }}
-                                                    >
-                                                        <option>+1 (US)</option>
-                                                        <option>+44 (UK)</option>
-                                                        <option>+91 (IN)</option>
-                                                        <option>+61 (AU)</option>
-                                                        <option>+81 (JP)</option>
-                                                        <option>+49 (DE)</option>
-                                                    </select>
-                                                </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                                PHONE NUMBER (WITH COUNTRY CODE)
+                                            </label>
+                                            <div className="flex gap-2">
+                                                <select
+                                                    value={phoneCountryCode}
+                                                    onChange={(e) => setPhoneCountryCode(e.target.value)}
+                                                    className="w-[110px] h-12 bg-[#16181B] border border-white/20 rounded-xl px-3 font-mono text-xs text-white focus:outline-none focus:border-[#B8FE00]"
+                                                >
+                                                    <option>+1 (US)</option>
+                                                    <option>+44 (UK)</option>
+                                                    <option>+91 (IN)</option>
+                                                    <option>+61 (AU)</option>
+                                                    <option>+81 (JP)</option>
+                                                    <option>+49 (DE)</option>
+                                                    <option>+33 (FR)</option>
+                                                </select>
                                                 <input
                                                     type="tel"
                                                     value={phoneNumber}
                                                     onChange={(e) => setPhoneNumber(e.target.value)}
-                                                    className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
-                                                    placeholder="555-0123"
+                                                    placeholder="9876543210"
+                                                    className="flex-1 h-12 px-4 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#B8FE00]"
                                                 />
                                             </div>
-                                        </div>
-
-                                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex gap-3">
-                                            <span className="material-symbols-outlined text-blue-400 shrink-0">security</span>
-                                            <p className="text-xs text-blue-200 leading-relaxed">
-                                                We'll send a verification code to your Telegram account. If you have 2FA enabled on Telegram, you may need your password.
-                                            </p>
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={handleSendCode}
                                             disabled={loading}
-                                            className="w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
+                                            className="w-full h-12 bg-[#B8FE00] text-[#16181B] font-display text-xs tracking-wider uppercase font-bold rounded-xl hover:bg-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                                         >
-                                            {loading ? 'Sending...' : 'Get Code'}
+                                            {loading ? "TRANSMITTING CODE..." : "SEND TELEGRAM CODE ↗"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={skipTelegram}
+                                            className="text-center font-mono text-xs text-[#A0A6B2] hover:text-white transition-colors"
+                                        >
+                                            Skip for now &amp; proceed to Dashboard →
                                         </button>
                                     </>
                                 )}
 
                                 {telegramStep === 'CODE' && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-400 block mb-3 text-center">Enter the code sent to Telegram</label>
-                                            <div className="flex justify-center gap-2">
-                                                {code.map((digit, idx) => (
-                                                    <input
-                                                        key={idx}
-                                                        id={`code-${idx}`}
-                                                        type="text"
-                                                        maxLength={1}
-                                                        value={digit}
-                                                        onChange={(e) => handleCodeInput(idx, e.target.value)}
-                                                        onKeyDown={(e) => handleKeyDown(idx, e)}
-                                                        className="w-12 h-14 bg-[#0f172a] border border-[#1e293b] rounded-xl text-center text-xl font-bold text-white focus:outline-none focus:border-blue-500 transition-all"
-                                                    />
-                                                ))}
-                                            </div>
+                                    <div className="space-y-4">
+                                        <p className="text-xs font-mono text-center text-[#B8FE00]">
+                                            Enter the 5-digit security code received in Telegram:
+                                        </p>
+                                        <div className="flex justify-center gap-2">
+                                            {code.map((digit, idx) => (
+                                                <input
+                                                    key={idx}
+                                                    id={`code-${idx}`}
+                                                    type="text"
+                                                    maxLength={1}
+                                                    value={digit}
+                                                    onChange={(e) => handleCodeInput(idx, e.target.value)}
+                                                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                                                    className="w-12 h-14 bg-[#16181B] border-2 border-white/20 focus:border-[#B8FE00] rounded-xl text-center text-xl font-bold font-mono text-white focus:outline-none"
+                                                />
+                                            ))}
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={handleVerifyTelegram}
                                             disabled={loading}
-                                            className="w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
+                                            className="w-full h-12 bg-[#B8FE00] text-[#16181B] font-display text-xs tracking-wider uppercase font-bold rounded-xl hover:bg-white transition-all cursor-pointer"
                                         >
-                                            {loading ? 'Verifying...' : 'Connect & Finish'}
+                                            {loading ? "VERIFYING..." : "VERIFY & ENTER VAULT ↗"}
                                         </button>
 
-                                        <button
-                                            type="button"
-                                            onClick={() => setTelegramStep('PHONE')}
-                                            className="w-full text-sm text-gray-500 hover:text-white transition-colors"
-                                        >
-                                            Change Number?
-                                        </button>
+                                        <div className="flex justify-between items-center text-xs font-mono">
+                                            <button
+                                                type="button"
+                                                onClick={() => setTelegramStep('PHONE')}
+                                                className="text-[#A0A6B2] hover:text-white"
+                                            >
+                                                Change Number?
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={skipTelegram}
+                                                className="text-[#A0A6B2] hover:text-white"
+                                            >
+                                                Skip →
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
                                 {telegramStep === 'PASSWORD' && (
                                     <div className="space-y-4">
-                                        <div className="space-y-1.5">
-                                            <label className="text-sm font-medium text-gray-400 ml-1">2FA Password</label>
+                                        <div className="flex flex-col gap-1.5">
+                                            <label className="text-xs font-mono uppercase tracking-wider text-[#A0A6B2]">
+                                                TELEGRAM 2FA CLOUD PASSWORD
+                                            </label>
                                             <input
                                                 type="password"
                                                 value={telegramPassword}
                                                 onChange={(e) => setTelegramPassword(e.target.value)}
-                                                className="w-full bg-[#0f172a] border border-[#1e293b] rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                                                placeholder="Enter cloud password"
+                                                className="w-full h-12 px-4 bg-[#16181B] border border-white/20 rounded-xl font-mono text-xs text-white focus:outline-none focus:border-[#B8FE00]"
+                                                placeholder="Enter 2FA password"
                                             />
                                         </div>
+
                                         <button
                                             type="button"
                                             onClick={handleVerifyTelegram}
                                             disabled={loading}
-                                            className="w-full bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-3.5 rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
+                                            className="w-full h-12 bg-[#B8FE00] text-[#16181B] font-display text-xs tracking-wider uppercase font-bold rounded-xl hover:bg-white transition-all cursor-pointer"
                                         >
-                                            {loading ? 'Verifying...' : 'Connect & Finish'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {telegramStep === 'PHONE' && step === 2 && (
-                                    <div className="text-center">
-                                        <button
-                                            type="button"
-                                            onClick={skipTelegram}
-                                            className="text-gray-500 hover:text-white text-sm transition-colors mt-2"
-                                        >
-                                            Skip for now &rarr;
+                                            {loading ? "AUTHENTICATING 2FA..." : "CONFIRM 2FA & ENTER ↗"}
                                         </button>
                                     </div>
                                 )}
                             </div>
                         )}
+                    </div>
 
-                        <div className="mt-8 text-center">
-                            <Link href="/" className="text-gray-600 hover:text-gray-400 text-xs transition-colors flex items-center justify-center gap-1">
-                                <span className="material-symbols-outlined text-sm">arrow_back</span>
-                                Back to Homepage
-                            </Link>
-                        </div>
-
+                    {/* Bottom Link to Login */}
+                    <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs font-mono text-[#A0A6B2]">
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-[#B8FE00] font-bold hover:underline ml-1">
+                            LOG IN HERE ↗
+                        </Link>
                     </div>
                 </div>
             </div>

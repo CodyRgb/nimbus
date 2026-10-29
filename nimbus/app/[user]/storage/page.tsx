@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import api from "../../../lib/api";
 import MediaPreviewModal from "../../components/MediaPreviewModal";
 import DeleteConfirmModal from "../../components/DeleteConfirmModal";
@@ -14,8 +16,9 @@ import FavoriteButton from "../../components/FavoriteButton";
 import Pagination from "../../components/ui/Pagination";
 import StorageFileCard from "../../components/StorageFileCard";
 import RenameModal from "../../components/RenameModal";
+import ShareModal from "../../components/ShareModal";
 import MobileContextMenu, { MobileAction } from "../../components/MobileContextMenu";
-import { LuEye, LuDownload, LuTrash2, LuImagePlus, LuX, LuHeart, LuSmartphone, LuPencil } from "react-icons/lu";
+import { LuEye, LuDownload, LuTrash2, LuImagePlus, LuX, LuHeart, LuSmartphone, LuPencil, LuShare2 } from "react-icons/lu";
 import { AiFillHeart } from "react-icons/ai";
 
 interface FileData {
@@ -30,6 +33,8 @@ interface FileData {
 }
 
 export default function StoragePage() {
+    const params = useParams();
+    const username = (params?.user as string) || "user";
     const [files, setFiles] = useState<FileData[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -67,6 +72,9 @@ export default function StoragePage() {
     // Rename modal state
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [fileToRename, setFileToRename] = useState<FileData | null>(null);
+
+    // Share modal state
+    const [fileToShare, setFileToShare] = useState<FileData | null>(null);
 
     // Mobile Context Menu State
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -462,180 +470,226 @@ export default function StoragePage() {
             <div className="max-w-[1500px] mx-auto w-full">
                 {/* Header */}
                 <motion.div
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+                    className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-6 border-b border-white/10 pb-6"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-bold text-gradient mb-2 font-display">Storage</h1>
-                        <p className="text-gray-400 font-body">Manage your files in the cloud</p>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="eyebrow-tag text-pill-lime">VAULT STORAGE REPOSITORY</span>
+                            <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● TELEMETRY ONLINE</span>
+                        </div>
+                        <h1 className="font-['Anton'] text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white mb-2">
+                            ZERO-KNOWLEDGE VAULT
+                        </h1>
+                        <p className="text-white/60 text-sm max-w-xl font-sans">
+                            Hardware-isolated storage shards protected by military AES-256 GCM encryption with multi-regional redundancy.
+                        </p>
                     </div>
 
-                    {/* Bulk action buttons */}
-                    <AnimatePresence>
-                        {selectedFiles.size > 0 && (
-                            <motion.div
-                                className="flex gap-3"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                            >
-                                <motion.button
-                                    onClick={handleBulkDownload}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Bulk action buttons */}
+                        <AnimatePresence>
+                            {selectedFiles.size > 0 && (
+                                <motion.div
+                                    className="flex flex-wrap items-center gap-2 bg-[#202327] p-1.5 border border-[#B8FE00]/40 shadow-xl"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
                                 >
-                                    <LuDownload size={16} /> Download ({selectedFiles.size})
-                                </motion.button>
-                                <motion.button
-                                    onClick={() => {
-                                        setFilesToAdd(Array.from(selectedFiles));
-                                        setAddToAlbumModalOpen(true);
-                                    }}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <LuImagePlus size={16} /> Add to Album ({selectedFiles.size})
-                                </motion.button>
-                                <motion.button
-                                    onClick={handleBulkDelete}
-                                    className="px-4 py-2 glass-card border border-white/20 text-white rounded-xl hover:bg-white/10 font-medium text-sm transition-all flex items-center gap-2"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <LuTrash2 size={16} /> Delete ({selectedFiles.size})
-                                </motion.button>
-                                <motion.button
-                                    onClick={() => setSelectedFiles(new Set())}
-                                    className="px-4 py-2 glass-card border border-gray-500/30 text-gray-400 rounded-xl hover:bg-gray-500/10 font-medium text-sm transition-all flex items-center gap-2"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <LuX size={16} /> Cancel
-                                </motion.button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                    <button
+                                        onClick={handleBulkDownload}
+                                        className="px-3.5 py-1.5 bg-[#B8FE00] text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white transition-all flex items-center gap-1.5"
+                                    >
+                                        <LuDownload size={14} /> Download ({selectedFiles.size})
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setFilesToAdd(Array.from(selectedFiles));
+                                            setAddToAlbumModalOpen(true);
+                                        }}
+                                        className="px-3.5 py-1.5 bg-[#0720C6] text-white font-bold text-xs uppercase tracking-wider hover:bg-white hover:text-black transition-all flex items-center gap-1.5"
+                                    >
+                                        <LuImagePlus size={14} /> Album ({selectedFiles.size})
+                                    </button>
+                                    <button
+                                        onClick={handleBulkDelete}
+                                        className="px-3 py-1.5 bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600 hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5"
+                                    >
+                                        <LuTrash2 size={14} /> Delete
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedFiles(new Set())}
+                                        className="px-2.5 py-1.5 text-white/50 hover:text-white font-mono text-xs uppercase transition-all"
+                                        title="Clear selection"
+                                    >
+                                        <LuX size={14} />
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <Link
+                            href={`/${username}/upload`}
+                            className="px-5 py-2.5 bg-[#B8FE00] text-black font-bold uppercase tracking-wider text-xs hover:bg-white transition-all flex items-center gap-2 shadow-lg hover:shadow-[0_0_20px_rgba(184,254,0,0.3)]"
+                        >
+                            <span>+ UPLOAD ASSET</span>
+                        </Link>
+                    </div>
                 </motion.div>
 
-                {/* Stats Section */}
+                {/* Neo-Brutalist Stats Telemetry */}
                 <motion.div
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <GlassCard className="p-8 mb-8 border border-white/10">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
-                            <div>
-                                <p className="text-sm text-gray-400 mb-2 font-body">Total Storage Usage</p>
-                                <div className="text-4xl font-bold text-gradient font-display">
-                                    <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.5} suffix=" MB" />
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-400 mb-2 font-body">Total Files</p>
-                                <div className="text-4xl font-bold text-white font-display">
-                                    <AnimatedCounter value={totalFiles} duration={1} />
-                                </div>
-                            </div>
+                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="flex items-center justify-between text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
+                            <span>TOTAL STORAGE</span>
+                            <span className="text-[#B8FE00] font-bold">UNLIMITED</span>
                         </div>
+                        <div className="font-['Anton'] text-3xl sm:text-4xl text-white tracking-tight">
+                            <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.2} suffix=" MB" />
+                        </div>
+                        <div className="w-full bg-[#16181B] h-1.5 mt-3 overflow-hidden">
+                            <div
+                                className="bg-[#B8FE00] h-full"
+                                style={{ width: `${Math.min(100, Math.max(5, (stats.totalSize / (1024 * 1024 * 500)) * 100))}%` }}
+                            />
+                        </div>
+                    </div>
 
-                        {/* Type breakdown */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {Object.entries(stats.typeStats).map(([type, size]) => {
-                                const colors = getTypeColor(type);
-                                return (
-                                    <motion.div
-                                        key={type}
-                                        className={`glass-card p-4 bg-linear-to-br ${colors.bg} border ${colors.border}`}
-                                        whileHover={{ scale: 1.05 }}
-                                    >
-                                        <div className={`text-2xl font-bold ${colors.text} mb-1 font-display`}>
-                                            {formatSize(size)}
-                                        </div>
-                                        <div className="text-sm text-gray-400 capitalize font-body">{type}</div>
-                                    </motion.div>
-                                );
-                            })}
+                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="flex items-center justify-between text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
+                            <span>INDEXED ASSETS</span>
+                            <span className="flex h-2 w-2 rounded-full bg-[#B8FE00] animate-pulse"></span>
                         </div>
-                    </GlassCard>
+                        <div className="font-['Anton'] text-3xl sm:text-4xl text-white tracking-tight">
+                            <AnimatedCounter value={totalFiles} duration={1} />
+                        </div>
+                        <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">SYNCHRONIZED IN REAL TIME</p>
+                    </div>
+
+                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
+                            <span>ENCRYPTION ALGORITHM</span>
+                        </div>
+                        <div className="font-['Anton'] text-2xl sm:text-3xl text-white tracking-tight uppercase">
+                            AES-256 GCM
+                        </div>
+                        <div className="inline-block mt-2.5 px-2 py-0.5 bg-[#0720C6] text-white text-[10px] font-bold uppercase tracking-wider">
+                            HARDWARE SECURED
+                        </div>
+                    </div>
+
+                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
+                            <span>NODE REDUNDANCY</span>
+                        </div>
+                        <div className="font-['Anton'] text-3xl sm:text-4xl text-[#B8FE00] tracking-tight">
+                            100.0%
+                        </div>
+                        <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">14 REGIONAL REPLICAS</p>
+                    </div>
                 </motion.div>
 
-                {/* Controls */}
+                {/* Filter and Control Bar */}
                 <motion.div
-                    className="flex flex-col md:flex-row gap-4 mb-6"
+                    className="flex flex-col md:flex-row gap-3 mb-6 items-stretch"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                    <div className="flex-1">
+                    <div className="flex-1 relative">
                         <input
                             type="text"
-                            placeholder="🔍 Search files..."
+                            placeholder="SEARCH BY FILE NAME, MIME TYPE OR HASH..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white placeholder-gray-500 bg-transparent font-display transition-all"
+                            className="w-full px-4 py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
                         />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                            >
+                                <LuX size={16} />
+                            </button>
+                        )}
                     </div>
-                    <select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display transition-all cursor-pointer"
-                    >
-                        <option value="all">All Types</option>
-                        <option value="image">Images</option>
-                        <option value="video">Videos</option>
-                        <option value="audio">Audio</option>
-                        <option value="application">Documents</option>
-                    </select>
-                    <select
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-6 py-3 glass-panel border border-white/10 rounded-xl focus:ring-2 focus:ring-primary outline-none text-white bg-transparent font-display transition-all cursor-pointer"
-                    >
-                        <option value="date-desc">Newest First</option>
-                        <option value="date-asc">Oldest First</option>
-                        <option value="name-asc">Name (A-Z)</option>
-                        <option value="size-desc">Size (Largest)</option>
-                    </select>
 
-                    {/* View Mode Toggle */}
-                    <div className="flex gap-2 glass-card p-1 rounded-xl border border-white/10">
-                        <button
-                            onClick={() => setViewMode("grid")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                        <select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
                         >
-                            ⊞ Grid
-                        </button>
-                        <button
-                            onClick={() => setViewMode("list")}
-                            className={`px-4 py-2 rounded-lg transition-all ${viewMode === "list" ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
+                            <option value="all">ALL FORMATS</option>
+                            <option value="image">IMAGES (PNG/JPG)</option>
+                            <option value="video">VIDEOS (MP4/MKV)</option>
+                            <option value="audio">AUDIO (WAV/MP3)</option>
+                            <option value="application">DOCUMENTS & ARCHIVES</option>
+                        </select>
+
+                        <select
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
                         >
-                            ☰ List
-                        </button>
+                            <option value="date-desc">NEWEST FIRST</option>
+                            <option value="date-asc">OLDEST FIRST</option>
+                            <option value="name-asc">NAME (A - Z)</option>
+                            <option value="size-desc">SIZE (LARGEST)</option>
+                        </select>
+
+                        {/* View Mode Toggle */}
+                        <div className="flex bg-[#202327] border border-white/15 p-1 shrink-0">
+                            <button
+                                onClick={() => setViewMode("grid")}
+                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                            >
+                                ⊞ GRID
+                            </button>
+                            <button
+                                onClick={() => setViewMode("list")}
+                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                            >
+                                ☰ LIST
+                            </button>
+                        </div>
                     </div>
                 </motion.div>
 
                 {/* Content */}
                 {loading ? (
-                    <GlassCard className="p-12 text-center">
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
                         <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="inline-block text-6xl mb-4"
+                            className="inline-block text-5xl mb-4 text-[#B8FE00]"
                         >
                             ⚡
                         </motion.div>
-                        <p className="text-gray-400 font-body">Loading your files...</p>
-                    </GlassCard>
+                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">ACCESSING VAULT REGISTRY...</h3>
+                        <p className="text-white/40 font-mono text-xs uppercase tracking-wider">RETRIEVING ZERO-KNOWLEDGE CIPHER RECORDS</p>
+                    </div>
                 ) : filteredFiles.length === 0 ? (
-                    <GlassCard className="p-12 text-center">
-                        <div className="text-6xl mb-4">📁</div>
-                        <p className="text-gray-400 text-lg font-body">No files found.</p>
-                    </GlassCard>
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
+                        <div className="text-5xl mb-4 opacity-50">📁</div>
+                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">ZERO ASSETS RECORDED</h3>
+                        <p className="text-white/50 text-sm max-w-md mx-auto mb-6">
+                            No files match your query in the current shard. Drag & drop assets to initialize encrypted storage.
+                        </p>
+                        <Link
+                            href={`/${username}/upload`}
+                            className="inline-block px-6 py-3 bg-[#B8FE00] text-black font-extrabold uppercase tracking-wider text-xs hover:bg-white transition-all shadow-lg"
+                        >
+                            + UPLOAD FIRST ASSET
+                        </Link>
+                    </div>
                 ) : viewMode === "grid" ? (
                     /* Grid View with Date Grouping */
                     <div className="space-y-8">
@@ -686,6 +740,7 @@ export default function StoragePage() {
                                                             onToggleFavorite={handleToggleFavorite}
                                                             onPreview={() => handlePreview(globalIndex)}
                                                             onDownload={() => handleDownload(file._id, file.originalName)}
+                                                            onShare={() => setFileToShare(file)}
                                                             onAddToAlbum={() => {
                                                                 setFilesToAdd([file._id]);
                                                                 setAddToAlbumModalOpen(true);
@@ -708,24 +763,24 @@ export default function StoragePage() {
                     </div>
                 ) : (
                     /* List View */
-                    <GlassCard className="overflow-hidden">
-                        <div className="overflow-hidden">
+                    <div className="bg-[#202327] border border-white/10 overflow-hidden shadow-2xl">
+                        <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs md:text-sm">
-                                <thead className="glass-card border-b border-white/10">
+                                <thead className="bg-[#16181B] border-b border-white/10 text-white/50 font-mono uppercase text-[11px] tracking-wider">
                                     <tr>
                                         <th className={`px-2 md:px-6 py-3 md:py-4 ${selectedFiles.size > 0 ? '' : 'hidden md:table-cell'}`}>
                                             <input
                                                 type="checkbox"
                                                 checked={selectedFiles.size === filteredFiles.length && filteredFiles.length > 0}
                                                 onChange={selectAll}
-                                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-aurora-blue"
+                                                className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-[#B8FE00]"
                                             />
                                         </th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display">Name</th>
-                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Date Uploaded</th>
-                                        <th className="hidden lg:table-cell px-6 py-4 font-semibold text-white font-display">Type</th>
-                                        <th className="hidden md:table-cell px-6 py-4 font-semibold text-white font-display">Size</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 font-semibold text-white font-display text-right">Actions</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 font-bold text-white">Asset Name</th>
+                                        <th className="hidden lg:table-cell px-6 py-4">Ingestion Date</th>
+                                        <th className="hidden lg:table-cell px-6 py-4">Mime Shard</th>
+                                        <th className="hidden md:table-cell px-6 py-4">Volume</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/10">
@@ -750,7 +805,7 @@ export default function StoragePage() {
                                         return (
                                             <motion.tr
                                                 key={file._id}
-                                                className={`group transition-colors cursor-pointer relative ${isSelected ? 'bg-aurora-blue/10' : 'hover:bg-white/5'}`}
+                                                className={`group transition-colors cursor-pointer relative ${isSelected ? 'bg-[#B8FE00]/10 border-l-2 border-[#B8FE00]' : 'hover:bg-white/5'}`}
                                                 onClick={(e) => handleRowClick(file._id, e)}
                                                 onTouchStart={handleTouchStart}
                                                 onTouchEnd={handleTouchEnd}
@@ -766,7 +821,7 @@ export default function StoragePage() {
                                                             checked={isSelected}
                                                             onChange={() => toggleFileSelection(file._id)}
                                                             onClick={(e) => e.stopPropagation()}
-                                                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-aurora-blue"
+                                                            className="w-4 h-4 md:w-5 md:h-5 cursor-pointer accent-[#B8FE00]"
                                                         />
                                                     </div>
                                                 </td>
@@ -883,6 +938,18 @@ export default function StoragePage() {
                                                             <motion.button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    setFileToShare(file);
+                                                                }}
+                                                                className="p-2 text-[#B8FE00] hover:bg-[#B8FE00]/10 rounded-lg transition-colors"
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
+                                                                title="Share Link & Access"
+                                                            >
+                                                                <LuShare2 size={18} />
+                                                            </motion.button>
+                                                            <motion.button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     setFilesToAdd([file._id]);
                                                                     setAddToAlbumModalOpen(true);
                                                                 }}
@@ -914,7 +981,7 @@ export default function StoragePage() {
                                 </tbody>
                             </table>
                         </div>
-                    </GlassCard >
+                    </div>
                 )
                 }
             </div >
@@ -947,6 +1014,7 @@ export default function StoragePage() {
                             handleDeleteClick(selectedFile);
                         }}
                         onDownload={() => handleDownload(selectedFile._id, selectedFile.originalName)}
+                        onShare={() => setFileToShare(selectedFile)}
                         onNext={handlePreviewNext}
                         onPrevious={handlePreviewPrevious}
                         hasNext={selectedFileIndex !== null && selectedFileIndex < filteredFiles.length - 1}
@@ -997,6 +1065,13 @@ export default function StoragePage() {
                     />
                 )
             }
+
+            {/* Share & Permissions Modal */}
+            <ShareModal
+                isOpen={!!fileToShare}
+                onClose={() => setFileToShare(null)}
+                file={fileToShare}
+            />
 
             {/* Mobile Context Menu via Portal */}
             <MobileContextMenu

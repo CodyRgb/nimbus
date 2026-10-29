@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { LuHeart, LuDownload, LuPencil, LuTrash2, LuSmartphone, LuImagePlus } from "react-icons/lu";
+import { LuHeart, LuDownload, LuPencil, LuTrash2, LuSmartphone, LuImagePlus, LuShare2 } from "react-icons/lu";
 import { AiFillHeart } from "react-icons/ai";
 import FileThumbnail from "./FileThumbnail";
 import FavoriteButton from "./FavoriteButton"; // Keeping if needed elsewhere, though unused in render
@@ -22,6 +22,7 @@ interface StorageFileCardProps {
     onToggleFavorite: (fileId: string, status: boolean) => void;
     onPreview: () => void;
     onDownload: () => void;
+    onShare?: () => void;
     onAddToAlbum?: () => void;
     onDelete?: () => void;
     onRename?: () => void;
@@ -40,6 +41,7 @@ export default function StorageFileCard({
     onToggleFavorite,
     onPreview,
     onDownload,
+    onShare,
     onAddToAlbum,
     onDelete,
     onRename,
@@ -199,9 +201,9 @@ export default function StorageFileCard({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className={`group relative bg-gray-900 rounded-xl overflow-visible border transition-all cursor-pointer ${isSelected ? 'border-aurora-blue ring-2 ring-aurora-blue/20' :
-                isActive ? 'border-white/30' :
-                    'border-white/10 hover:border-white/20'
+            className={`group relative bg-[#202327] border transition-all duration-200 cursor-pointer overflow-visible ${isSelected ? 'border-[#B8FE00] ring-1 ring-[#B8FE00] shadow-[0_0_20px_rgba(184,254,0,0.25)]' :
+                isActive ? 'border-white/40' :
+                    'border-white/10 hover:border-[#B8FE00]/60 hover:-translate-y-1'
                 }`}
         >
             {/* Selection Checkbox */}
@@ -213,7 +215,7 @@ export default function StorageFileCard({
                     type="checkbox"
                     checked={isSelected}
                     onChange={onSelect}
-                    className="w-5 h-5 cursor-pointer accent-aurora-blue bg-black/40 backdrop-blur-sm rounded border-white/30 checked:bg-aurora-blue checked:border-aurora-blue"
+                    className="w-5 h-5 cursor-pointer accent-[#B8FE00] bg-black/60 backdrop-blur-sm rounded-none border border-white/30 checked:bg-[#B8FE00] checked:border-[#B8FE00]"
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
@@ -226,20 +228,21 @@ export default function StorageFileCard({
                             e.stopPropagation();
                             setMenuOpen(!menuOpen);
                         }}
-                        className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm transition-colors"
+                        className="p-1.5 bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/15 transition-all shadow-md"
+                        title="File actions"
                     >
-                        <BsThreeDotsVertical size={18} />
+                        <BsThreeDotsVertical size={16} />
                     </button>
 
                     <AnimatePresence>
                         {menuOpen && (
                             <motion.div
                                 ref={menuRef}
-                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                initial={{ opacity: 0, scale: 0.95, y: -6 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -6 }}
                                 onMouseLeave={() => setMenuOpen(false)}
-                                className="absolute right-0 top-full mt-1 w-56 bg-[#1e1e1e] border border-white/10 shadow-xl overflow-hidden z-30 flex flex-col py-1"
+                                className="absolute right-0 top-full mt-1.5 w-56 bg-[#202327] border border-white/20 shadow-2xl z-30 flex flex-col py-1 text-xs uppercase tracking-wider font-semibold"
                             >
                                 <button
                                     onClick={(e) => handleAction(e, handleToggleFavoriteInternal)}
@@ -268,6 +271,16 @@ export default function StorageFileCard({
                                     <LuSmartphone size={18} />
                                     <span>Open with devices</span>
                                 </button>
+
+                                {onShare && (
+                                    <button
+                                        onClick={(e) => handleAction(e, onShare)}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-[#B8FE00] hover:bg-[#B8FE00]/10 flex items-center gap-3 transition-colors font-semibold"
+                                    >
+                                        <LuShare2 size={18} />
+                                        <span>Share & Permissions</span>
+                                    </button>
+                                )}
 
                                 <div className="h-px bg-white/10 my-1 mx-2"></div>
 
@@ -307,29 +320,32 @@ export default function StorageFileCard({
             </div>
 
             {/* Thumbnail Area */}
-            <div className="aspect-square bg-gray-800 flex items-center justify-center relative">
+            <div className="aspect-square bg-[#16181B] flex items-center justify-center relative overflow-hidden border-b border-white/5">
                 <FileThumbnail
                     fileId={file._id}
                     fileName={file.originalName}
                     mimeType={file.mimeType}
-                    className="w-full h-full object-cover pointer-events-none" // prevent img drag interfering with touch
+                    className="w-full h-full object-cover pointer-events-none group-hover:scale-105 transition-transform duration-300"
                 />
-                {/* Favorite Indicator (Visual only, since button is in menu now) */}
+                {/* Favorite Indicator */}
                 {file.isFavorite && (
-                    <div className="absolute top-2 left-8 z-10 text-xl">
-                        ❤️
+                    <div className="absolute top-2.5 left-9 z-10 bg-[#B8FE00] text-black text-[9px] font-black uppercase px-1.5 py-0.5 tracking-wider shadow-md">
+                        STARRED
                     </div>
                 )}
             </div>
 
             {/* Info Area */}
-            <div className="p-2 md:p-3 bg-gray-900 border-t border-white/5">
-                <p className="text-sm font-medium text-white truncate font-body" title={file.originalName}>
+            <div className="p-3 bg-[#1e2125]">
+                <p className="text-xs font-bold text-white truncate tracking-tight font-sans" title={file.originalName}>
                     {file.originalName}
                 </p>
-                <p className="text-xs text-gray-500 font-mono mt-1">
-                    {formatSize(file.size)}
-                </p>
+                <div className="flex items-center justify-between mt-1.5 text-[11px] font-mono text-white/50">
+                    <span className="text-[#B8FE00] font-bold">{formatSize(file.size)}</span>
+                    <span className="uppercase text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 text-white/60">
+                        {file.mimeType.split('/')[1]?.slice(0, 5) || 'FILE'}
+                    </span>
+                </div>
             </div>
         </motion.div>
     );

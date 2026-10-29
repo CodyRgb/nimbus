@@ -36,12 +36,12 @@ export default function RenameModal({
         const trimmedName = newName.trim();
 
         if (!trimmedName) {
-            setError("Name cannot be empty");
+            setError("Identifier cannot be empty");
             return;
         }
 
         if (trimmedName.length > 255) {
-            setError("Name is too long (max 255 characters)");
+            setError("Identifier length exceeds quota (max 255 chars)");
             return;
         }
 
@@ -55,7 +55,7 @@ export default function RenameModal({
             await onRename(trimmedName);
             onClose();
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to rename");
+            setError(err.response?.data?.message || "Failed to mutate metadata identifier");
         } finally {
             setIsRenaming(false);
         }
@@ -71,66 +71,75 @@ export default function RenameModal({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/85 backdrop-blur-md"
                     />
 
                     {/* Modal */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-md glass-card border border-white/10 rounded-2xl p-6 shadow-2xl"
+                        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                        className="relative w-full max-w-md bg-[#202327] border-2 border-white/10 p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.85)] z-10"
                     >
-                        <h2 className="text-2xl font-bold text-white mb-4 font-display">
-                            Rename {itemType === "file" ? "File" : "Album"}
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-widest bg-[#B8FE00]/15 text-[#B8FE00] border border-[#B8FE00]/30">
+                                METADATA MUTATION
+                            </span>
+                            <span className="text-[10px] font-mono text-white/40 uppercase">{itemType}</span>
+                        </div>
+
+                        <h2 className="text-3xl font-bold uppercase tracking-wider text-white font-display mb-2">
+                            RENAME {itemType === "file" ? "VAULT ASSET" : "CIPHER ALBUM"}
                         </h2>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-300 mb-2 font-body">
-                                    New Name
+                        <p className="text-sm text-neutral-400 mb-6 font-sans">
+                            Update the canonical resource identifier in the indexed metadata ledger.
+                        </p>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-mono font-bold text-white/70 uppercase tracking-wider mb-2">
+                                    NEW IDENTIFIER
                                 </label>
                                 <input
                                     type="text"
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
-                                    className="w-full px-4 py-3 glass-card border border-white/10 rounded-xl focus:ring-2 focus:ring-aurora-blue outline-none text-white placeholder-gray-500 bg-white/5 font-body"
-                                    placeholder={`Enter ${itemType} name`}
+                                    className="w-full px-4 py-3 bg-[#16181B] border border-white/20 text-white font-mono text-sm focus:border-[#B8FE00] focus:outline-none transition-colors"
+                                    placeholder={`Enter new ${itemType} name`}
                                     autoFocus
                                     disabled={isRenaming}
                                 />
                                 {error && (
-                                    <p className="mt-2 text-sm text-red-400 font-body">{error}</p>
+                                    <p className="mt-2 text-xs font-mono text-red-400 flex items-center gap-1">
+                                        <span>✕</span> {error}
+                                    </p>
                                 )}
                             </div>
 
-                            <div className="flex gap-3 justify-end">
-                                <motion.button
+                            <div className="flex gap-3 pt-2">
+                                <button
                                     type="button"
                                     onClick={onClose}
                                     disabled={isRenaming}
-                                    className="px-4 py-2 glass-card border border-white/10 text-gray-300 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 font-body"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 px-4 py-2.5 bg-[#16181B] border border-white/20 text-white font-mono uppercase text-xs tracking-wider hover:border-white/50 hover:bg-white/5 transition-all disabled:opacity-50"
                                 >
-                                    Cancel
-                                </motion.button>
-                                <motion.button
+                                    CANCEL
+                                </button>
+                                <button
                                     type="submit"
                                     disabled={isRenaming}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 font-body"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 px-4 py-2.5 bg-[#B8FE00] hover:bg-white text-black font-mono font-bold uppercase text-xs tracking-wider border border-[#B8FE00] shadow-[0_0_20px_rgba(184,254,0,0.3)] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isRenaming ? (
                                         <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Renaming...
+                                            <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                            <span>MUTATING...</span>
                                         </>
                                     ) : (
-                                        "Rename"
+                                        "MUTATE NAME"
                                     )}
-                                </motion.button>
+                                </button>
                             </div>
                         </form>
                     </motion.div>

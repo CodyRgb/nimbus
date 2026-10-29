@@ -43,28 +43,28 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white/5 border border-white/10 rounded-xl p-4 mb-3 backdrop-blur-sm"
+            className="bg-[#202327] border border-white/15 p-4 mb-3 shadow-lg"
         >
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-start mb-2.5">
                 <div className="flex-1 min-w-0 mr-4">
-                    <h4 className="text-white font-medium truncate text-sm" title={file.name}>
+                    <h4 className="text-white font-bold truncate text-sm font-sans tracking-tight" title={file.name}>
                         {file.name}
                     </h4>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs font-mono text-white/50 mt-1 uppercase">
                         {status === 'error' ? (
-                            <span className="text-red-400">{error || 'Upload failed'}</span>
+                            <span className="text-red-400 font-bold">{error || 'INGESTION FAILED'}</span>
                         ) : (
                             <>
-                                {formatSize(uploadedBytes)} / {formatSize(totalBytes)} ({progress}%)
+                                <span className="text-[#B8FE00] font-bold">{formatSize(uploadedBytes)}</span> / {formatSize(totalBytes)} ({progress}%)
                                 {currentPosition && totalUploads && (
-                                    <span className={status === 'uploading' ? 'text-aurora-blue font-semibold' : ''}>
-                                        {' • '}{currentPosition} of {totalUploads}
+                                    <span className={status === 'uploading' ? 'text-[#B8FE00] font-bold' : ''}>
+                                        {' • '}[{currentPosition}/{totalUploads}]
                                     </span>
                                 )}
-                                {status === 'uploading' && ' • Uploading...'}
-                                {status === 'paused' && ' • Paused'}
-                                {status === 'completed' && ' • Completed'}
-                                {status === 'queued' && ' • Queued'}
+                                {status === 'uploading' && ' • ENCRYPTING SHARDS...'}
+                                {status === 'paused' && ' • PAUSED'}
+                                {status === 'completed' && ' • COMPLETED'}
+                                {status === 'queued' && ' • QUEUED'}
                             </>
                         )}
                     </p>
@@ -73,7 +73,7 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                     {status === 'uploading' && (
                         <button
                             onClick={onPause}
-                            className="p-1.5 rounded-full hover:bg-white/10 text-gray-300 hover:text-white transition-colors"
+                            className="p-1.5 bg-[#16181B] border border-white/10 hover:border-[#B8FE00] text-white/80 hover:text-[#B8FE00] transition-colors"
                             title="Pause"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,7 +84,7 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                     {(status === 'paused' || status === 'error') && (
                         <button
                             onClick={status === 'error' ? onRetry : onResume}
-                            className="p-1.5 rounded-full hover:bg-white/10 text-gray-300 hover:text-white transition-colors"
+                            className="p-1.5 bg-[#16181B] border border-white/10 hover:border-[#B8FE00] text-white/80 hover:text-[#B8FE00] transition-colors"
                             title={status === 'error' ? "Retry" : "Resume"}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                     {status !== 'completed' && (
                         <button
                             onClick={onCancel}
-                            className="p-1.5 rounded-full hover:bg-red-500/20 text-gray-300 hover:text-red-400 transition-colors"
+                            className="p-1.5 bg-[#16181B] border border-white/10 hover:border-red-500 text-white/80 hover:text-red-400 transition-colors"
                             title="Cancel"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +105,7 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                         </button>
                     )}
                     {status === 'completed' && (
-                        <span className="text-green-400">
+                        <span className="text-[#B8FE00] font-bold">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -115,12 +115,12 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-[#16181B] h-2 overflow-hidden border border-white/5">
                 <div
-                    className={`h-full rounded-full transition-none ${status === 'error' ? 'bg-red-500' :
-                        status === 'completed' ? 'bg-green-500' :
-                            status === 'paused' ? 'bg-yellow-500' :
-                                'bg-gradient-aurora'
+                    className={`h-full transition-none ${status === 'error' ? 'bg-red-500' :
+                        status === 'completed' ? 'bg-[#B8FE00]' :
+                            status === 'paused' ? 'bg-yellow-400' :
+                                'bg-[#B8FE00]'
                         }`}
                     style={{ width: `${progress}%` }}
                 />

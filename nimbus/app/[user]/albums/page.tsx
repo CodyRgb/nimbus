@@ -214,49 +214,56 @@ export default function AlbumsPage() {
     }, [albums.length]);
 
     return (
-        <div className="w-full text-white selection:bg-blue-500/30">
+        <div className="w-full text-white">
 
-            <main className="px-4 md:px-8 max-w-[1500px] mx-auto w-full">
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-4">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                            Albums
+            <main className="max-w-[1500px] mx-auto w-full">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-6 border-b border-white/10 gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="eyebrow-tag text-pill-lime">VAULT GALLERIES</span>
+                            <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● ENCRYPTED COLLECTIONS</span>
+                        </div>
+                        <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                            CIPHER ALBUMS
                         </h1>
+                        <p className="text-white/60 text-sm font-sans max-w-xl">
+                            Curated photographic and media collections with cryptographic shard isolation and selective sharing links.
+                        </p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-3">
                         {isSelectionMode ? (
                             <>
                                 <button
                                     onClick={handleBulkDelete}
                                     disabled={selectedAlbums.size === 0}
-                                    className="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2.5 bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600 hover:text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                    Delete ({selectedAlbums.size})
+                                    DELETE ({selectedAlbums.size})
                                 </button>
                                 <button
                                     onClick={() => {
                                         setIsSelectionMode(false);
                                         setSelectedAlbums(new Set());
                                     }}
-                                    className="px-4 py-2 bg-white/5 text-gray-400 hover:bg-white/10 rounded-xl transition-colors"
+                                    className="px-4 py-2.5 bg-[#202327] text-white/70 hover:text-white border border-white/15 font-mono text-xs uppercase tracking-wider transition-all"
                                 >
-                                    Cancel
+                                    CANCEL
                                 </button>
                             </>
                         ) : (
                             <>
                                 <button
                                     onClick={() => setIsSelectionMode(true)}
-                                    className="px-4 py-2 bg-white/5 text-gray-300 hover:bg-white/10 rounded-xl transition-colors"
+                                    className="px-4 py-2.5 bg-[#202327] text-white/80 hover:text-white border border-white/15 font-bold text-xs uppercase tracking-wider transition-all"
                                 >
-                                    Select
+                                    SELECT
                                 </button>
                                 <button
                                     onClick={() => setCreateModalOpen(true)}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors flex items-center gap-2"
+                                    className="px-5 py-2.5 bg-[#B8FE00] hover:bg-white text-black font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg hover:shadow-[0_0_20px_rgba(184,254,0,0.3)]"
                                 >
-                                    <span>+ Create Album</span>
+                                    <span>+ CREATE ALBUM</span>
                                 </button>
                             </>
                         )}
@@ -264,20 +271,32 @@ export default function AlbumsPage() {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
+                        <div className="inline-block animate-spin text-[#B8FE00] text-4xl mb-4">⚡</div>
+                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">INDEXING ALBUMS...</h3>
+                        <p className="text-white/40 font-mono text-xs uppercase">SYNCING WITH TELEMETRY NODE</p>
                     </div>
                 ) : albums.length === 0 ? (
-                    <div className="text-center py-20">
-                        <div className="text-6xl mb-4">🖼️</div>
-                        <h3 className="text-xl font-medium text-gray-300 mb-2">No albums yet</h3>
-                        <p className="text-gray-500">Create an album by selecting photos from your storage.</p>
-                        <Link
-                            href={`/${user?.name}/storage`}
-                            className="inline-block mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-colors"
-                        >
-                            Go to Storage
-                        </Link>
+                    <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl max-w-2xl mx-auto">
+                        <div className="text-5xl mb-4 opacity-50">🖼️</div>
+                        <h3 className="font-['Anton'] text-3xl uppercase tracking-tight text-white mb-3">ZERO ALBUMS CREATED</h3>
+                        <p className="text-white/60 text-sm max-w-md mx-auto mb-6 font-sans">
+                            Organize your media into encrypted collections. Select photos and videos from your vault storage to bind them to an album.
+                        </p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={() => setCreateModalOpen(true)}
+                                className="px-6 py-3 bg-[#B8FE00] hover:bg-white text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg"
+                            >
+                                + CREATE FIRST ALBUM
+                            </button>
+                            <Link
+                                href={`/${user?.name || 'user'}/storage`}
+                                className="px-6 py-3 bg-[#0720C6] hover:bg-white hover:text-black text-white font-extrabold text-xs uppercase tracking-wider transition-all"
+                            >
+                                OPEN STORAGE VAULT
+                            </Link>
+                        </div>
                     </div>
                 ) : (
                     <>
@@ -298,39 +317,48 @@ export default function AlbumsPage() {
                                             <motion.div
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                className="mb-4"
+                                                className="mb-4 flex items-center gap-3"
                                             >
-                                                <h2 className="text-2xl font-bold text-white">
+                                                <span className="w-2 h-2 bg-[#B8FE00]"></span>
+                                                <h2 className="font-['Anton'] text-2xl uppercase tracking-tight text-white">
                                                     {formatDateHeader(firstAlbum.createdAt)}
                                                 </h2>
-                                                <div className="h-px bg-gradient-to-r from-blue-500/50 to-transparent mt-2"></div>
+                                                <div className="h-px bg-white/10 flex-1 ml-2"></div>
                                             </motion.div>
 
                                             {/* Albums Grid */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                                 {albumsInGroup.map((album) => {
                                                     const isSelected = selectedAlbums.has(album._id);
 
-                                                    // Visual Content (Image, Gradient, Text) - wrapped in overflow-hidden
+                                                    // Visual Content (Image, Gradient, Text)
                                                     const VisualContent = (
-                                                        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                                                        <div className="absolute inset-0 overflow-hidden pointer-events-none bg-[#16181B]">
                                                             {album.coverImage ? (
                                                                 <img
                                                                     src={album.coverImage}
                                                                     alt={album.name}
-                                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                                 />
                                                             ) : (
-                                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                                                                    <span className="text-4xl">📁</span>
+                                                                <div className="w-full h-full flex flex-col items-center justify-center bg-[#16181B] border border-white/5">
+                                                                    <span className="text-4xl mb-2 opacity-50">📁</span>
+                                                                    <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">ENCRYPTED CONTAINER</span>
                                                                 </div>
                                                             )}
 
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-                                                            <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform z-10">
-                                                                <h3 className="text-lg font-semibold text-white truncate">{album.name}</h3>
-                                                                <p className="text-sm text-gray-400">{album.fileCount} items</p>
+                                                            <div className="absolute bottom-0 left-0 right-0 p-4 z-10 border-t border-white/10 bg-[#202327]/80 backdrop-blur-sm">
+                                                                <div className="flex items-center justify-between gap-2 mb-1">
+                                                                    <h3 className="font-['Anton'] text-lg text-white uppercase tracking-tight truncate">{album.name}</h3>
+                                                                    <span className="bg-[#B8FE00] text-black text-[9px] font-extrabold uppercase px-1.5 py-0.5 tracking-wider shrink-0">
+                                                                        {album.fileCount} ITEMS
+                                                                    </span>
+                                                                </div>
+                                                                {album.description && (
+                                                                    <p className="text-xs text-white/60 truncate font-sans">{album.description}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     );
@@ -348,7 +376,7 @@ export default function AlbumsPage() {
                                                                         type="checkbox"
                                                                         checked={isSelected}
                                                                         onChange={() => toggleAlbumSelection(album._id)}
-                                                                        className="w-5 h-5 cursor-pointer accent-blue-500 bg-black/40 backdrop-blur-sm rounded border-white/30"
+                                                                        className="w-5 h-5 cursor-pointer accent-[#B8FE00] bg-black/60 backdrop-blur-sm rounded-none border border-white/30"
                                                                     />
                                                                 </motion.div>
                                                             )}
@@ -364,22 +392,22 @@ export default function AlbumsPage() {
                                                                         e.stopPropagation();
                                                                         setActiveMenuId(activeMenuId === album._id ? null : album._id);
                                                                     }}
-                                                                    className={`p-2 rounded-full backdrop-blur-sm transition-all ${activeMenuId === album._id
-                                                                        ? 'bg-black/80 text-white opacity-100'
-                                                                        : 'bg-black/60 hover:bg-black/80 text-white opacity-0 group-hover:opacity-100'
+                                                                    className={`p-1.5 transition-all ${activeMenuId === album._id
+                                                                        ? 'bg-[#B8FE00] text-black opacity-100'
+                                                                        : 'bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/15 opacity-0 group-hover:opacity-100'
                                                                         }`}
                                                                 >
-                                                                    <BsThreeDotsVertical size={16} />
+                                                                    <BsThreeDotsVertical size={15} />
                                                                 </button>
 
                                                                 <AnimatePresence>
                                                                     {activeMenuId === album._id && (
                                                                         <motion.div
-                                                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                            initial={{ opacity: 0, scale: 0.95, y: -6 }}
                                                                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                            exit={{ opacity: 0, scale: 0.95, y: -6 }}
                                                                             onClick={(e) => e.stopPropagation()}
-                                                                            className="absolute right-0 top-full mt-2 w-48 bg-[#1A1A1A] border border-white/10 shadow-xl overflow-hidden py-1"
+                                                                            className="absolute right-0 top-full mt-1.5 w-48 bg-[#202327] border border-white/20 shadow-2xl z-50 py-1 text-xs uppercase tracking-wider font-semibold"
                                                                         >
                                                                             <button
                                                                                 onClick={(e) => {
@@ -388,10 +416,10 @@ export default function AlbumsPage() {
                                                                                     setThumbnailModalOpen(true);
                                                                                     setActiveMenuId(null);
                                                                                 }}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                                                                className="w-full text-left px-4 py-2.5 text-white/90 hover:bg-white/10 hover:text-[#B8FE00] flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <LuImage size={16} />
-                                                                                <span>Change Thumbnail</span>
+                                                                                <LuImage size={15} />
+                                                                                <span>Change Cover</span>
                                                                             </button>
                                                                             <button
                                                                                 onClick={(e) => {
@@ -399,9 +427,9 @@ export default function AlbumsPage() {
                                                                                     handleRenameClick(album);
                                                                                     setActiveMenuId(null);
                                                                                 }}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 flex items-center gap-3 transition-colors"
+                                                                                className="w-full text-left px-4 py-2.5 text-white/90 hover:bg-white/10 hover:text-[#B8FE00] flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <LuPencil size={16} />
+                                                                                <LuPencil size={15} />
                                                                                 <span>Rename</span>
                                                                             </button>
                                                                             <button
@@ -415,9 +443,9 @@ export default function AlbumsPage() {
                                                                                     }
                                                                                     setActiveMenuId(null);
                                                                                 }}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
+                                                                                className="w-full text-left px-4 py-2.5 text-red-400 hover:bg-red-500/20 flex items-center gap-3 transition-colors"
                                                                             >
-                                                                                <LuTrash2 size={16} />
+                                                                                <LuTrash2 size={15} />
                                                                                 <span>Delete</span>
                                                                             </button>
                                                                         </motion.div>
@@ -432,7 +460,7 @@ export default function AlbumsPage() {
                                                             <div
                                                                 key={album._id}
                                                                 onClick={() => toggleAlbumSelection(album._id)}
-                                                                className={`group relative block aspect-square bg-gray-900 rounded-2xl border transition-all cursor-pointer ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-white/10 hover:border-white/20'
+                                                                className={`group relative block aspect-square bg-[#202327] border transition-all cursor-pointer ${isSelected ? 'border-[#B8FE00] ring-1 ring-[#B8FE00] shadow-[0_0_20px_rgba(184,254,0,0.25)]' : 'border-white/10 hover:border-white/30'
                                                                     }`}
                                                             >
                                                                 {VisualContent}
@@ -444,7 +472,7 @@ export default function AlbumsPage() {
                                                     return (
                                                         <div
                                                             key={album._id}
-                                                            className="group relative block aspect-square glass-panel rounded-2xl border border-white/10 hover:border-primary/50 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]"
+                                                            className="group relative block aspect-square bg-[#202327] border border-white/10 hover:border-[#B8FE00]/60 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer"
                                                         >
                                                             {/* Visually clipped content */}
                                                             {VisualContent}

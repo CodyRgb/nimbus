@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
@@ -26,6 +28,8 @@ const AddToAlbumModal: React.FC<AddToAlbumModalProps> = ({ isOpen, onClose, file
     useEffect(() => {
         if (isOpen) {
             fetchAlbums();
+            setCreatingNew(false);
+            setNewAlbumName('');
         }
     }, [isOpen]);
 
@@ -67,80 +71,114 @@ const AddToAlbumModal: React.FC<AddToAlbumModalProps> = ({ isOpen, onClose, file
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-[#1A1A1A] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="absolute inset-0 bg-black/85 backdrop-blur-md"
+                    />
+
+                    {/* Modal */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                        className="relative w-full max-w-md bg-[#202327] border-2 border-white/10 p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.85)] z-10"
                     >
-                        <div className="p-6">
-                            <h2 className="text-xl font-semibold text-white mb-4">Add to Album</h2>
-
-                            {!creatingNew ? (
-                                <div className="space-y-4">
-                                    <div className="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                                        {albums.map((album) => (
-                                            <button
-                                                key={album._id}
-                                                onClick={() => addToAlbum(album._id)}
-                                                className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group text-left"
-                                            >
-                                                <span className="text-gray-200 group-hover:text-white">{album.name}</span>
-                                                <span className="text-xs text-gray-500">{album.fileCount} items</span>
-                                            </button>
-                                        ))}
-                                        {albums.length === 0 && (
-                                            <p className="text-gray-500 text-center py-4">No albums found</p>
-                                        )}
-                                    </div>
-
-                                    <button
-                                        onClick={() => setCreatingNew(true)}
-                                        className="w-full py-3 px-4 bg-white/5 hover:bg-white/10 text-blue-400 rounded-xl transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <span>+ Create New Album</span>
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm text-gray-400 mb-1">Album Name</label>
-                                        <input
-                                            type="text"
-                                            value={newAlbumName}
-                                            onChange={(e) => setNewAlbumName(e.target.value)}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
-                                            placeholder="My Awesome Album"
-                                            autoFocus
-                                        />
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => setCreatingNew(false)}
-                                            className="flex-1 py-2 px-4 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleCreateAlbum}
-                                            disabled={!newAlbumName.trim() || loading}
-                                            className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {loading ? 'Creating...' : 'Create & Add'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-widest bg-[#0720C6] text-white">
+                                COLLECTION ROUTING
+                            </span>
+                            <span className="text-[10px] font-mono text-[#B8FE00] font-bold">
+                                {fileIds.length} {fileIds.length === 1 ? 'ASSET' : 'ASSETS'} SELECTED
+                            </span>
                         </div>
 
+                        <h2 className="text-3xl font-bold uppercase tracking-wider text-white font-display mb-2">
+                            ADD TO CIPHER ALBUM
+                        </h2>
+                        
+                        <p className="text-sm text-neutral-400 mb-6 font-sans">
+                            Attach vault assets to a cryptographic group collection.
+                        </p>
+
+                        {!creatingNew ? (
+                            <div className="space-y-4">
+                                <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                                    {albums.map((album) => (
+                                        <button
+                                            key={album._id}
+                                            onClick={() => addToAlbum(album._id)}
+                                            disabled={loading}
+                                            className="w-full flex items-center justify-between p-3.5 bg-[#16181B] border border-white/10 hover:border-[#B8FE00] hover:bg-[#1a1d22] transition-all group text-left cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm font-bold text-white group-hover:text-[#B8FE00] transition-colors">
+                                                    {album.name}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] font-mono px-2 py-0.5 bg-black/40 border border-white/10 text-[#B8FE00] font-bold">
+                                                {album.fileCount || 0} ITEMS
+                                            </span>
+                                        </button>
+                                    ))}
+                                    {albums.length === 0 && (
+                                        <div className="text-neutral-500 font-mono text-xs text-center py-6 border border-dashed border-white/10">
+                                            NO ALBUMS INITIALIZED YET
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => setCreatingNew(true)}
+                                    className="w-full py-3 px-4 bg-[#B8FE00]/5 hover:bg-[#B8FE00]/10 border-2 border-dashed border-[#B8FE00]/40 hover:border-[#B8FE00] text-[#B8FE00] transition-all flex items-center justify-center gap-2 font-mono text-xs font-bold uppercase tracking-wider cursor-pointer"
+                                >
+                                    <span>+ INITIALIZE NEW ALBUM</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-mono font-bold text-white/70 uppercase tracking-wider mb-2">
+                                        ALBUM TITLE
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newAlbumName}
+                                        onChange={(e) => setNewAlbumName(e.target.value)}
+                                        className="w-full bg-[#16181B] border border-white/20 px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#B8FE00] transition-colors"
+                                        placeholder="e.g. Q4_AUDIT_LOGS"
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => setCreatingNew(false)}
+                                        className="flex-1 py-2.5 px-4 bg-[#16181B] border border-white/20 text-white font-mono uppercase text-xs tracking-wider hover:border-white/50 transition-all"
+                                    >
+                                        BACK
+                                    </button>
+                                    <button
+                                        onClick={handleCreateAlbum}
+                                        disabled={!newAlbumName.trim() || loading}
+                                        className="flex-1 py-2.5 px-4 bg-[#B8FE00] hover:bg-white text-black font-mono font-bold uppercase text-xs tracking-wider border border-[#B8FE00] shadow-[0_0_20px_rgba(184,254,0,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {loading ? 'INITIALIZING...' : 'CREATE & ADD'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {!creatingNew && (
-                            <div className="p-4 border-t border-white/10 flex justify-end">
+                            <div className="mt-6 pt-4 border-t border-white/10 flex justify-end">
                                 <button
                                     onClick={onClose}
-                                    className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                                    className="px-4 py-2 text-xs font-mono uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
                                 >
-                                    Cancel
+                                    DISMISS
                                 </button>
                             </div>
                         )}

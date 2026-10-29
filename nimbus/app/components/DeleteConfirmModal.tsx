@@ -53,77 +53,84 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+                className="absolute inset-0 bg-black/85 backdrop-blur-md"
                 onClick={onCancel}
             />
             
             {/* Modal */}
-            <div className="relative glass-card max-w-md w-full p-8 border border-red-500/30 glow-pink">
-                {/* Warning Icon */}
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-red-500/20 rounded-2xl border border-red-500/30">
-                    <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+            <div className="relative bg-[#202327] border-2 border-red-500/40 max-w-md w-full p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.85)] z-10">
+                {/* Warning Icon & Tag */}
+                <div className="flex items-center justify-between mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-widest bg-red-500/15 text-red-400 border border-red-500/30">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
+                        CRITICAL PURGE DIRECTIVE
+                    </span>
+                    <span className="text-[10px] font-mono text-white/40">ACTION_IRREVERSIBLE</span>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-2xl font-bold text-white text-center mb-3 font-display">
-                    Delete File?
+                <h3 className="text-3xl font-bold text-white uppercase tracking-wider font-display mb-2">
+                    PURGE VAULT ASSET?
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-400 text-center mb-8 font-body">
-                    Are you sure you want to delete this file? This action cannot be undone.
+                <p className="text-sm text-neutral-400 mb-6 font-sans leading-relaxed">
+                    This file will be permanently expunged across all decentralized storage clusters. Sharded chunks and decryption keys cannot be restored.
                 </p>
 
                 {/* File Details */}
-                <div className="glass-card p-5 mb-8 border border-white/10 bg-white/5">
-                    <div className="flex items-start gap-3">
-                        <div className="shrink-0 w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-xl flex items-center justify-center border border-red-500/30">
-                            <span className="text-xl">📄</span>
+                <div className="bg-[#16181B] p-4 mb-6 border border-white/10">
+                    <div className="flex items-start gap-3.5">
+                        <div className="shrink-0 w-11 h-11 bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold font-mono text-sm">
+                            DEL
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-white truncate font-display" title={fileName}>
+                            <p className="font-bold text-white truncate text-sm tracking-tight" title={fileName}>
                                 {fileName}
                             </p>
-                            <p className="text-sm text-gray-400 font-body">
-                                {fileSize} • {fileType}
+                            <p className="text-xs font-mono text-white/50 mt-1">
+                                {fileSize} • <span className="uppercase text-red-400/80">{fileType || 'BINARY'}</span>
                             </p>
                         </div>
                     </div>
                 </div>
 
+                {/* Warning Banner */}
+                <div className="p-3 bg-red-950/30 border-l-2 border-red-500 mb-6 text-xs text-red-300 font-mono">
+                    WARNING: Encrypted parity shards will be immediately deallocated.
+                </div>
+
                 {/* Actions */}
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                     <button
                         onClick={onCancel}
                         disabled={isDeleting}
-                        className="flex-1 px-6 py-3 glass-card border border-white/20 text-white font-medium rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-body"
+                        className="flex-1 px-5 py-2.5 bg-[#16181B] border border-white/20 text-white font-mono uppercase text-xs tracking-wider hover:border-white/50 hover:bg-white/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Cancel
+                        CANCEL
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg font-body"
+                        className="flex-1 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-mono font-bold uppercase text-xs tracking-wider border border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {isDeleting ? (
                             <>
-                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
-                                Deleting...
+                                <span>PURGING...</span>
                             </>
                         ) : (
-                            'Delete'
+                            'PURGE ASSET'
                         )}
                     </button>
                 </div>
 
                 {/* Keyboard Hints */}
-                <p className="text-xs text-gray-500 text-center mt-6 font-body">
-                    Press <kbd className="px-2 py-1 glass-card border border-white/20 rounded">ESC</kbd> to cancel or <kbd className="px-2 py-1 glass-card border border-white/20 rounded">Enter</kbd> to confirm
+                <p className="text-[11px] font-mono text-white/40 text-center mt-5">
+                    Press <kbd className="px-1.5 py-0.5 bg-[#16181B] border border-white/20 text-white/70">ESC</kbd> to abort or <kbd className="px-1.5 py-0.5 bg-[#16181B] border border-white/20 text-white/70">ENTER</kbd> to confirm
                 </p>
             </div>
         </div>

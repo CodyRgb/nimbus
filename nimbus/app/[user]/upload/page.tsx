@@ -268,177 +268,205 @@ export default function UploadPage() {
     };
 
     return (
-        <div className="w-full text-white selection:bg-primary selection:text-white overflow-x-hidden">
+        <div className="w-full text-white overflow-x-hidden">
             {/* Main Content */}
-            <div className="px-1 md:px-2 lg:px-10 py-2 md:py-4 lg:py-10">
-                <div className="max-w-[1500px] mx-auto w-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        {/* Left Column - Upload Area & Queue */}
-                        <div className="lg:col-span-8 space-y-6">
-                            {/* Upload Header */}
-                            <div className="bg-[#1a2332] rounded-2xl p-8 border border-white/5">
-                                <div className="flex items-end justify-between">
-                                    <div>
-                                        <h2 className="text-4xl font-bold mb-2">Upload Files</h2>
-                                        <p className="text-white/60">Securely store and share your data in the cloud.</p>
+            <div className="max-w-[1500px] mx-auto w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column - Upload Area & Queue */}
+                    <div className="lg:col-span-8 space-y-6">
+                        {/* Upload Header */}
+                        <div className="bg-[#202327] p-8 border border-white/10">
+                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="eyebrow-tag text-pill-lime">INGESTION ENGINE</span>
+                                        <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● ENCRYPTION READY</span>
                                     </div>
-                                    <button className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all ">
-                                        <span className="material-symbols-outlined text-lg">folder_open</span>
-                                        <span className="text-sm font-medium ">New Folder</span>
-                                    </button>
+                                    <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                                        DISPATCH TO VAULT
+                                    </h1>
+                                    <p className="text-white/60 text-sm font-sans max-w-xl">
+                                        End-to-end zero-knowledge client encryption. Assets are split into redundant shards across 14 sovereign clusters.
+                                    </p>
                                 </div>
-                            </div>
-
-                            {/* Drop Zone */}
-                            <div
-                                className={`relative bg-[#1a2332] rounded-2xl p-16 border-2 border-dashed transition-all ${isDragging
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-white/10 hover:border-primary/50'
-                                    }`}
-                                onDrop={handleDrop}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                            >
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    multiple
-                                    onChange={handleFileInputChange}
-                                    className="hidden"
-                                />
-
-                                <div className="flex flex-col items-center">
-                                    <div className="mb-8 size-32 rounded-full bg-gradient-to-b from-primary/20 to-transparent flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-6xl text-primary">cloud_upload</span>
-                                    </div>
-
-                                    <h3 className="text-2xl font-bold mb-2">Drag & drop files here</h3>
-                                    <p className="text-white/50 mb-8">Support for PDF, DOCX, JPG, PNG, and MP4</p>
-
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="h-px w-12 bg-white/20"></div>
-                                        <span className="text-xs text-white/40 uppercase tracking-wider">or</span>
-                                        <div className="h-px w-12 bg-white/20"></div>
-                                    </div>
-
-                                    <button
-                                        onClick={handleBrowseClick}
-                                        className="flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 rounded-full font-medium transition-all shadow-lg shadow-primary/20"
-                                    >
-                                        <span className="material-symbols-outlined">add_circle</span>
-                                        Browse Files
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={handleBrowseClick}
+                                    className="px-5 py-2.5 bg-[#B8FE00] text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white transition-all shrink-0 flex items-center gap-2 shadow-lg hover:shadow-[0_0_20px_rgba(184,254,0,0.3)]"
+                                >
+                                    <span>+ SELECT ASSETS</span>
+                                </button>
                             </div>
                         </div>
 
-                        {/* Right Column - Storage & Recent Files */}
-                        <div className="lg:col-span-4 space-y-6">
-                            {/* Storage Panel */}
-                            <div className="bg-[#1a2332] rounded-2xl p-6 border border-white/5">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-bold">Storage</h3>
-                                    <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full">Unlimited</span>
+                        {/* Drop Zone */}
+                        <div
+                            className={`relative bg-[#202327] p-12 sm:p-16 border-2 border-dashed transition-all cursor-pointer ${isDragging
+                                ? 'border-[#B8FE00] bg-[#0720C6]/20 shadow-[0_0_40px_rgba(184,254,0,0.2)]'
+                                : 'border-white/20 hover:border-[#B8FE00]/60'
+                                }`}
+                            onDrop={handleDrop}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onClick={handleBrowseClick}
+                        >
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                onChange={handleFileInputChange}
+                                className="hidden"
+                            />
+
+                            <div className="flex flex-col items-center text-center">
+                                <div className="mb-6 w-20 h-20 bg-[#16181B] border border-white/15 flex items-center justify-center text-[#B8FE00] shadow-inner">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
                                 </div>
 
-                                <div className="mb-3">
-                                    <div className="flex items-end gap-2 mb-2">
-                                        <span className="text-3xl font-bold">
-                                            {storageStats ? formatSize(storageStats.totalUsed).split(' ')[0] : '0'}
-                                        </span>
-                                        <span className="text-sm text-white/60 mb-1">
-                                            {storageStats ? formatSize(storageStats.totalUsed).split(' ')[1] : 'B'} used
-                                        </span>
-                                    </div>
+                                <h3 className="font-['Anton'] text-2xl sm:text-3xl uppercase tracking-tight text-white mb-2">
+                                    DRAG & DROP ASSETS HERE
+                                </h3>
+                                <p className="text-white/50 text-xs font-mono uppercase tracking-wider mb-6 max-w-md">
+                                    HIGH-THROUGHPUT CONCURRENT PIPELINE • IMAGES, VIDEOS, DOCUMENTS & ENCRYPTED TARBALLS
+                                </p>
+
+                                <div className="flex items-center gap-4 mb-6 w-full max-w-xs justify-center">
+                                    <div className="h-px flex-1 bg-white/15"></div>
+                                    <span className="text-[11px] font-mono text-white/40 uppercase tracking-widest">OR</span>
+                                    <div className="h-px flex-1 bg-white/15"></div>
                                 </div>
 
-                                <div className="h-3 bg-white/10 rounded-full overflow-hidden mb-6 flex">
-                                    {storageStats && storageStats.totalUsed > 0 && (
-                                        <>
-                                            <div
-                                                className="h-full bg-blue-400"
-                                                style={{ width: `${(storageStats.categoryStats.images / storageStats.totalUsed) * 100}%` }}
-                                            />
-                                            <div
-                                                className="h-full bg-yellow-400"
-                                                style={{ width: `${(storageStats.categoryStats.documents / storageStats.totalUsed) * 100}%` }}
-                                            />
-                                            <div
-                                                className="h-full bg-purple-400"
-                                                style={{ width: `${(storageStats.categoryStats.videos / storageStats.totalUsed) * 100}%` }}
-                                            />
-                                            <div
-                                                className="h-full bg-white/40"
-                                                style={{ width: `${(storageStats.categoryStats.other / storageStats.totalUsed) * 100}%` }}
-                                            />
-                                        </>
-                                    )}
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleBrowseClick();
+                                    }}
+                                    className="px-8 py-3.5 bg-[#0720C6] text-white hover:bg-[#B8FE00] hover:text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-xl"
+                                >
+                                    BROWSE LOCAL STORAGE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-2 rounded-full bg-blue-400"></div>
-                                        <span className="text-xs text-white/60">Images</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-2 rounded-full bg-yellow-400"></div>
-                                        <span className="text-xs text-white/60">Documents</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-2 rounded-full bg-purple-400"></div>
-                                        <span className="text-xs text-white/60">Videos</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-2 rounded-full bg-white/40"></div>
-                                        <span className="text-xs text-white/60">Other</span>
-                                    </div>
-                                </div>
+                    {/* Right Column - Storage & Recent Files */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Storage Panel */}
+                        <div className="bg-[#202327] p-6 border border-white/10">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-['Anton'] text-xl uppercase tracking-tight text-white">STORAGE TELEMETRY</h3>
+                                <span className="text-[10px] font-extrabold uppercase font-mono text-black bg-[#B8FE00] px-2 py-0.5 tracking-wider">UNLIMITED</span>
                             </div>
 
-                            {/* Just Added */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between px-2">
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">JUST ADDED</h3>
-                                    <button
-                                        onClick={() => router.push(`/${user?.name}/storage`)}
-                                        className="text-xs text-primary hover:underline"
-                                    >
-                                        View All
-                                    </button>
+                            <div className="mb-4">
+                                <div className="flex items-baseline gap-2 mb-1">
+                                    <span className="font-['Anton'] text-4xl text-white tracking-tight">
+                                        {storageStats ? formatSize(storageStats.totalUsed).split(' ')[0] : '0'}
+                                    </span>
+                                    <span className="text-sm font-mono text-[#B8FE00] font-bold uppercase">
+                                        {storageStats ? formatSize(storageStats.totalUsed).split(' ')[1] : 'B'} OCCUPIED
+                                    </span>
                                 </div>
+                                <p className="text-[11px] font-mono text-white/40 uppercase">ZERO-KNOWLEDGE CIPHER ALLOCATION</p>
+                            </div>
 
-                                {loadingFiles ? (
-                                    <div className="text-center py-8">
-                                        <div className="inline-block animate-spin text-primary text-2xl">⚡</div>
-                                    </div>
-                                ) : recentFiles.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {recentFiles.map((file) => (
-                                            <div
-                                                key={file._id}
-                                                className="flex items-center gap-3 p-3 bg-[#1a2332] hover:bg-[#1f2937] rounded-xl border border-white/5 transition-all group"
-                                            >
-                                                <div className={`flex items-center justify-center size-10 rounded-lg ${getFileIconColor(file.mimeType)}`}>
-                                                    <span className="material-symbols-outlined text-lg">{getFileIcon(file.mimeType)}</span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-white truncate">{file.originalName}</p>
-                                                    <p className="text-xs text-white/40">
-                                                        {getTimeAgo(file.createdAt)} • {formatSize(file.size)}
-                                                    </p>
-                                                </div>
-                                                <span className="material-symbols-outlined text-primary text-lg">check_circle</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 bg-[#1a2332] rounded-xl border border-white/5">
-                                        <div className="text-3xl mb-2">📁</div>
-                                        <p className="text-sm text-white/40">No files yet</p>
-                                    </div>
+                            <div className="h-2 bg-[#16181B] overflow-hidden mb-6 flex border border-white/10">
+                                {storageStats && storageStats.totalUsed > 0 && (
+                                    <>
+                                        <div
+                                            className="h-full bg-[#B8FE00]"
+                                            style={{ width: `${(storageStats.categoryStats.images / storageStats.totalUsed) * 100}%` }}
+                                            title="Images"
+                                        />
+                                        <div
+                                            className="h-full bg-[#0720C6]"
+                                            style={{ width: `${(storageStats.categoryStats.documents / storageStats.totalUsed) * 100}%` }}
+                                            title="Documents"
+                                        />
+                                        <div
+                                            className="h-full bg-purple-500"
+                                            style={{ width: `${(storageStats.categoryStats.videos / storageStats.totalUsed) * 100}%` }}
+                                            title="Videos"
+                                        />
+                                        <div
+                                            className="h-full bg-white/40"
+                                            style={{ width: `${(storageStats.categoryStats.other / storageStats.totalUsed) * 100}%` }}
+                                            title="Other"
+                                        />
+                                    </>
                                 )}
                             </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                                <div className="flex items-center gap-2 p-2 bg-[#16181B] border border-white/5">
+                                    <div className="w-2.5 h-2.5 bg-[#B8FE00]"></div>
+                                    <span className="text-white/70 uppercase">IMAGES</span>
+                                </div>
+                                <div className="flex items-center gap-2 p-2 bg-[#16181B] border border-white/5">
+                                    <div className="w-2.5 h-2.5 bg-[#0720C6]"></div>
+                                    <span className="text-white/70 uppercase">DOCS</span>
+                                </div>
+                                <div className="flex items-center gap-2 p-2 bg-[#16181B] border border-white/5">
+                                    <div className="w-2.5 h-2.5 bg-purple-500"></div>
+                                    <span className="text-white/70 uppercase">VIDEOS</span>
+                                </div>
+                                <div className="flex items-center gap-2 p-2 bg-[#16181B] border border-white/5">
+                                    <div className="w-2.5 h-2.5 bg-white/40"></div>
+                                    <span className="text-white/70 uppercase">ARCHIVES</span>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Just Added */}
+                        <div className="bg-[#202327] p-6 border border-white/10 space-y-4">
+                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                                <h3 className="font-['Anton'] text-lg uppercase tracking-tight text-white">RECENT INGESTIONS</h3>
+                                <button
+                                    onClick={() => router.push(`/${user?.name || 'user'}/storage`)}
+                                    className="text-xs font-mono font-bold uppercase text-[#B8FE00] hover:underline tracking-wider"
+                                >
+                                    OPEN VAULT →
+                                </button>
+                            </div>
+
+                            {loadingFiles ? (
+                                <div className="text-center py-8">
+                                    <div className="inline-block animate-spin text-[#B8FE00] text-2xl">⚡</div>
+                                </div>
+                            ) : recentFiles.length > 0 ? (
+                                <div className="space-y-2">
+                                    {recentFiles.map((file) => (
+                                        <div
+                                            key={file._id}
+                                            className="flex items-center gap-3 p-2.5 bg-[#16181B] hover:border-[#B8FE00]/40 border border-white/10 transition-all group"
+                                        >
+                                            <div className="flex items-center justify-center w-8 h-8 bg-[#202327] border border-white/10 text-xs font-mono text-[#B8FE00]">
+                                                {file.mimeType.startsWith('image/') ? 'IMG' :
+                                                 file.mimeType.startsWith('video/') ? 'VID' :
+                                                 file.mimeType.includes('pdf') ? 'PDF' : 'DOC'}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-bold text-white truncate font-sans">{file.originalName}</p>
+                                                <p className="text-[10px] font-mono text-white/40 uppercase">
+                                                    {getTimeAgo(file.createdAt)} • {formatSize(file.size)}
+                                                </p>
+                                            </div>
+                                            <span className="text-[#B8FE00] text-xs font-bold font-mono">✓</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-[#16181B] border border-white/5">
+                                    <div className="text-2xl mb-2 opacity-40">📁</div>
+                                    <p className="text-xs font-mono text-white/40 uppercase">NO RECENT INGESTIONS</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                         {/* Upload Queue - Full Width */}
                         <div className="lg:col-span-12">
@@ -477,6 +505,5 @@ export default function UploadPage() {
                     </div>
                 </div>
             </div>
-        </div>
     );
 }
