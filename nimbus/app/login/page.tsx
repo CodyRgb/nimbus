@@ -77,8 +77,8 @@ export default function LoginPage() {
                 {/* Brand Header */}
                 <div className="flex items-center justify-center gap-2 mb-8">
                     <span className="text-[#B8FE00] text-2xl">✦</span>
-                    <span className="font-display text-3xl tracking-wider uppercase text-white">
-                        NIMBUS VAULT
+                    <span className="font-display font-extrabold text-3xl tracking-wider uppercase text-white">
+                        CIPHERVAULT
                     </span>
                 </div>
 

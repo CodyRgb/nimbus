@@ -480,7 +480,7 @@ export default function StoragePage() {
                             <span className="eyebrow-tag text-pill-lime">VAULT STORAGE REPOSITORY</span>
                             <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● TELEMETRY ONLINE</span>
                         </div>
-                        <h1 className="font-['Anton'] text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white mb-2">
+                        <h1 className="font-display font-extrabold text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white mb-2">
                             ZERO-KNOWLEDGE VAULT
                         </h1>
                         <p className="text-white/60 text-sm max-w-xl font-sans">
@@ -551,7 +551,7 @@ export default function StoragePage() {
                             <span>TOTAL STORAGE</span>
                             <span className="text-[#B8FE00] font-bold">UNLIMITED</span>
                         </div>
-                        <div className="font-['Anton'] text-3xl sm:text-4xl text-white tracking-tight">
+                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
                             <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.2} suffix=" MB" />
                         </div>
                         <div className="w-full bg-[#16181B] h-1.5 mt-3 overflow-hidden">
@@ -567,7 +567,7 @@ export default function StoragePage() {
                             <span>INDEXED ASSETS</span>
                             <span className="flex h-2 w-2 rounded-full bg-[#B8FE00] animate-pulse"></span>
                         </div>
-                        <div className="font-['Anton'] text-3xl sm:text-4xl text-white tracking-tight">
+                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
                             <AnimatedCounter value={totalFiles} duration={1} />
                         </div>
                         <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">SYNCHRONIZED IN REAL TIME</p>
@@ -577,7 +577,7 @@ export default function StoragePage() {
                         <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
                             <span>ENCRYPTION ALGORITHM</span>
                         </div>
-                        <div className="font-['Anton'] text-2xl sm:text-3xl text-white tracking-tight uppercase">
+                        <div className="font-display font-extrabold text-2xl sm:text-3xl text-white tracking-tight uppercase">
                             AES-256 GCM
                         </div>
                         <div className="inline-block mt-2.5 px-2 py-0.5 bg-[#0720C6] text-white text-[10px] font-bold uppercase tracking-wider">
@@ -589,7 +589,7 @@ export default function StoragePage() {
                         <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
                             <span>NODE REDUNDANCY</span>
                         </div>
-                        <div className="font-['Anton'] text-3xl sm:text-4xl text-[#B8FE00] tracking-tight">
+                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-[#B8FE00] tracking-tight">
                             100.0%
                         </div>
                         <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">14 REGIONAL REPLICAS</p>
@@ -673,13 +673,13 @@ export default function StoragePage() {
                         >
                             ⚡
                         </motion.div>
-                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">ACCESSING VAULT REGISTRY...</h3>
+                        <h3 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white mb-2">ACCESSING VAULT REGISTRY...</h3>
                         <p className="text-white/40 font-mono text-xs uppercase tracking-wider">RETRIEVING ZERO-KNOWLEDGE CIPHER RECORDS</p>
                     </div>
                 ) : filteredFiles.length === 0 ? (
                     <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
                         <div className="text-5xl mb-4 opacity-50">📁</div>
-                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">ZERO ASSETS RECORDED</h3>
+                        <h3 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white mb-2">ZERO ASSETS RECORDED</h3>
                         <p className="text-white/50 text-sm max-w-md mx-auto mb-6">
                             No files match your query in the current shard. Drag & drop assets to initialize encrypted storage.
                         </p>

@@ -73,14 +73,13 @@
         "typography": {
             "fontFamilies": {
                 "display": {
-                    "primary": "Anton",
+                    "primary": "Outfit",
                     "fallbacks": [
-                        "Impact",
-                        "Bebas Neue",
-                        "Oswald",
+                        "Plus Jakarta Sans",
+                        "Inter",
                         "sans-serif"
                     ],
-                    "characteristics": "Ultra-condensed, heavy weight, all-caps, tight tracking, strong vertical presence"
+                    "characteristics": "Geometric, highly legible, modern proportions, strong premium presence"
                 },
                 "body": {
                     "primary": "Plus Jakarta Sans",

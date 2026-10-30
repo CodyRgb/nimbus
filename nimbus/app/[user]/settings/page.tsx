@@ -53,7 +53,7 @@ export default function SecuritySettingsPage() {
             id: 'lnk-01',
             fileName: 'CYBER_ARCHITECTURE_2026.pdf',
             fileSize: '42.8 MB',
-            url: 'https://nimbus.vault.io/s/66fa19b0?token=k89a12c',
+            url: 'https://ciphervault.io/s/66fa19b0?token=k89a12c',
             permission: 'view_only',
             expiresAt: '18h 12m',
             viewsCount: 14,
@@ -63,7 +63,7 @@ export default function SecuritySettingsPage() {
             id: 'lnk-02',
             fileName: 'QUANTUM_CIPHER_CORE.zip',
             fileSize: '1.2 GB',
-            url: 'https://nimbus.vault.io/s/66fa22e1?token=p44b99x',
+            url: 'https://ciphervault.io/s/66fa22e1?token=p44b99x',
             permission: 'full_access',
             expiresAt: '5d 04h',
             viewsCount: 3,
@@ -73,7 +73,7 @@ export default function SecuritySettingsPage() {
             id: 'lnk-03',
             fileName: 'AUDIT_METRICS_Q3.csv',
             fileSize: '8.4 MB',
-            url: 'https://nimbus.vault.io/s/66fa77d8?token=r12v00m',
+            url: 'https://ciphervault.io/s/66fa77d8?token=r12v00m',
             permission: 'view_only',
             expiresAt: '2h 45m',
             viewsCount: 29,
@@ -393,13 +393,13 @@ export default function SecuritySettingsPage() {
                             </h3>
 
                             <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-                                Nimbus integrates directly with our dedicated Telegram Bot infrastructure to authenticate sessions, upload encrypted buffers via direct chat, and deliver instant compromise alerts.
+                                CipherVault integrates directly with our dedicated Telegram Bot infrastructure to authenticate sessions, upload encrypted buffers via direct chat, and deliver instant compromise alerts.
                             </p>
 
                             <div className="p-4 bg-[#16181B] border border-white/10 font-mono text-xs space-y-2">
                                 <div className="flex justify-between">
                                     <span className="text-white/40">BOT HANDLE:</span>
-                                    <span className="text-[#B8FE00]">@NimbusCloudStorageBot</span>
+                                    <span className="text-[#B8FE00]">@CipherVaultBot</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-white/40">LINKED IDENTITY:</span>
@@ -485,7 +485,7 @@ export default function SecuritySettingsPage() {
                                     AUTHORIZED DEVICE SESSIONS
                                 </h3>
                                 <p className="text-xs font-sans text-neutral-400">
-                                    Active authenticated cryptographic tokens granting access to your Nimbus storage vault.
+                                    Active authenticated cryptographic tokens granting access to your CipherVault storage vault.
                                 </p>
                             </div>
                             <button

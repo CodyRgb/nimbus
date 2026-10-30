@@ -282,7 +282,7 @@ export default function UploadPage() {
                                         <span className="eyebrow-tag text-pill-lime">INGESTION ENGINE</span>
                                         <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● ENCRYPTION READY</span>
                                     </div>
-                                    <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                                    <h1 className="font-display font-extrabold text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
                                         DISPATCH TO VAULT
                                     </h1>
                                     <p className="text-white/60 text-sm font-sans max-w-xl">
@@ -326,7 +326,7 @@ export default function UploadPage() {
                                     </svg>
                                 </div>
 
-                                <h3 className="font-['Anton'] text-2xl sm:text-3xl uppercase tracking-tight text-white mb-2">
+                                <h3 className="font-display font-extrabold text-2xl sm:text-3xl uppercase tracking-tight text-white mb-2">
                                     DRAG & DROP ASSETS HERE
                                 </h3>
                                 <p className="text-white/50 text-xs font-mono uppercase tracking-wider mb-6 max-w-md">
@@ -358,13 +358,13 @@ export default function UploadPage() {
                         {/* Storage Panel */}
                         <div className="bg-[#202327] p-6 border border-white/10">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-['Anton'] text-xl uppercase tracking-tight text-white">STORAGE TELEMETRY</h3>
+                                <h3 className="font-display font-extrabold text-xl uppercase tracking-tight text-white">STORAGE TELEMETRY</h3>
                                 <span className="text-[10px] font-extrabold uppercase font-mono text-black bg-[#B8FE00] px-2 py-0.5 tracking-wider">UNLIMITED</span>
                             </div>
 
                             <div className="mb-4">
                                 <div className="flex items-baseline gap-2 mb-1">
-                                    <span className="font-['Anton'] text-4xl text-white tracking-tight">
+                                    <span className="font-display font-extrabold text-4xl text-white tracking-tight">
                                         {storageStats ? formatSize(storageStats.totalUsed).split(' ')[0] : '0'}
                                     </span>
                                     <span className="text-sm font-mono text-[#B8FE00] font-bold uppercase">
@@ -424,7 +424,7 @@ export default function UploadPage() {
                         {/* Just Added */}
                         <div className="bg-[#202327] p-6 border border-white/10 space-y-4">
                             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                                <h3 className="font-['Anton'] text-lg uppercase tracking-tight text-white">RECENT INGESTIONS</h3>
+                                <h3 className="font-display font-extrabold text-lg uppercase tracking-tight text-white">RECENT INGESTIONS</h3>
                                 <button
                                     onClick={() => router.push(`/${user?.name || 'user'}/storage`)}
                                     className="text-xs font-mono font-bold uppercase text-[#B8FE00] hover:underline tracking-wider"

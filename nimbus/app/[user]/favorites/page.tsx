@@ -285,7 +285,7 @@ export default function FavoritesPage() {
                             <span className="eyebrow-tag text-pill-lime">PINNED ASSETS</span>
                             <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● REAL-TIME SYNC</span>
                         </div>
-                        <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                        <h1 className="font-display font-extrabold text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
                             STARRED VAULT ASSETS
                         </h1>
                         <p className="text-white/60 text-sm font-sans max-w-xl">
@@ -342,13 +342,13 @@ export default function FavoritesPage() {
                 {loading ? (
                     <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
                         <div className="inline-block animate-spin text-[#B8FE00] text-4xl mb-4">⚡</div>
-                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">SYNCING STARRED ASSETS...</h3>
+                        <h3 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white mb-2">SYNCING STARRED ASSETS...</h3>
                         <p className="text-white/40 font-mono text-xs uppercase">QUERYING DECENTRALIZED REPOSITORY</p>
                     </div>
                 ) : filteredFiles.length === 0 ? (
                     <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl max-w-2xl mx-auto">
                         <div className="text-5xl mb-4 opacity-50">⭐</div>
-                        <h3 className="font-['Anton'] text-3xl uppercase tracking-tight text-white mb-2">ZERO STARRED ASSETS</h3>
+                        <h3 className="font-display font-extrabold text-3xl uppercase tracking-tight text-white mb-2">ZERO STARRED ASSETS</h3>
                         <p className="text-white/50 text-sm max-w-md mx-auto mb-6">
                             You haven't pinned any files yet. Open your storage vault and click the Star or Heart icon on any file to bookmark it here.
                         </p>
@@ -375,7 +375,7 @@ export default function FavoritesPage() {
                                             className="mb-4 flex items-center gap-3"
                                         >
                                             <span className="w-2 h-2 bg-[#B8FE00]"></span>
-                                            <h2 className="font-['Anton'] text-2xl uppercase tracking-tight text-white">
+                                            <h2 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white">
                                                 {formatDateHeader(firstFile.dateTaken || firstFile.uploadedAt)}
                                             </h2>
                                             <div className="h-px bg-white/10 flex-1 ml-2"></div>

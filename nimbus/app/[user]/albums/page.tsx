@@ -223,7 +223,7 @@ export default function AlbumsPage() {
                             <span className="eyebrow-tag text-pill-lime">VAULT GALLERIES</span>
                             <span className="text-[11px] font-mono text-[#B8FE00] uppercase font-bold tracking-wider">● ENCRYPTED COLLECTIONS</span>
                         </div>
-                        <h1 className="font-['Anton'] text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
+                        <h1 className="font-display font-extrabold text-4xl sm:text-5xl uppercase tracking-tight text-white mb-2">
                             CIPHER ALBUMS
                         </h1>
                         <p className="text-white/60 text-sm font-sans max-w-xl">
@@ -273,13 +273,13 @@ export default function AlbumsPage() {
                 {loading ? (
                     <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl">
                         <div className="inline-block animate-spin text-[#B8FE00] text-4xl mb-4">⚡</div>
-                        <h3 className="font-['Anton'] text-2xl uppercase tracking-tight text-white mb-2">INDEXING ALBUMS...</h3>
+                        <h3 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white mb-2">INDEXING ALBUMS...</h3>
                         <p className="text-white/40 font-mono text-xs uppercase">SYNCING WITH TELEMETRY NODE</p>
                     </div>
                 ) : albums.length === 0 ? (
                     <div className="bg-[#202327] border border-white/10 p-16 text-center shadow-xl max-w-2xl mx-auto">
                         <div className="text-5xl mb-4 opacity-50">🖼️</div>
-                        <h3 className="font-['Anton'] text-3xl uppercase tracking-tight text-white mb-3">ZERO ALBUMS CREATED</h3>
+                        <h3 className="font-display font-extrabold text-3xl uppercase tracking-tight text-white mb-3">ZERO ALBUMS CREATED</h3>
                         <p className="text-white/60 text-sm max-w-md mx-auto mb-6 font-sans">
                             Organize your media into encrypted collections. Select photos and videos from your vault storage to bind them to an album.
                         </p>
@@ -320,7 +320,7 @@ export default function AlbumsPage() {
                                                 className="mb-4 flex items-center gap-3"
                                             >
                                                 <span className="w-2 h-2 bg-[#B8FE00]"></span>
-                                                <h2 className="font-['Anton'] text-2xl uppercase tracking-tight text-white">
+                                                <h2 className="font-display font-extrabold text-2xl uppercase tracking-tight text-white">
                                                     {formatDateHeader(firstAlbum.createdAt)}
                                                 </h2>
                                                 <div className="h-px bg-white/10 flex-1 ml-2"></div>
@@ -351,7 +351,7 @@ export default function AlbumsPage() {
 
                                                             <div className="absolute bottom-0 left-0 right-0 p-4 z-10 border-t border-white/10 bg-[#202327]/80 backdrop-blur-sm">
                                                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                                                    <h3 className="font-['Anton'] text-lg text-white uppercase tracking-tight truncate">{album.name}</h3>
+                                                                    <h3 className="font-display font-extrabold text-lg text-white uppercase tracking-tight truncate">{album.name}</h3>
                                                                     <span className="bg-[#B8FE00] text-black text-[9px] font-extrabold uppercase px-1.5 py-0.5 tracking-wider shrink-0">
                                                                         {album.fileCount} ITEMS
                                                                     </span>

@@ -1,6 +1,6 @@
-# Deploying Nimbus to Vercel
+# Deploying CipherVault to Vercel
 
-This guide will walk you through deploying the Nimbus frontend to Vercel.
+This guide will walk you through deploying the CipherVault frontend to Vercel.
 
 ## Prerequisites
 

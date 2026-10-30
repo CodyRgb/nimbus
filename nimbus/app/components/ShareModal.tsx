@@ -38,7 +38,7 @@ export default function ShareModal({ isOpen, onClose, file }: ShareModalProps) {
     useEffect(() => {
         if (isOpen && file) {
             // Generate deterministic mock public dispatch URL with encryption key token
-            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://nimbus.vault.io';
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ciphervault.io';
             const randomToken = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
             const generatedUrl = `${origin}/s/${file._id}?token=${randomToken}&scope=${accessScope}`;
             setCurrentLink(generatedUrl);
@@ -71,7 +71,7 @@ export default function ShareModal({ isOpen, onClose, file }: ShareModalProps) {
     };
 
     const handleCreateLink = () => {
-        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://nimbus.vault.io';
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ciphervault.io';
         const randomToken = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
         const newUrl = `${origin}/s/${file?._id}?token=${randomToken}&scope=${accessScope}`;
         

@@ -54,8 +54,8 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                                <span className="font-display text-2xl tracking-wider text-white uppercase leading-none">
-                                    NIMBUS
+                                <span className="font-display font-extrabold text-2xl tracking-wider text-white uppercase leading-none">
+                                    CIPHERVAULT
                                 </span>
                                 <span className="text-[10px] font-mono text-[#B8FE00] font-bold">®</span>
                             </div>

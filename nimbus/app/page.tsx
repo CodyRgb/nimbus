@@ -62,7 +62,7 @@ export default function LandingPage() {
             <div className="lg:col-span-5 flex flex-col gap-6">
               {/* Display Headline */}
               <div className="flex flex-col">
-                <h1 className="font-display text-white uppercase text-5xl sm:text-7xl lg:text-8xl leading-[0.9] tracking-tight">
+                <h1 className="font-display font-black text-white uppercase text-5xl sm:text-7xl lg:text-8xl leading-[1.02] tracking-tight">
                   UNLIMITED <br />
                   <span className="text-[#B8FE00] drop-shadow-[0_0_35px_rgba(184,254,0,0.4)]">
                     CLOUD VAULT
@@ -136,7 +136,7 @@ export default function LandingPage() {
                     <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
                     <span className="w-3 h-3 rounded-full bg-[#B8FE00]"></span>
                     <span className="ml-2 font-mono text-xs text-[#A0A6B2]">
-                      nimbus_core_vault::v2.4
+                      ciphervault_core::v2.4
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -302,7 +302,7 @@ export default function LandingPage() {
                 </h3>
                 <p className="text-white/85 text-sm leading-relaxed mb-6">
                   Your files are encrypted client-side using WebCrypto AES-GCM before transmission.
-                  Neither Telegram nor Nimbus servers can read your decrypted files. Only your device holds the key.
+                  Neither Telegram nor CipherVault servers can read your decrypted files. Only your device holds the key.
                 </p>
               </div>
               <div className="pt-6 border-t border-white/20 flex items-center justify-between text-xs font-mono text-white">
@@ -323,7 +323,7 @@ export default function LandingPage() {
                 </h3>
                 <p className="text-[#A0A6B2] text-sm leading-relaxed mb-6">
                   Seamlessly bridge web and mobile. Upload through our web vault, or forward large files,
-                  photos, and documents directly to your dedicated Nimbus Telegram bot for immediate cloud sync.
+                  photos, and documents directly to your dedicated CipherVault Telegram bot for immediate cloud sync.
                 </p>
               </div>
               <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/70">
@@ -348,7 +348,7 @@ export default function LandingPage() {
                 WHERE TELEGRAM SPEED MEETS ENTERPRISE SECURITY.
               </h2>
               <p className="text-[#5A6065] text-base leading-relaxed">
-                Nimbus was built to solve the corporate cloud storage monopoly. By marrying Telegram&apos;s
+                CipherVault was built to solve the corporate cloud storage monopoly. By marrying Telegram&apos;s
                 world-class worldwide infrastructure with rigorous client-side cryptography, we deliver
                 an uncompromising sovereign vault for everyone.
               </p>
@@ -467,7 +467,7 @@ export default function LandingPage() {
       {/* ============================================================== */}
       <section className="py-28 px-4 sm:px-6 lg:px-8 bg-[#16181B] border-t border-b border-white/10">
         <div className="max-w-[1000px] mx-auto text-center">
-          <div className="eyebrow-tag mb-4 justify-center">✦ THE NIMBUS MANIFESTO</div>
+          <div className="eyebrow-tag mb-4 justify-center">✦ THE CIPHERVAULT MANIFESTO</div>
           <blockquote className="display-statement text-white leading-relaxed tracking-wide">
             &ldquo;WE BELIEVE PERSONAL DATA SHOULD BE{" "}
             <span className="text-pill-blue">PERMANENTLY SOVEREIGN</span>, SECURE, AND FREE FROM ARTIFICIAL
@@ -800,7 +800,7 @@ export default function LandingPage() {
                   ✦ ✦ ✦ ✦ ✦
                 </div>
                 <p className="text-white text-base sm:text-lg leading-relaxed mb-8">
-                  &ldquo;As a security engineer, client-side encryption is non-negotiable for me. Nimbus encrypts all byte streams
+                  &ldquo;As a security engineer, client-side encryption is non-negotiable for me. CipherVault encrypts all byte streams
                   locally with AES-GCM before Telegram even touches them. Flawless execution and blistering speeds.&rdquo;
                 </p>
               </div>
@@ -833,12 +833,12 @@ export default function LandingPage() {
           <div className="flex flex-col gap-4">
             {[
               {
-                q: "HOW IS NIMBUS CLOUD STORAGE TRULY UNLIMITED?",
-                a: "Nimbus acts as a high-performance cryptographic layer atop Telegram's globally distributed cloud API. Telegram provides unlimited storage capacity for channels and bots. We partition, encrypt, and orchestrate file storage across this infrastructure with zero storage limits."
+                q: "HOW IS CIPHERVAULT CLOUD STORAGE TRULY UNLIMITED?",
+                a: "CipherVault acts as a high-performance cryptographic layer atop Telegram's globally distributed cloud API. Telegram provides unlimited storage capacity for channels and bots. We partition, encrypt, and orchestrate file storage across this infrastructure with zero storage limits."
               },
               {
-                q: "CAN NIMBUS OR TELEGRAM READ MY ENCRYPTED FILES?",
-                a: "No. Your browser handles encryption via the native WebCrypto API using AES-256 GCM before the bytes leave your machine. Telegram only ever stores encrypted binary payloads, and Nimbus servers never store your private encryption key."
+                q: "CAN CIPHERVAULT OR TELEGRAM READ MY ENCRYPTED FILES?",
+                a: "No. Your browser handles encryption via the native WebCrypto API using AES-256 GCM before the bytes leave your machine. Telegram only ever stores encrypted binary payloads, and CipherVault servers never store your private encryption key."
               },
               {
                 q: "WHAT IS THE MAXIMUM FILE SIZE FOR A SINGLE UPLOAD?",
@@ -846,7 +846,7 @@ export default function LandingPage() {
               },
               {
                 q: "HOW DOES THE TELEGRAM BOT INTEGRATION WORK?",
-                a: "When you link your Telegram account during registration, Nimbus assigns you a direct bot session. Any media, archive, or document you forward to the bot appears automatically in your web vault, neatly categorized and indexed."
+                a: "When you link your Telegram account during registration, CipherVault assigns you a direct bot session. Any media, archive, or document you forward to the bot appears automatically in your web vault, neatly categorized and indexed."
               },
             ].map((faq, idx) => (
               <div
@@ -894,7 +894,7 @@ export default function LandingPage() {
                 {newsletterSubscribed ? (
                   <div className="p-5 bg-[#B8FE00]/10 border border-[#B8FE00] rounded-xl text-[#B8FE00] font-mono text-sm flex items-center gap-3">
                     <span className="text-xl">✓</span>
-                    <span>Transmitted successfully. Welcome to Nimbus Dispatch.</span>
+                    <span>Transmitted successfully. Welcome to CipherVault Dispatch.</span>
                   </div>
                 ) : (
                   <form onSubmit={handleNewsletter} className="flex flex-col sm:flex-row gap-3">
@@ -931,8 +931,8 @@ export default function LandingPage() {
             <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-[#B8FE00] text-xl">✦</span>
-                <span className="font-display text-2xl text-white uppercase tracking-wider">
-                  NIMBUS®
+                <span className="font-display font-extrabold text-2xl text-white uppercase tracking-wider">
+                  CIPHERVAULT®
                 </span>
               </div>
               <p className="text-[#A0A6B2] text-xs leading-relaxed max-w-xs font-mono">
@@ -979,8 +979,8 @@ export default function LandingPage() {
               <h4 className="font-display text-sm tracking-wider uppercase text-white mb-2">
                 CONNECT
               </h4>
-              <span className="text-xs font-mono text-[#A0A6B2]">support@nimbus.cloud</span>
-              <span className="font-display text-sm text-[#B8FE00]">@NimbusCloudBot</span>
+              <span className="text-xs font-mono text-[#A0A6B2]">support@ciphervault.io</span>
+              <span className="font-display text-sm text-[#B8FE00]">@CipherVaultBot</span>
               <div className="pt-2 flex items-center gap-2">
                 <Link
                   href="/register"
@@ -994,7 +994,7 @@ export default function LandingPage() {
 
           {/* Sub-Footer Copyright */}
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[#A0A6B2]">
-            <div>© {new Date().getFullYear()} NIMBUS CLOUD VAULT. ALL RIGHTS RESERVED.</div>
+            <div>© {new Date().getFullYear()} CIPHERVAULT. ALL RIGHTS RESERVED.</div>
             <div className="flex items-center gap-6">
               <span className="hover:text-white transition-colors cursor-pointer">PRIVACY POLICY</span>
               <span className="hover:text-white transition-colors cursor-pointer">SECURITY DISCLOSURE</span>
@@ -1005,7 +1005,7 @@ export default function LandingPage() {
           {/* Edge-to-Edge Giant Watermark Outline */}
           <div className="mt-12 overflow-hidden text-center select-none pointer-events-none">
             <div className="watermark-outline text-center">
-              NIMBUS VAULT
+              CIPHERVAULT
             </div>
           </div>
         </div>

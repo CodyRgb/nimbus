@@ -7,7 +7,7 @@ interface FileCache {
     etag?: string;
 }
 
-interface NimbusDB extends DBSchema {
+interface CipherVaultDB extends DBSchema {
     fileList: {
         key: string;
         value: FileCache;
@@ -19,12 +19,12 @@ interface NimbusDB extends DBSchema {
     };
 }
 
-let dbPromise: Promise<IDBPDatabase<NimbusDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<CipherVaultDB>> | null = null;
 
-const initDB = async (): Promise<IDBPDatabase<NimbusDB>> => {
+const initDB = async (): Promise<IDBPDatabase<CipherVaultDB>> => {
     if (dbPromise) return dbPromise;
 
-    dbPromise = openDB<NimbusDB>('nimbus-cache', 1, {
+    dbPromise = openDB<CipherVaultDB>('ciphervault-cache', 1, {
         upgrade(db) {
             // File list cache store
             if (!db.objectStoreNames.contains('fileList')) {
