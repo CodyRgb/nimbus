@@ -541,20 +541,20 @@ export default function StoragePage() {
 
                 {/* Neo-Brutalist Stats Telemetry */}
                 <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+                    className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
-                        <div className="flex items-center justify-between text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
-                            <span>TOTAL STORAGE</span>
+                    <div className="bg-[#202327] p-3.5 sm:p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/50 uppercase font-mono tracking-wider mb-1.5 sm:mb-2">
+                            <span>STORAGE</span>
                             <span className="text-[#B8FE00] font-bold">UNLIMITED</span>
                         </div>
-                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
+                        <div className="font-display font-extrabold text-xl sm:text-3xl md:text-4xl text-white tracking-tight">
                             <AnimatedCounter value={stats.totalSize / (1024 * 1024)} duration={1.2} suffix=" MB" />
                         </div>
-                        <div className="w-full bg-[#16181B] h-1.5 mt-3 overflow-hidden">
+                        <div className="w-full bg-[#16181B] h-1.5 mt-2.5 sm:mt-3 overflow-hidden">
                             <div
                                 className="bg-[#B8FE00] h-full"
                                 style={{ width: `${Math.min(100, Math.max(5, (stats.totalSize / (1024 * 1024 * 500)) * 100))}%` }}
@@ -562,37 +562,37 @@ export default function StoragePage() {
                         </div>
                     </div>
 
-                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
-                        <div className="flex items-center justify-between text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
-                            <span>INDEXED ASSETS</span>
+                    <div className="bg-[#202327] p-3.5 sm:p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/50 uppercase font-mono tracking-wider mb-1.5 sm:mb-2">
+                            <span>INDEXED</span>
                             <span className="flex h-2 w-2 rounded-full bg-[#B8FE00] animate-pulse"></span>
                         </div>
-                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
+                        <div className="font-display font-extrabold text-xl sm:text-3xl md:text-4xl text-white tracking-tight">
                             <AnimatedCounter value={totalFiles} duration={1} />
                         </div>
-                        <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">SYNCHRONIZED IN REAL TIME</p>
+                        <p className="text-[10px] sm:text-[11px] font-mono text-white/40 mt-2 sm:mt-3 uppercase truncate">REAL-TIME SYNC</p>
                     </div>
 
-                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
-                        <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
-                            <span>ENCRYPTION ALGORITHM</span>
+                    <div className="bg-[#202327] p-3.5 sm:p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="text-[10px] sm:text-xs text-white/50 uppercase font-mono tracking-wider mb-1.5 sm:mb-2 truncate">
+                            <span>SECURITY CIPHER</span>
                         </div>
-                        <div className="font-display font-extrabold text-2xl sm:text-3xl text-white tracking-tight uppercase">
+                        <div className="font-display font-extrabold text-lg sm:text-2xl md:text-3xl text-white tracking-tight uppercase truncate">
                             AES-256 GCM
                         </div>
-                        <div className="inline-block mt-2.5 px-2 py-0.5 bg-[#0720C6] text-white text-[10px] font-bold uppercase tracking-wider">
-                            HARDWARE SECURED
+                        <div className="inline-block mt-2 sm:mt-2.5 px-1.5 sm:px-2 py-0.5 bg-[#0720C6] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">
+                            ZERO-KNOWLEDGE
                         </div>
                     </div>
 
-                    <div className="bg-[#202327] p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
-                        <div className="text-xs text-white/50 uppercase font-mono tracking-wider mb-2">
-                            <span>NODE REDUNDANCY</span>
+                    <div className="bg-[#202327] p-3.5 sm:p-5 border border-white/10 hover:border-[#B8FE00]/40 transition-colors">
+                        <div className="text-[10px] sm:text-xs text-white/50 uppercase font-mono tracking-wider mb-1.5 sm:mb-2 truncate">
+                            <span>REDUNDANCY</span>
                         </div>
-                        <div className="font-display font-extrabold text-3xl sm:text-4xl text-[#B8FE00] tracking-tight">
+                        <div className="font-display font-extrabold text-xl sm:text-3xl md:text-4xl text-[#B8FE00] tracking-tight">
                             100.0%
                         </div>
-                        <p className="text-[11px] font-mono text-white/40 mt-3 uppercase">14 REGIONAL REPLICAS</p>
+                        <p className="text-[10px] sm:text-[11px] font-mono text-white/40 mt-2 sm:mt-3 uppercase truncate">14 REPLICAS</p>
                     </div>
                 </motion.div>
 
@@ -609,7 +609,7 @@ export default function StoragePage() {
                             placeholder="SEARCH BY FILE NAME, MIME TYPE OR HASH..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
+                            className="w-full px-4 py-2.5 sm:py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
                         />
                         {searchTerm && (
                             <button
@@ -621,23 +621,23 @@ export default function StoragePage() {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                    <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
+                            className="w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 bg-[#202327] border border-white/15 text-white font-mono text-[11px] sm:text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
                         >
                             <option value="all">ALL FORMATS</option>
                             <option value="image">IMAGES (PNG/JPG)</option>
                             <option value="video">VIDEOS (MP4/MKV)</option>
                             <option value="audio">AUDIO (WAV/MP3)</option>
-                            <option value="application">DOCUMENTS & ARCHIVES</option>
+                            <option value="application">DOCS & ARCHIVES</option>
                         </select>
 
                         <select
                             value={sortOrder}
                             onChange={(e) => setSortOrder(e.target.value)}
-                            className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
+                            className="w-full sm:w-auto px-3 sm:px-4 py-2.5 sm:py-3 bg-[#202327] border border-white/15 text-white font-mono text-[11px] sm:text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
                         >
                             <option value="date-desc">NEWEST FIRST</option>
                             <option value="date-asc">OLDEST FIRST</option>
@@ -646,16 +646,16 @@ export default function StoragePage() {
                         </select>
 
                         {/* View Mode Toggle */}
-                        <div className="flex bg-[#202327] border border-white/15 p-1 shrink-0">
+                        <div className="col-span-2 sm:col-span-1 flex bg-[#202327] border border-white/15 p-1 shrink-0 justify-center">
                             <button
                                 onClick={() => setViewMode("grid")}
-                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                                className={`flex-1 sm:flex-initial px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all text-center ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
                             >
                                 ⊞ GRID
                             </button>
                             <button
                                 onClick={() => setViewMode("list")}
-                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                                className={`flex-1 sm:flex-initial px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all text-center ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
                             >
                                 ☰ LIST
                             </button>
@@ -718,7 +718,7 @@ export default function StoragePage() {
                                         </motion.div>
 
                                         {/* Files Grid */}
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-6">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                                             {filesInGroup.map((file, index) => {
                                                 const isSelected = selectedFiles.has(file._id);
                                                 const globalIndex = filteredFiles.indexOf(file);
@@ -1072,6 +1072,56 @@ export default function StoragePage() {
                 onClose={() => setFileToShare(null)}
                 file={fileToShare}
             />
+
+            {/* Floating Mobile Bulk Actions Bar */}
+            <AnimatePresence>
+                {selectedFiles.size > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        className="fixed bottom-20 md:hidden left-3 right-3 z-40 bg-[#16181B]/95 backdrop-blur-xl border border-[#B8FE00]/40 p-2 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center justify-between gap-2"
+                    >
+                        <div className="flex items-center gap-1.5 pl-2">
+                            <span className="w-2 h-2 rounded-full bg-[#B8FE00] animate-pulse"></span>
+                            <span className="text-xs font-mono font-bold text-white uppercase">{selectedFiles.size} SELECTED</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                onClick={handleBulkDownload}
+                                className="p-2 bg-[#B8FE00] text-black font-bold rounded-lg text-xs hover:bg-white"
+                                title="Download"
+                            >
+                                <LuDownload size={15} />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setFilesToAdd(Array.from(selectedFiles));
+                                    setAddToAlbumModalOpen(true);
+                                }}
+                                className="p-2 bg-[#0720C6] text-white font-bold rounded-lg text-xs"
+                                title="Add to Album"
+                            >
+                                <LuImagePlus size={15} />
+                            </button>
+                            <button
+                                onClick={handleBulkDelete}
+                                className="p-2 bg-red-600/30 text-red-400 border border-red-500/30 rounded-lg text-xs"
+                                title="Delete"
+                            >
+                                <LuTrash2 size={15} />
+                            </button>
+                            <button
+                                onClick={() => setSelectedFiles(new Set())}
+                                className="p-2 text-white/60 hover:text-white rounded-lg text-xs"
+                                title="Cancel"
+                            >
+                                <LuX size={15} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Mobile Context Menu via Portal */}
             <MobileContextMenu

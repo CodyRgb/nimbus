@@ -3,7 +3,12 @@ import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 import { AuthProvider } from "./context/AuthContext";
+import { UploadProvider } from "./context/UploadContext";
 import ConditionalNavbar from "./layout/ConditionalNavbar";
+import FloatingUploadWidget from "./components/FloatingUploadWidget";
+import OnlineStatus from "./components/OnlineStatus";
+import PWAInstaller from "./components/PWAInstaller";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -22,6 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: "CipherVault | Infinite, Encrypted & Zero-Knowledge Cloud Storage",
   description: "Unlimited cloud storage power engineered on Telegram's distributed API. Ultra-fast, zero-knowledge AES-256 encrypted, and always accessible.",
+  manifest: "/manifest.json",
   icons: {
     icon: '/ciphervault-logo.png',
     shortcut: '/ciphervault-logo.png',
@@ -42,6 +48,11 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className="dark">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0720C6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="CipherVault" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -50,12 +61,18 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${outfit.variable} ${plusJakartaSans.variable} antialiased font-body bg-[#16181B] text-white selection:bg-[#B8FE00] selection:text-[#16181B] overflow-x-hidden`}
+        className={`${outfit.variable} ${plusJakartaSans.variable} antialiased font-body bg-[#16181B] text-white selection:bg-[#B8FE00] selection:text-[#16181B] overflow-x-hidden pb-16 md:pb-0`}
         suppressHydrationWarning
       >
         <AuthProvider>
-          <ConditionalNavbar />
-          {children}
+          <UploadProvider>
+            <OnlineStatus />
+            <ConditionalNavbar />
+            <PWAInstaller />
+            {children}
+            <FloatingUploadWidget />
+            <MobileBottomNav />
+          </UploadProvider>
         </AuthProvider>
       </body>
     </html>

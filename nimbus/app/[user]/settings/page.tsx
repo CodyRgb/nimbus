@@ -296,7 +296,62 @@ export default function SecuritySettingsPage() {
                             </div>
                         </div>
 
-                        <div className="border border-white/10 bg-[#202327] overflow-hidden">
+                        {/* Mobile Cards View */}
+                        <div className="md:hidden space-y-3">
+                            {activeLinks.map((link) => (
+                                <div key={link.id} className="p-4 bg-[#202327] border border-white/10 space-y-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0">
+                                            <div className="font-bold text-white text-sm truncate" title={link.fileName}>
+                                                {link.fileName}
+                                            </div>
+                                            <div className="text-[10px] font-mono text-white/40 mt-0.5">
+                                                {link.fileSize} • {link.createdAt}
+                                            </div>
+                                        </div>
+                                        <span className={`px-2 py-0.5 text-[9px] font-mono font-bold uppercase shrink-0 ${
+                                            link.permission === 'view_only' 
+                                                ? 'bg-blue-900/40 text-blue-300 border border-blue-500/30' 
+                                                : 'bg-[#B8FE00]/15 text-[#B8FE00] border border-[#B8FE00]/30'
+                                        }`}>
+                                            {link.permission === 'view_only' ? 'STREAM' : 'FULL'}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="truncate flex-1 text-xs text-white/80 bg-black/40 px-2.5 py-1.5 border border-white/10 font-mono">
+                                            {link.url}
+                                        </span>
+                                        <button
+                                            onClick={() => handleCopy(link.id, link.url)}
+                                            className="p-2 bg-[#16181B] hover:bg-[#B8FE00] hover:text-black text-white border border-white/15 transition-all shrink-0"
+                                            title="Copy to clipboard"
+                                        >
+                                            {copiedLinkId === link.id ? <LuCheck size={14} className="text-[#B8FE00]" /> : <LuCopy size={14} />}
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs font-mono">
+                                        <span className="text-white/60">Expires: {link.expiresAt}</span>
+                                        <button
+                                            onClick={() => handleRevokeLink(link.id)}
+                                            className="px-2.5 py-1 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-[10px] uppercase font-bold border border-red-500/30 transition-all flex items-center gap-1"
+                                        >
+                                            <LuTrash2 size={11} />
+                                            <span>Revoke</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {activeLinks.length === 0 && (
+                                <div className="p-8 text-center text-neutral-500 font-mono text-xs bg-[#202327] border border-white/10">
+                                    ALL SHARED LINKS REVOKED OR NONE PROVISIONED
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block border border-white/10 bg-[#202327] overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm font-sans">
                                     <thead className="bg-[#16181B] text-white/60 font-mono text-[11px] uppercase tracking-wider border-b border-white/10">

@@ -221,17 +221,18 @@ export default function StorageFileCard({
             </div>
 
             {/* 3-Dots Menu Button */}
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+            <div className="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
                 <div className="relative">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             setMenuOpen(!menuOpen);
                         }}
-                        className="p-1.5 bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/15 transition-all shadow-md"
+                        className="p-1.5 sm:p-1.5 bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/20 transition-all shadow-md rounded-sm"
                         title="File actions"
+                        aria-label="File options"
                     >
-                        <BsThreeDotsVertical size={16} />
+                        <BsThreeDotsVertical size={15} />
                     </button>
 
                     <AnimatePresence>

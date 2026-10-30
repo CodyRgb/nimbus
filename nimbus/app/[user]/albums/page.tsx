@@ -392,9 +392,10 @@ export default function AlbumsPage() {
                                                                         e.stopPropagation();
                                                                         setActiveMenuId(activeMenuId === album._id ? null : album._id);
                                                                     }}
-                                                                    className={`p-1.5 transition-all ${activeMenuId === album._id
+                                                                    aria-label="Album options"
+                                                                    className={`p-1.5 sm:p-1.5 rounded-sm transition-all ${activeMenuId === album._id
                                                                         ? 'bg-[#B8FE00] text-black opacity-100'
-                                                                        : 'bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/15 opacity-0 group-hover:opacity-100'
+                                                                        : 'bg-[#16181B]/90 hover:bg-[#B8FE00] hover:text-black text-white border border-white/20 opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
                                                                         }`}
                                                                 >
                                                                     <BsThreeDotsVertical size={15} />

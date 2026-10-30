@@ -62,30 +62,30 @@ export default function LandingPage() {
             <div className="lg:col-span-5 flex flex-col gap-6">
               {/* Display Headline */}
               <div className="flex flex-col">
-                <h1 className="font-display font-black text-white uppercase text-5xl sm:text-7xl lg:text-8xl leading-[1.02] tracking-tight">
+                <h1 className="font-display font-black text-white uppercase text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.02] tracking-tight">
                   UNLIMITED <br />
                   <span className="text-[#B8FE00] drop-shadow-[0_0_35px_rgba(184,254,0,0.4)]">
                     CLOUD VAULT
                   </span>
                 </h1>
-                <p className="mt-4 text-white/80 text-base sm:text-lg leading-relaxed max-w-lg">
+                <p className="mt-4 text-white/80 text-sm sm:text-base lg:text-lg leading-relaxed max-w-lg">
                   Harness the limitless power of Telegram&apos;s distributed infrastructure.
                   Zero storage limits, client-side zero-knowledge AES-256 encryption, and instant high-speed streaming.
                 </p>
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                 <Link
                   href={isLoggedIn ? `/${user?.name}/storage` : "/register"}
-                  className="px-8 py-4 bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-full hover:bg-white transition-all shadow-[0_0_25px_rgba(184,254,0,0.4)] hover:scale-105 flex items-center gap-2 group cursor-pointer"
+                  className="px-8 py-4 bg-[#B8FE00] text-[#16181B] font-display text-sm tracking-wider uppercase font-bold rounded-full hover:bg-white transition-all shadow-[0_0_25px_rgba(184,254,0,0.4)] hover:scale-105 flex items-center justify-center gap-2 group cursor-pointer text-center"
                 >
                   <span>{isLoggedIn ? "OPEN DASHBOARD" : "START STORING FREE"}</span>
                   <span className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
                 </Link>
                 <Link
                   href="/login"
-                  className="px-7 py-4 bg-transparent border-2 border-white text-white font-display text-sm tracking-wider uppercase font-semibold rounded-full hover:bg-white/10 transition-all cursor-pointer"
+                  className="px-7 py-4 bg-transparent border-2 border-white text-white font-display text-sm tracking-wider uppercase font-semibold rounded-full hover:bg-white/10 transition-all cursor-pointer text-center"
                 >
                   SIGN IN
                 </Link>
@@ -177,7 +177,7 @@ export default function LandingPage() {
                   <div className="flex items-center justify-between text-[#A0A6B2] pb-2 border-b border-white/5 text-[11px]">
                     <span>SECURE ASSET</span>
                     <span>SIZE</span>
-                    <span>INTEGRITY</span>
+                    <span className="hidden sm:inline">INTEGRITY</span>
                     <span>STATUS</span>
                   </div>
 
@@ -186,14 +186,14 @@ export default function LandingPage() {
                     { name: "Cinematic_Broll_4K_HDR.mp4", size: "1.84 GB", hash: "SHA-256 ✓", status: "STREAMING" },
                     { name: "Financial_Ledger_Q4_Export.db", size: "94.6 MB", hash: "SHA-256 ✓", status: "ENCRYPTED" },
                   ].map((row, idx) => (
-                    <div key={idx} className="flex items-center justify-between py-1.5 hover:bg-white/5 px-2 rounded transition-colors">
-                      <div className="flex items-center gap-2 truncate max-w-[200px]">
+                    <div key={idx} className="flex items-center justify-between py-1.5 hover:bg-white/5 px-2 rounded transition-colors gap-2">
+                      <div className="flex items-center gap-2 truncate max-w-[140px] sm:max-w-[200px]">
                         <span className="text-[#B8FE00]">✦</span>
                         <span className="text-white truncate">{row.name}</span>
                       </div>
-                      <span className="text-gray-400">{row.size}</span>
-                      <span className="text-[#B8FE00]">{row.hash}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-[#0720C6] text-white font-bold">
+                      <span className="text-gray-400 text-[10px] sm:text-xs">{row.size}</span>
+                      <span className="text-[#B8FE00] hidden sm:inline">{row.hash}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-[#0720C6] text-white font-bold shrink-0">
                         {row.status}
                       </span>
                     </div>

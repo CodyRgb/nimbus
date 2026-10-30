@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+import { LuDownload } from "react-icons/lu";
+
 interface User {
     _id: string;
     name: string;
@@ -31,6 +33,12 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    const triggerPWAInstall = () => {
+        if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent('ciphervault-trigger-install'));
+        }
+    };
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -141,6 +149,16 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
 
                     {/* Right Actions */}
                     <div className="hidden md:flex items-center gap-3 shrink-0">
+                        {/* PWA Install Trigger */}
+                        <button
+                            onClick={triggerPWAInstall}
+                            className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-[#B8FE00] border border-[#B8FE00]/30 hover:border-[#B8FE00] bg-[#B8FE00]/10 hover:bg-[#B8FE00]/20 rounded-full transition-all cursor-pointer shadow-sm"
+                            title="Install CipherVault Progressive Web App"
+                        >
+                            <LuDownload className="w-3.5 h-3.5" />
+                            <span>INSTALL APP</span>
+                        </button>
+
                         {isOnAuthPage ? (
                             <Link
                                 href="/"
@@ -257,10 +275,20 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                                     </Link>
                                     <button
                                         onClick={() => {
+                                            setMobileMenuOpen(false);
+                                            triggerPWAInstall();
+                                        }}
+                                        className="mt-1 w-full px-4 py-2.5 text-xs font-display tracking-widest uppercase rounded-lg text-[#B8FE00] bg-[#B8FE00]/10 border border-[#B8FE00]/30 hover:bg-[#B8FE00]/20 flex items-center justify-center gap-2"
+                                    >
+                                        <LuDownload className="w-4 h-4" />
+                                        <span>INSTALL APP (PWA)</span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
                                             logout();
                                             setMobileMenuOpen(false);
                                         }}
-                                        className="mt-2 w-full px-4 py-2.5 text-xs font-display tracking-widest uppercase rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 text-center"
+                                        className="mt-1 w-full px-4 py-2.5 text-xs font-display tracking-widest uppercase rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 text-center"
                                     >
                                         LOGOUT VAULT
                                     </button>
@@ -284,6 +312,16 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                                             {item.label}
                                         </Link>
                                     ))}
+                                    <button
+                                        onClick={() => {
+                                            setMobileMenuOpen(false);
+                                            triggerPWAInstall();
+                                        }}
+                                        className="mt-1 w-full px-4 py-2.5 text-xs font-display tracking-widest uppercase rounded-lg text-[#B8FE00] bg-[#B8FE00]/10 border border-[#B8FE00]/30 hover:bg-[#B8FE00]/20 flex items-center justify-center gap-2"
+                                    >
+                                        <LuDownload className="w-4 h-4" />
+                                        <span>INSTALL CIPHERVAULT PWA</span>
+                                    </button>
                                     <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
                                         <Link
                                             href="/login"

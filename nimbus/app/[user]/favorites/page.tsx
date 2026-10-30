@@ -307,34 +307,36 @@ export default function FavoritesPage() {
                             placeholder="SEARCH STARRED ASSETS BY NAME OR EXTENSION..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
+                            className="w-full px-4 py-2.5 sm:py-3 bg-[#16181B] border border-white/15 focus:border-[#B8FE00] focus:ring-1 focus:ring-[#B8FE00] outline-none text-white placeholder-white/40 font-mono text-xs uppercase tracking-wider transition-all"
                         />
                     </div>
-                    <select
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                        className="px-4 py-3 bg-[#202327] border border-white/15 text-white font-mono text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
-                    >
-                        <option value="date-desc">NEWEST FIRST</option>
-                        <option value="date-asc">OLDEST FIRST</option>
-                        <option value="name-asc">NAME (A - Z)</option>
-                        <option value="size-desc">SIZE (LARGEST)</option>
-                    </select>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className="flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-3 bg-[#202327] border border-white/15 text-white font-mono text-[11px] sm:text-xs uppercase tracking-wider focus:border-[#B8FE00] outline-none cursor-pointer"
+                        >
+                            <option value="date-desc">NEWEST FIRST</option>
+                            <option value="date-asc">OLDEST FIRST</option>
+                            <option value="name-asc">NAME (A - Z)</option>
+                            <option value="size-desc">SIZE (LARGEST)</option>
+                        </select>
 
-                    {/* View Mode Toggle */}
-                    <div className="flex bg-[#202327] border border-white/15 p-1 shrink-0">
-                        <button
-                            onClick={() => setViewMode("grid")}
-                            className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
-                        >
-                            ⊞ GRID
-                        </button>
-                        <button
-                            onClick={() => setViewMode("list")}
-                            className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
-                        >
-                            ☰ LIST
-                        </button>
+                        {/* View Mode Toggle */}
+                        <div className="flex bg-[#202327] border border-white/15 p-1 shrink-0">
+                            <button
+                                onClick={() => setViewMode("grid")}
+                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "grid" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                            >
+                                ⊞ GRID
+                            </button>
+                            <button
+                                onClick={() => setViewMode("list")}
+                                className={`px-3 py-1.5 font-bold text-xs uppercase tracking-wider transition-all ${viewMode === "list" ? "bg-[#B8FE00] text-black" : "text-white/60 hover:text-white"}`}
+                            >
+                                ☰ LIST
+                            </button>
+                        </div>
                     </div>
                 </motion.div>
 

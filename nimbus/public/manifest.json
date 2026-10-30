@@ -1,0 +1,33 @@
+{
+  "name": "CipherVault - Sovereign Cloud Storage",
+  "short_name": "CipherVault",
+  "description": "Unlimited zero-knowledge AES-256 encrypted cloud storage powered by Telegram's distributed API.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#16181B",
+  "theme_color": "#0720C6",
+  "scope": "/",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/ciphervault-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/ciphervault-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/ciphervault-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
