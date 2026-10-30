@@ -126,7 +126,8 @@ export default function AlbumsPage() {
         // Let's assume the Album model stores a fully qualified URL or a relative path.
         // If the existing coverImage is a URL, we should match that format.
         // Let's construct a standard API URL for the image.
-        const thumbnailUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${selectedFile._id}/view`;
+        const baseUrl = api.defaults.baseURL || 'http://localhost:5000/api';
+        const thumbnailUrl = `${baseUrl}/files/${selectedFile._id}/view`;
 
         try {
             await api.put(`/albums/${albumToUpdateThumbnail._id}`, {
