@@ -7,9 +7,11 @@ export interface PersistentUpload {
     size: number;
     mimeType: string;
     progress: number;
-    status: 'queued' | 'uploading' | 'paused' | 'error' | 'completed';
+    status: 'queued' | 'uploading' | 'paused' | 'error' | 'completed' | 'cancelled';
     uploadedBytes: number;
     totalBytes: number;
+    speed?: number; // bytes/sec
+    retryCount?: number;
     error?: string;
     createdAt: number;
     completedAt?: number;

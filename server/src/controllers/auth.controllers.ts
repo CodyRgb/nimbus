@@ -120,3 +120,24 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     });
     res.status(200).json({ message: 'Logged out successfully' });
 };
+
+// @desc    Get current user & verify session persistence
+// @route   GET /api/auth/me
+// @access  Private
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ message: 'Not authorized' });
+            return;
+        }
+
+        res.json({
+            _id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+        });
+    } catch (error) {
+        console.error('getMe error:', error);
+        res.status(500).json({ message: 'Server error retrieving session' });
+    }
+};

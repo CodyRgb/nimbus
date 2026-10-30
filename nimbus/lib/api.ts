@@ -27,7 +27,9 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('ciphervault_token') || 
+                      sessionStorage.getItem('token') || 
+                      sessionStorage.getItem('ciphervault_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

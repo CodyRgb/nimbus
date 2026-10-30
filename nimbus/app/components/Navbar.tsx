@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { useUpload } from "../context/UploadContext";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
@@ -22,6 +23,7 @@ interface NavbarProps {
 
 export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) {
     const { logout } = useAuth();
+    const { uploads, activeUploadsCount, overallProgress, setIsDrawerOpen } = useUpload();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
@@ -159,6 +161,21 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                             <span>INSTALL APP</span>
                         </button>
 
+                        {/* Upload Manager Indicator */}
+                        {uploads.length > 0 && (
+                            <button
+                                onClick={() => setIsDrawerOpen(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-[#16181B] border border-[#B8FE00]/40 hover:border-[#B8FE00] rounded-full text-[#B8FE00] text-xs font-mono transition-all cursor-pointer shadow-[0_0_15px_rgba(184,254,0,0.15)]"
+                                title="Open Upload Management Dashboard"
+                            >
+                                <span className="w-2 h-2 rounded-full bg-[#B8FE00] animate-pulse" />
+                                <span className="font-bold">
+                                    {activeUploadsCount > 0 ? `${overallProgress}%` : `${uploads.length} FILES`}
+                                </span>
+                                <span className="text-[10px] text-white/60">QUEUE ↗</span>
+                            </button>
+                        )}
+
                         {isOnAuthPage ? (
                             <Link
                                 href="/"
@@ -201,20 +218,33 @@ export default function Navbar({ isLoggedIn, user, isOnAuthPage }: NavbarProps) 
                         )}
                     </div>
 
-                    {/* Mobile Hamburger Toggle */}
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle Navigation Menu"
-                        className="md:hidden p-2 text-white hover:text-[#B8FE00] transition-colors focus:outline-none"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {mobileMenuOpen ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            )}
-                        </svg>
-                    </button>
+                    {/* Mobile Controls Right */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {uploads.length > 0 && (
+                            <button
+                                onClick={() => setIsDrawerOpen(true)}
+                                className="flex items-center gap-1.5 px-2.5 py-1 bg-[#16181B] border border-[#B8FE00]/50 rounded-full text-[#B8FE00] font-mono text-[11px] shadow-sm cursor-pointer"
+                                title="Open Upload Management Dashboard"
+                            >
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#B8FE00] animate-pulse" />
+                                <span className="font-bold">{activeUploadsCount > 0 ? `${overallProgress}%` : `${uploads.length}`}</span>
+                                <span className="text-[9px]">↗</span>
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Toggle Navigation Menu"
+                            className="p-2 text-white hover:text-[#B8FE00] transition-colors focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {mobileMenuOpen ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                )}
+                            </svg>
+                        </button>
+                    </div>
                 </motion.nav>
 
                 {/* Mobile Drawer */}

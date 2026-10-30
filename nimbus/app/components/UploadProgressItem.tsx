@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export interface UploadProgressItemProps {
     file: File;
     progress: number;
-    status: 'uploading' | 'paused' | 'error' | 'completed' | 'queued';
+    status: 'uploading' | 'paused' | 'error' | 'completed' | 'queued' | 'cancelled';
     uploadedBytes: number;
     totalBytes: number;
     error?: string;
@@ -65,6 +65,7 @@ const UploadProgressItem: React.FC<UploadProgressItemProps> = ({
                                 {status === 'paused' && ' • PAUSED'}
                                 {status === 'completed' && ' • COMPLETED'}
                                 {status === 'queued' && ' • QUEUED'}
+                                {status === 'cancelled' && ' • CANCELLED'}
                             </>
                         )}
                     </p>

@@ -17,7 +17,7 @@ export default function MobileBottomNav() {
     const pathname = usePathname();
     const params = useParams();
     const { isLoggedIn, user } = useAuth();
-    const { activeUploadsCount, queuedCount, overallProgress } = useUpload();
+    const { activeUploadsCount, queuedCount, overallProgress, setIsDrawerOpen } = useUpload();
 
     // Only show for authenticated users inside the dashboard
     if (!isLoggedIn || !user) return null;
@@ -71,6 +71,12 @@ export default function MobileBottomNav() {
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={(e) => {
+                                if (item.name === "Upload" && isActive) {
+                                    e.preventDefault();
+                                    setIsDrawerOpen(true);
+                                }
+                            }}
                             className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all relative ${
                                 isActive
                                     ? "text-[#B8FE00] font-bold"
@@ -80,9 +86,18 @@ export default function MobileBottomNav() {
                             <div className="relative flex items-center justify-center">
                                 {item.icon}
                                 {item.badge && (
-                                    <span className="absolute -top-1.5 -right-3 px-1 py-0.2 text-[8px] font-mono font-bold bg-[#B8FE00] text-[#16181B] rounded-full shadow-sm animate-pulse">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setIsDrawerOpen(true);
+                                        }}
+                                        className="absolute -top-1.5 -right-3 px-1 py-0.2 text-[8px] font-mono font-bold bg-[#B8FE00] text-[#16181B] rounded-full shadow-sm animate-pulse cursor-pointer"
+                                        title="Open Upload Management Drawer"
+                                    >
                                         {item.badge}
-                                    </span>
+                                    </button>
                                 )}
                             </div>
                             <span className="text-[10px] font-mono uppercase tracking-wider mt-1">

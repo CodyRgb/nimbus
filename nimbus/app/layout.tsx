@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { UploadProvider } from "./context/UploadContext";
 import ConditionalNavbar from "./layout/ConditionalNavbar";
 import FloatingUploadWidget from "./components/FloatingUploadWidget";
+import UploadManagerDrawer from "./components/UploadManagerDrawer";
 import OnlineStatus from "./components/OnlineStatus";
 import PWAInstaller from "./components/PWAInstaller";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -71,6 +72,7 @@ export default function RootLayout({
             <PWAInstaller />
             {children}
             <FloatingUploadWidget />
+            <UploadManagerDrawer />
             <MobileBottomNav />
           </UploadProvider>
         </AuthProvider>

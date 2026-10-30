@@ -34,7 +34,7 @@ interface Album {
 }
 
 export default function AlbumDetailsPage() {
-    const { isLoggedIn, user } = useAuth();
+    const { isLoggedIn, user, isLoading } = useAuth();
     const params = useParams();
     const router = useRouter();
     const [album, setAlbum] = useState<Album | null>(null);
@@ -82,6 +82,7 @@ export default function AlbumDetailsPage() {
     }, [albumId]);
 
     useEffect(() => {
+        if (isLoading) return;
         if (!isLoggedIn) {
             router.push('/login');
             return;
@@ -89,7 +90,7 @@ export default function AlbumDetailsPage() {
         if (albumId) {
             fetchAlbumDetails();
         }
-    }, [isLoggedIn, albumId, router, fetchAlbumDetails]);
+    }, [isLoggedIn, isLoading, albumId, router, fetchAlbumDetails]);
 
     const handleRemoveFromAlbum = async (fileId: string) => {
         if (!confirm("Remove this photo from album?")) return;

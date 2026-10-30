@@ -24,7 +24,7 @@ import RenameModal from '../../components/RenameModal';
 import FileSelectionModal from '../../components/FileSelectionModal';
 
 export default function AlbumsPage() {
-    const { isLoggedIn, user } = useAuth();
+    const { isLoggedIn, user, isLoading } = useAuth();
     const params = useParams();
     const router = useRouter();
     const [albums, setAlbums] = useState<Album[]>([]);
@@ -49,12 +49,13 @@ export default function AlbumsPage() {
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
     useEffect(() => {
+        if (isLoading) return;
         if (!isLoggedIn) {
             router.push('/login');
             return;
         }
         fetchAlbums();
-    }, [isLoggedIn, router]);
+    }, [isLoggedIn, isLoading, router]);
 
     const fetchAlbums = async () => {
         try {

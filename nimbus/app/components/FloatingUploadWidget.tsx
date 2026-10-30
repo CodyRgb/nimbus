@@ -24,6 +24,7 @@ export default function FloatingUploadWidget() {
         completedCount,
         failedCount,
         overallProgress,
+        setIsDrawerOpen,
         pauseUpload,
         resumeUpload,
         retryUpload,
@@ -83,6 +84,17 @@ export default function FloatingUploadWidget() {
                                 </div>
 
                                 <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => {
+                                            setIsExpanded(false);
+                                            setIsDrawerOpen(true);
+                                        }}
+                                        title="Open full upload management dashboard"
+                                        className="px-2.5 py-1 text-[10px] font-mono font-bold bg-[#B8FE00]/15 text-[#B8FE00] border border-[#B8FE00]/30 rounded-lg hover:bg-[#B8FE00] hover:text-[#16181B] transition-all flex items-center gap-1"
+                                    >
+                                        <span>DASHBOARD</span>
+                                        <span>↗</span>
+                                    </button>
                                     {completedCount > 0 && (
                                         <button
                                             onClick={clearCompleted}
@@ -200,7 +212,7 @@ export default function FloatingUploadWidget() {
                         /* Minimized Floating Pill Button */
                         <motion.button
                             key="collapsed-widget"
-                            onClick={() => setIsExpanded(true)}
+                            onClick={() => setIsDrawerOpen(true)}
                             initial={{ opacity: 0, scale: 0.9, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 15 }}
@@ -211,6 +223,7 @@ export default function FloatingUploadWidget() {
                                     ? "bg-[#202327]/95 border-[#B8FE00]/50 text-white shadow-[0_0_25px_rgba(184,254,0,0.25)]"
                                     : "bg-[#202327]/90 border-white/20 text-white"
                             }`}
+                            title="Open Upload Management Dashboard"
                         >
                             <div className="relative flex items-center justify-center">
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center ${hasActive ? 'bg-[#0720C6] text-[#B8FE00]' : 'bg-[#B8FE00] text-black font-bold'}`}>
@@ -235,13 +248,13 @@ export default function FloatingUploadWidget() {
                                 </div>
                                 <div className="text-[10px] text-white/50 leading-tight">
                                     {hasActive
-                                        ? `${activeUploadsCount} active • ${queuedCount} queued`
-                                        : `${completedCount} items secured in cloud`}
+                                        ? `${activeUploadsCount} active • ${queuedCount} queued • Tap for dashboard`
+                                        : `${completedCount} items secured • Tap for dashboard`}
                                 </div>
                             </div>
 
-                            <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-white/70 ml-1">
-                                <LuChevronUp size={14} />
+                            <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[#B8FE00] ml-1">
+                                <span>↗</span>
                             </div>
                         </motion.button>
                     )}

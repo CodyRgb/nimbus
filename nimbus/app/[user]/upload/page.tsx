@@ -45,6 +45,19 @@ export default function UploadPage() {
         resumeUpload,
         retryUpload,
         cancelUpload,
+        pauseAll,
+        resumeAll,
+        cancelAll,
+        retryFailed,
+        clearCompleted,
+        setIsDrawerOpen,
+        activeUploadsCount,
+        queuedCount,
+        pausedCount,
+        failedCount,
+        completedCount,
+        overallProgress,
+        overallSpeed,
         recentFiles,
         loadingRecent,
         refreshRecentFiles
@@ -229,14 +242,64 @@ export default function UploadPage() {
                     {/* Active Uploads Queue (survives page refresh & route change) */}
                     {uploads.length > 0 && (
                         <div className="bg-[#202327] border border-white/10 rounded-2xl p-5 sm:p-6 shadow-xl">
-                            <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-4 border-b border-white/10 gap-3">
                                 <div>
-                                    <h3 className="font-display font-extrabold text-lg uppercase tracking-tight text-white">
-                                        ACTIVE DISPATCH QUEUE ({uploads.length})
-                                    </h3>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-display font-extrabold text-lg uppercase tracking-tight text-white">
+                                            ACTIVE DISPATCH QUEUE ({uploads.length})
+                                        </h3>
+                                        {activeUploadsCount > 0 && (
+                                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-[#B8FE00] text-[#16181B] rounded animate-pulse">
+                                                {overallProgress}% • {(overallSpeed / (1024 * 1024)).toFixed(1)} MB/s
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-[11px] font-mono text-white/50">
-                                        Survives navigation and page refresh via IndexedDB.
+                                        {activeUploadsCount} active • {queuedCount} queued • {pausedCount} paused • {completedCount} secured
                                     </p>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                    {(activeUploadsCount > 0 || queuedCount > 0) && (
+                                        <button
+                                            onClick={pauseAll}
+                                            className="px-2.5 py-1 text-[11px] font-mono font-bold bg-[#16181B] border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-all"
+                                        >
+                                            PAUSE ALL
+                                        </button>
+                                    )}
+                                    {pausedCount > 0 && (
+                                        <button
+                                            onClick={resumeAll}
+                                            className="px-2.5 py-1 text-[11px] font-mono font-bold bg-[#16181B] border border-[#B8FE00]/40 text-[#B8FE00] hover:bg-[#B8FE00]/10 rounded-lg transition-all"
+                                        >
+                                            RESUME ALL
+                                        </button>
+                                    )}
+                                    {failedCount > 0 && (
+                                        <button
+                                            onClick={retryFailed}
+                                            className="px-2.5 py-1 text-[11px] font-mono font-bold bg-[#16181B] border border-orange-500/40 text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all"
+                                        >
+                                            RETRY FAILED
+                                        </button>
+                                    )}
+                                    {completedCount > 0 && (
+                                        <button
+                                            onClick={clearCompleted}
+                                            className="px-2.5 py-1 text-[11px] font-mono font-bold bg-[#16181B] border border-white/20 text-white/70 hover:text-white rounded-lg transition-all"
+                                        >
+                                            CLEAR DONE
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setIsDrawerOpen(true)}
+                                        className="px-2.5 py-1 text-[11px] font-mono font-bold bg-[#0720C6] text-white hover:bg-[#B8FE00] hover:text-[#16181B] rounded-lg transition-all flex items-center gap-1 shadow-sm"
+                                        title="Open slide-over upload manager"
+                                    >
+                                        <span>DASHBOARD</span>
+                                        <span>↗</span>
+                                    </button>
                                 </div>
                             </div>
 
